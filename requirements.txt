@@ -11,3 +11,7 @@ apscheduler
 Pillow
 qrcode
 aiohttp
+pandas
+werkzeug
+bcrypt
+requests
