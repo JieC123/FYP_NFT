@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/BudgetSimulation.css') }}"> <!-- Same CSS as for Event -->
+    <title>Event Planning Dashboard - Staff</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Budget Simulation</h2>
+            </div>
+            <a href="{{ url_for('budget.budget_page') }}" class="nav-btn">Budget Management</a>
+            <a href="{{ url_for('budget_simulate.budget_simulation') }}" class="nav-btn active">Budget Simulation</a>
+            
+            <div class="tableList">
+                <form id="simulation-form" method="POST">
+                    <!-- Section 1: Event Information -->
+                    <h3>Event Information</h3>
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label for="event-type">Select an event type:</label>
+                            <div>
+                                
+                                <select id="event-type" name="event-type" class="short-field">
+                                    <option value="" disabled selected>Select event type</option>
+                                    <option value="Concert">Concert</option>
+                                    <option value="Conference">Conference</option>
+                                    <option value="Seminar">Seminar</option>
+                                    <option value="Workshop">Workshop</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-duration">Event Duration (days):</label>
+                            <input type="number" 
+                                   id="event-duration" 
+                                   name="event-duration" 
+                                   required 
+                                   class="short-field" 
+                                   placeholder="Enter number of days"
+                                   min="1"
+                                   step="1"
+                                   oninput="this.value = this.value <= 0 ? 1 : Math.floor(Math.abs(this.value))"
+                                   onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                        </div>
+                        <div class="form-group">
+                            <label for="venue-type">Venue:</label>
+                            <select id="venue-type" name="venue-type" class="form-control" onchange="updateVenueCost()">
+                                <option value="" disabled selected>Select a Venue</option>
+                            </select>
+                            <div class="venue-cost-display">
+                                <p>Cost per Day: RM<span id="daily-venue-cost">0.00</span></p>
+                                <p>Total Cost: RM<span id="total-venue-cost">0.00</span></p>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <!-- Section 2: Attendees & Food Costs -->
+                    <h3>Attendees</h3>
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label for="attendees">Expected Number of Attendees:</label>
+                            <input type="number" 
+                                   id="attendees" 
+                                   name="attendees" 
+                                   required 
+                                   class="short-field" 
+                                   placeholder="Enter number of attendees"
+                                   min="1"
+                                   step="1"
+                                   oninput="this.value = this.value <= 0 ? 1 : Math.floor(Math.abs(this.value))"
+                                   onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                        </div>
+                        <div class="form-group">
+                            <label for="food-cost-per-attendee">Food & Beverage Cost per Attendee (RM):</label>
+                            <input type="number" id="food-cost-per-attendee" name="food-cost-per-attendee" step="0.01" required class="short-field" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="total-food-cost">Total Food & Beverage Cost (RM):</label>
+                            <input type="number" id="total-food-cost" name="total-food-cost" class="short-field" readonly placeholder="0.00">
+
+                        </div>
+                    </div>
+                    <h3>Staffing</h3>
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label for="staff-role">Staff Role:
+                                <i class="info-icon" onclick="showStaffInfoPopup()">&#9432;</i>
+                            </label>
+                            <select id="staff-role" name="staff-role" class="short-field">
+                                <option value="" disabled selected>Select a Role</option>
+                                
+                                <option value="Coordinator">Coordinator</option>
+                                <option value="Support_Staff">Support Staff</option>
+                                <option value="Marketing_Staff">Marketing Staff</option>
+                                <option value="Speaker">Speaker</option>
+                                <option value="Technical_Staff">Technical Staff</option>
+                                
+                            </select>
+                        </div>
+                        <div id="staff-input-container">
+                            <!-- Dynamically added input fields will appear here -->
+                        </div>
+                    </div>
+
+            
+                    <!-- Section 4: Marketing & Miscellaneous Costs -->
+                    <h3>Marketing & Miscellaneous</h3>
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label for="marketing-cost">Marketing and Advertising (RM):
+                                <i class="info-icon" onclick="showInfoPopup()">&#9432;</i>
+                            </label>
+                            <select id="marketing-cost" name="marketing-cost" required class="short-field" onchange="updateMarketingCost()">
+                                <option value="None" data-cost="0">None</option>
+                                <option value="TV Ad" data-cost="0">TV Ad</option>
+                                <option value="Radio Ad" data-cost="0">Radio Ad</option>
+                                <option value="Newspaper Ad" data-cost="0">Newspaper Ad</option>
+                                <option value="TV + Radio" data-cost="0">TV + Radio</option>
+                                <option value="TV + Newspaper" data-cost="0">TV + Newspaper</option>
+                                <option value="Radio + Newspaper" data-cost="0">Radio + Newspaper</option>
+                                <option value="TV + Radio + Newspaper" data-cost="0">TV + Radio + Newspaper</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="misc-cost">Miscellaneous Costs (RM):</label>
+                            <input type="number" id="misc-cost" name="misc-cost" required class="short-field" placeholder="0.00" step="0.01">
+                        </div>
+                    </div>
+            
+                    <!-- Submit Button -->
+                    <div style="text-align: center;">
+                        <button type="submit" class="confirm-btn">Simulate Budget</button>
+                    </div>
+                </form>
+            
+                <!-- Result Section -->
+                <div id="result" style="margin-top: 20px;"></div>
+            </div>
+            
+            
+            <div id="info-popup" class="popup">
+                <div class="popup-content">
+                    <span class="close-btn" onclick="closeInfoPopup()">&times;</span>
+                    <h3 class="popup-title">Marketing and Advertising Costs</h3>
+                    <div class="popup-description">
+                        <p>Our system utilizes advanced predictive modeling to estimate marketing and advertising costs based on:</p>
+                        <ul>
+                            <li>Historical campaign data</li>
+                            <li>Current market trends</li>
+                            <li>Event type and scale</li>
+                            <li>Target audience reach</li>
+                        </ul>
+                        <p>While actual costs may vary slightly, our predictions are continuously updated to maintain accuracy and reflect real-world market rates.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="staff-info-popup" class="popup">
+                <div class="popup-content">
+                    <span class="close-btn" onclick="closeStaffInfoPopup()">&times;</span>
+                    <h3 class="popup-title">Staffing Costs Information</h3>
+                    <div class="popup-description">
+                        <p>Our staffing cost predictions are calculated considering:</p>
+                        <ul>
+                            <li>Industry standard rates</li>
+                            <li>Experience level requirements</li>
+                            <li>Event duration and complexity</li>
+                            <li>Specific role responsibilities</li>
+                        </ul>
+                        <p>These estimates are regularly updated to ensure competitive and realistic budget planning for your event staffing needs.</p>
+                    </div>
+                </div>
+            </div>
+
+    <script>
+document.getElementById('simulation-form').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    // Validate event type is selected
+    const eventType = document.getElementById('event-type').value;
+    if (!eventType) {
+        alert('Please select an event type');
+        return;
+    }
+
+    // Collect staff requirements from all staff input fields
+    const staffInputs = document.querySelectorAll('.staff-input-field');
+    const staffRequirements = {};
+    let hasStaff = false;
+    
+    staffInputs.forEach(input => {
+        const role = input.dataset.role;
+        const count = parseInt(input.value);
+        if (count > 0) {
+            staffRequirements[role] = count;
+            hasStaff = true;
+        }
+    });
+
+    // Debug log to check staff requirements
+    console.log('Collected staff requirements:', staffRequirements);
+
+    const eventDuration = parseInt(document.getElementById('event-duration').value) || 1;
+    
+    // Create the request body with all necessary data
+    const requestData = {
+        total_food_cost: parseFloat(document.getElementById('total-food-cost').value) || 0,
+        marketing_cost: document.getElementById('marketing-cost').value,
+        event_type: eventType,
+        event_duration: eventDuration,
+        staff_requirements: staffRequirements,
+        venue_cost: parseFloat(document.getElementById('total-venue-cost').textContent) || 0,
+        miscellaneous_cost: parseFloat(document.getElementById('misc-cost').value) || 0
+    };
+
+    console.log('Sending request data:', requestData); // Debug log
+
+    try {
+        const response = await fetch('/BudgetSimulation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Received result:', result); // Debug log
+
+        // Update the result display
+        if (result.total_budget !== undefined) {
+            let staffBreakdownHTML = '';
+            
+            // Only generate staff breakdown if we have staff data
+            if (result.staff_breakdown && Object.keys(result.staff_breakdown).length > 0) {
+                staffBreakdownHTML = `
+                    <div class="staff-cost-breakdown">
+                        <h4>Staff Cost Breakdown</h4>
+                        <div class="staff-grid">
+                            ${Object.entries(result.staff_breakdown).map(([role, details]) => `
+                                <div class="staff-cost-card">
+                                    <div class="staff-role">${role}</div>
+                                    <div class="staff-details">
+                                        <div class="detail-row">
+                                            <span>Daily Rate:</span>
+                                            <span>RM ${parseFloat(details.daily_rate).toFixed(2)}</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Count:</span>
+                                            <span>${details.count}</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span>Duration:</span>
+                                            <span>${eventDuration} day(s)</span>
+                                        </div>
+                                        <div class="detail-row total">
+                                            <span>Total:</span>
+                                            <span>RM ${parseFloat(details.total).toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('result').innerHTML = `
+                <div class="budget-result">
+                    <h3 class="result-title">Budget Breakdown</h3>
+                    <div class="result-grid">
+                        <div class="result-card total">
+                            <div class="card-header">Total Budget</div>
+                            <div class="card-amount">RM ${parseFloat(result.total_budget).toFixed(2)}</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-header">Venue Cost</div>
+                            <div class="card-amount">RM ${parseFloat(result.venue_cost).toFixed(2)}</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-header">Food & Beverage</div>
+                            <div class="card-amount">RM ${parseFloat(result.total_food_cost).toFixed(2)}</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-header">Marketing</div>
+                            <div class="card-amount">RM ${parseFloat(result.marketing_cost).toFixed(2)}</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-header">Staff Cost</div>
+                            <div class="card-amount">RM ${parseFloat(result.staff_cost).toFixed(2)}</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="card-header">Miscellaneous Costs</div>
+                            <div class="card-amount">RM ${parseFloat(result.miscellaneous_cost).toFixed(2)}</div>
+                        </div>
+                    </div>
+                    ${staffBreakdownHTML}
+                </div>
+            `;
+        } else {
+            document.getElementById('result').textContent = `Error: ${result.error || 'Unexpected response'}`;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('result').textContent = `Error fetching result: ${error.message}`;
+    }
+});
+
+
+
+
+        // Function to calculate total food cost
+        function calculateTotalFoodCost() {
+    const attendees = document.getElementById('attendees').value;
+    const foodCostPerAttendee = document.getElementById('food-cost-per-attendee').value;
+
+    if (attendees && foodCostPerAttendee) {
+        const totalFoodCost = parseFloat(attendees) * parseFloat(foodCostPerAttendee);
+        document.getElementById('total-food-cost').value = totalFoodCost.toFixed(2);
+    } else {
+        document.getElementById('total-food-cost').value = "0.00";
+    }
+}
+
+// Attach event listeners to trigger the calculation
+document.getElementById('attendees').addEventListener('input', calculateTotalFoodCost);
+document.getElementById('food-cost-per-attendee').addEventListener('input', calculateTotalFoodCost);
+
+
+// Add event listeners for the input fields to trigger the calculation
+document.getElementById('attendees').addEventListener('input', calculateTotalFoodCost);
+document.getElementById('food-cost-per-attendee').addEventListener('input', calculateTotalFoodCost);
+
+
+function showInfoPopup() {
+        document.getElementById("info-popup").style.display = "block";
+    }
+
+    function closeInfoPopup() {
+        document.getElementById("info-popup").style.display = "none";
+    }
+
+    function showStaffInfoPopup() {
+    document.getElementById("staff-info-popup").style.display = "block";
+}
+
+function closeStaffInfoPopup() {
+    document.getElementById("staff-info-popup").style.display = "none";
+}
+
+
+    async function fetchMarketingCosts() {
+    try {
+        const response = await fetch('/fetch-marketing-costs');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Fetched marketing costs:', data);
+
+        // Update the dropdown with fetched values
+        const select = document.getElementById('marketing-cost');
+        const options = select.options;
+
+        // Map the data costs to the options
+        const costMap = {
+            'TV Ad': data.tv_cost,
+            'Radio Ad': data.radio_cost,
+            'Newspaper Ad': data.newspaper_cost,
+            'TV + Radio': data.tv_radio_cost,
+            'TV + Newspaper': data.tv_newspaper_cost,
+            'Radio + Newspaper': data.radio_newspaper_cost,
+            'TV + Radio + Newspaper': data.all_costs
+        };
+
+        // Update each option's data-cost attribute
+        for (let i = 0; i < options.length; i++) {
+            const optionValue = options[i].value;
+            if (costMap[optionValue]) {
+                options[i].setAttribute('data-cost', costMap[optionValue].toFixed(2));
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching marketing costs:', error);
+    }
+}
+
+// Add new function to update marketing cost in form submission
+function updateMarketingCost() {
+    const select = document.getElementById('marketing-cost');
+    const selectedOption = select.options[select.selectedIndex];
+    const marketingCost = selectedOption.getAttribute('data-cost');
+    console.log('Selected marketing cost:', marketingCost);
+    return marketingCost;
+}
+
+// Fetch marketing costs on page load
+window.onload = fetchMarketingCosts;
+
+
+
+const staffRoleDropdown = document.getElementById('staff-role');
+const staffInputContainer = document.getElementById('staff-input-container');
+
+staffRoleDropdown.addEventListener('change', async function () {
+    const selectedRole = this.value;
+    if (!selectedRole) return;
+
+    // Check if an input field for the selected role already exists
+    if (document.getElementById(`staff-field-${selectedRole}`)) {
+        alert(`${selectedRole} already added.`);
+        return;
+    }
+
+    try {
+        const response = await fetch('/fetch-staff-rate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                role: selectedRole,
+                event_type: document.getElementById('event-type').value
+            })
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch staff rate');
+        const data = await response.json();
+
+        // Create staff input field with rate display
+        const staffFieldDiv = document.createElement('div');
+        staffFieldDiv.classList.add('form-group');
+        staffFieldDiv.id = `staff-field-${selectedRole}`;
+        staffFieldDiv.innerHTML = `
+            <label for="staff-count-${selectedRole}">${selectedRole}:</label>
+            <div class="staff-input-wrapper">
+                <input type="number" 
+                       id="staff-count-${selectedRole}" 
+                       name="staff-count-${selectedRole}" 
+                       class="staff-input-field short-field" 
+                       data-role="${selectedRole}"
+                       data-rate="${data.daily_rate}"
+                       placeholder="Enter number of ${selectedRole}" 
+                       min="1" 
+                       step="1" 
+                       required
+                       oninput="updateStaffCosts(this)">
+                <button type="button" class="delete-field-btn" 
+                        onclick="deleteStaffField('${selectedRole}')">Remove</button>
+            </div>
+            <div class="staff-cost-display">
+                <div class="cost-info">
+                    <p class="daily-rate">Daily Rate: RM${data.daily_rate.toFixed(2)}</p>
+                    <p class="total-cost">Total Cost: RM0.00</p>
+                    <p class="duration-info">Duration: ${document.getElementById('event-duration').value || 1} day(s)</p>
+                </div>
+            </div>
+        `;
+        staffInputContainer.appendChild(staffFieldDiv);
+
+    } catch (error) {
+        console.error('Error fetching staff rate:', error);
+        alert('Error fetching staff rate. Please try again.');
+    }
+});
+// Function to delete a specific staff input field
+function deleteStaffField(role) {
+    const fieldDiv = document.getElementById(`staff-field-${role}`);
+    if (fieldDiv) {
+        staffInputContainer.removeChild(fieldDiv);
+    }
+}
+
+// Add this function for real-time updates
+function updateStaffCosts(inputElement) {
+    const role = inputElement.dataset.role;
+    const count = parseInt(inputElement.value) || 0;
+    const dailyRate = parseFloat(inputElement.dataset.rate);
+    const duration = parseInt(document.getElementById('event-duration').value) || 1;
+    
+    const totalCost = count * dailyRate * duration;
+    
+    // Store the total cost as a data attribute
+    inputElement.dataset.totalCost = totalCost.toFixed(2);
+    
+    // Update the staff field display
+    const staffField = document.getElementById(`staff-field-${role}`);
+    if (staffField) {
+        const costDisplay = staffField.querySelector('.staff-cost-display');
+        if (costDisplay) {
+            costDisplay.innerHTML = `
+                <div class="cost-info">
+                    <p class="daily-rate">Daily Rate: RM${dailyRate.toFixed(2)}</p>
+                    <p class="total-cost">Total Cost: RM${totalCost.toFixed(2)}</p>
+                    <p class="duration-info">Duration: ${duration} day(s)</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Add event listener for duration changes
+document.getElementById('event-duration').addEventListener('input', function() {
+    const staffInputs = document.querySelectorAll('.staff-input-field');
+    staffInputs.forEach(input => updateStaffCosts(input));
+});
+
+function calculateTotalVenueCost() {
+    const venueCost = parseFloat(document.getElementById('venue-cost').value) || 0;
+    const duration = parseInt(document.getElementById('event-duration').value) || 1;
+    const totalVenueCost = venueCost * duration;
+    
+    // Update the total venue cost in your budget calculations
+    // This will be handled by your existing form submission logic
+}
+
+// Add event listener for duration changes
+document.getElementById('event-duration').addEventListener('input', calculateTotalVenueCost);
+
+function updateVenueCost() {
+    const venueSelect = document.getElementById('venue-type');
+    const duration = parseInt(document.getElementById('event-duration').value) || 1;
+    
+    if (venueSelect.value) {
+        const selectedOption = venueSelect.options[venueSelect.selectedIndex];
+        const dailyCost = parseFloat(selectedOption.dataset.cost);
+        const totalCost = dailyCost * duration;
+        
+        // Update the displayed costs
+        document.getElementById('daily-venue-cost').textContent = dailyCost.toFixed(2);
+        document.getElementById('total-venue-cost').textContent = totalCost.toFixed(2);
+        
+        // Update the hidden input for form submission
+        document.getElementById('venue-cost').value = totalCost.toFixed(2);
+    } else {
+        // Reset costs if no venue is selected
+        document.getElementById('daily-venue-cost').textContent = '0.00';
+        document.getElementById('total-venue-cost').textContent = '0.00';
+        document.getElementById('venue-cost').value = '0';
+    }
+}
+
+async function loadVenueOptions() {
+    try {
+        const response = await fetch('/fetch-venue-options');
+        if (!response.ok) throw new Error('Failed to fetch venue options');
+        
+        const data = await response.json();
+        const select = document.getElementById('venue-type');
+        
+        // Clear existing options
+        select.innerHTML = '<option value="" disabled selected>Select a Venue</option>';
+        
+        // Sort venues by type and capacity (descending)
+        const sortedVenues = data.venues.sort((a, b) => {
+            // First sort by venue type alphabetically
+            if (a.type !== b.type) {
+                return a.type.localeCompare(b.type);
+            }
+            // Then sort by capacity (higher to lower)
+            const capacityA = parseInt(a.capacity);
+            const capacityB = parseInt(b.capacity);
+            return capacityB - capacityA;
+        });
+        
+        // Group venues by type
+        const groupedVenues = {};
+        sortedVenues.forEach(venue => {
+            if (!groupedVenues[venue.type]) {
+                groupedVenues[venue.type] = [];
+            }
+            groupedVenues[venue.type].push(venue);
+        });
+        
+        // Add options with optgroups
+        Object.keys(groupedVenues).sort().forEach(type => {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = type.replace('_', ' ');
+            
+            groupedVenues[type].forEach(venue => {
+                const option = document.createElement('option');
+                option.value = venue.id;
+                // Only show the venue name with capacity range from the model
+                option.textContent = venue.name;  // The name already includes the capacity range
+                option.dataset.cost = venue.daily_cost;
+                optgroup.appendChild(option);
+            });
+            
+            select.appendChild(optgroup);
+        });
+    } catch (error) {
+        console.error('Error loading venue options:', error);
+    }
+}
+
+// Call this when page loads
+window.addEventListener('load', loadVenueOptions);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Home</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+</head>
+<body>
+<div class="chat-widget">
+    <div class="chat-button" id="chat-button">
+        <i class="fas fa-robot"></i>
+    </div>
+    <div class="chat-box" id="chat-box" style="display: none;">
+        <div class="chat-header">
+            <h3>TicketPro AI Assistant</h3>
+            <button class="close-chat" id="close-chat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot">
+                Welcome to TicketPro! I'm your Web3 assistant. How can I help you with NFT tickets today? 🎟️
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="Type your message..." id="chat-input-field">
+            <button id="send-message">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get DOM elements using IDs
+        const chatButton = document.getElementById('chat-button');
+        const chatBox = document.getElementById('chat-box');
+        const closeChat = document.getElementById('close-chat');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input-field');
+        const sendButton = document.getElementById('send-message');
+
+        // Add click outside listener
+        document.addEventListener('click', function(event) {
+            const chatWidget = document.querySelector('.chat-widget');
+            // Check if click is outside the chat widget and chat is open
+            if (!chatWidget.contains(event.target) && chatBox.style.display === 'block') {
+                chatBox.style.display = 'none';
+            }
+        });
+
+        // Prevent chat from closing when clicking inside
+        chatBox.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+
+        // Toggle chat box
+        chatButton.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent the document click from immediately closing it
+            chatBox.style.display = chatBox.style.display === 'none' ? 'block' : 'none';
+        });
+
+        closeChat.addEventListener('click', () => {
+            chatBox.style.display = 'none';
+        });
+
+        // Chat responses database
+        const responses = {
+            greetings: {
+                patterns: ['hello', 'hi', 'hey', 'greetings'],
+                responses: ['<p>Hello! How can I help you today?</p>', '<p>Hi there! What can I assist you with?</p>']
+            },
+            botIdentity: {
+                patterns: [
+                    'who are you', 
+                    'what are you', 
+                    'your name', 
+                    'who created you', 
+                    'what can you do', 
+                    'your purpose', 
+                    'about you', 
+                    'tell me about yourself',
+                    'what do you do'
+                ],
+                responses: [`
+                <p>Hello! I'm the TicketPro AI Assistant, your dedicated Web3 ticketing helper! 🤖</p>
+                <p>I'm here to assist you with all aspects of NFT ticketing:</p>
+                <p>• Purchasing NFT tickets</p>
+                <p>• Managing your tickets</p>
+                <p>• Using the marketplace</p>
+                <p>• Transferring tickets</p>
+                <p>• Profile management</p>
+                <p>• Payment processes</p>
+                <p>I'm available 24/7 to answer your questions and help make your ticketing experience smooth! 🎫</p>
+                <p>How can I assist you today?</p>`]
+            },
+            profile: {
+                patterns: ['profile', 'edit profile', 'change profile', 'update profile', 'modify profile', 'user id', 'email change', 'change email', 'change user id'],
+                responses: [`
+                <p>Here's what you need to know about your profile:</p>
+                <p>1. Go to Profile page by clicking your username</p>
+                <p>2. You can update your:</p>
+                <p>   • Profile picture</p>
+                <p>   • Name</p>
+                <p>   • Phone number</p>
+                <p>Note: User ID and Email cannot be modified after account creation for security reasons.</p>`]
+            },
+            buyTicket: {
+                patterns: ['how to buy', 'purchase', 'buying', 'book ticket', 'want to buy', 'buy ticket', 'buying ticket', 'reserve a ticket', 'want to buy ticket', 'buy'],
+                responses: [`
+                <p>Here's how to buy tickets:</p>
+                <p>1. Browse events on our Events page</p>
+                <p>2. Click on your preferred event</p>
+                <p>3. Select the ticket type</p>
+                <p>4. Select the ticket quantity</p>
+                <p>5. Click "Buy Now"</p>
+                <p>6. Complete the payment with your crypto wallet</p>
+                <p>Your NFT ticket will be sent to your wallet!</p>`]
+            },
+            transfer: {
+                patterns: ['transfer ticket', 'send ticket', 'give ticket', 'transfer', 'transferrable', 'can i transfer', 'ticket transfer'],
+                responses: [`
+                    <p>About ticket transfers:</p>
+                    <p>1. Only tickets marked as "Transferrable" can be transferred</p>
+                    <p>2. You can check if a ticket is transferrable:</p>
+                    <p>   • During purchase: Look for the "Transferrable" badge</p>
+                    <p>   • In MyTicket: Check the ticket's transfer status</p>
+                    <p>To transfer an eligible ticket:</p>
+                    <p>1. Open your crypto wallet</p>
+                    <p>2. Enter the recipient's wallet address</p>
+                    <p>3. Enter the ticket's token ID you want to transfer</p>
+                    <p>4. Confirm the transfer</p>
+                    <p>Note: Non-transferrable tickets cannot be transferred or resold!</p>`]
+            },
+            ticketTypes: {
+                patterns: ['ticket type', 'types of ticket', 'transferrable ticket', 'non transferrable', 'ticket transferrable', 'which tickets can transfer'],
+                responses: [`
+                    <p>TicketPro offers two types of NFT tickets:</p>
+                    <p>1. Transferrable Tickets:</p>
+                    <p>   • Can be transferred to other users</p>
+                    <p>   • Can be resold on our marketplace</p>
+                    <p>   • Ideal for flexible scheduling</p>
+                    <p>2. Non-Transferrable Tickets:</p>
+                    <p>   • Cannot be transferred</p>
+                    <p>   • Cannot be resold</p>
+                    <p>   • Helps prevent ticket scalping</p>
+                    <p>You can see the transferrable status when purchasing tickets!</p>`]
+            },
+            payment: {
+                patterns: ['payment method', 'how to pay', 'payment', 'pay with'],
+                responses: ['<p>We accept ETH (Ethereum) as payment. Make sure your wallet is connected to make purchases!</p>']
+            },
+            marketplace: {
+                patterns: ['resell', 'sell ticket', 'marketplace', 'how to resell ticket', 'how to resell', 'resale'],
+                responses: [`
+                <p>To resell your ticket on the marketplace:</p>
+                <p>1. Go to MyTicket page</p>
+                <p>2. Select the preferred ticket</p>
+                <p>3. Click "Resell"</p>
+                <p>4. Set your price</p>
+                <p>5. Confirm the listing and wait for the buyer</p>`]
+            }
+        };
+
+        // Send message function
+        function sendMessageHandler() {
+            const message = chatInput.value.trim().toLowerCase();
+            if (message) {
+                // Add user message to chat
+                addMessage(message, 'user');
+
+                // Get bot response
+                const botResponse = getBotResponse(message);
+                setTimeout(() => {
+                    addMessage(botResponse, 'bot');
+                }, 500);
+
+                chatInput.value = '';
+            }
+        }
+
+        // Add message to chat
+        function addMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.innerHTML = message;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Get bot response based on user input
+        function getBotResponse(message) {
+            // Check each category for matching patterns
+            for (const category in responses) {
+                const patterns = responses[category].patterns;
+                if (patterns.some(pattern => message.includes(pattern))) {
+                    const possibleResponses = responses[category].responses;
+                    return possibleResponses[Math.floor(Math.random() * possibleResponses.length)];
+                }
+            }
+
+            // Default response if no pattern matches
+            return "I'm not sure about that. You can ask me about buying tickets, transferring tickets, payment methods, or using the marketplace!";
+        }
+
+        // Event listeners for sending messages
+        sendButton.addEventListener('click', sendMessageHandler);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessageHandler();
+            }
+        });
+    });
+
+    window.addEventListener('load', function () {
+        checkLoginStatus();
+    });
+
+    window.history.pushState(null, null, window.location.href);
+    window.onpopstate = function () {
+        window.history.pushState(null, null, window.location.href);
+    };
+</script>
+</body>
+</html>

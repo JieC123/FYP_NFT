@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Order Detail</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ticket_manage.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>    
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant">
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Order Detail</h2>
+                <button class="back-btn" onclick="location.href='{{ url_for('order_management') }}'">⬅️ Back</button>
+            </div>
+
+            <div class="admin-container order-detail">
+                <div class="admin-header">
+                    <h2>Order #{{ transaction.TransactionID }}</h2>
+                    <div class="status {{ transaction.TransactionStatus | lower }}">{{ transaction.TransactionStatus }}</div>
+                </div>
+                
+                <div class="order-details">
+                    <div class="detail-section">
+                        <h3>Customer Information</h3>
+                        <p><strong>Name:</strong> {{ transaction.UserName }}</p>
+                        <p><strong>Email:</strong> {{ transaction.UserEmail }}</p>
+                        <p><strong>Contact:</strong> {{ transaction.UserContactInfo }}</p>
+                    </div>
+                    <div class="detail-section">
+                        <h3>Order Information</h3>
+                        <p><strong>Order Date:</strong> {{ transaction.OrderDate.strftime('%d/%m/%Y %H:%M:%S') }}</p>
+                        <p><strong>Payment Method:</strong> {{ transaction.PaymentMethod }}</p>
+                        <p><strong>Total Amount:</strong> {{ transaction.TotalAmount }} ETH</p>
+                    </div>
+                </div>
+
+                <div class="detail-section full-width">
+                    <h3>Ticket Details</h3>
+                    <div class="table-responsive">
+                        <table class="ticket-detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Ticket Type</th>
+                                    <th>Token ID</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in transaction.Items %}
+                                <tr>
+                                    <td>{{ item['EventTitle'] }}</td>
+                                    <td>{{ item['TicketType'] }}</td>
+                                    <td>{{ item['TokenID'] }}</td>
+                                    <td>{{ item['Quantity'] }}</td>
+                                    <td>{{ item['Price'] }} ETH</td>
+                                    <td>{{ item['Subtotal'] }} ETH</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="admin-actions">
+                    <button class="action-btn" id="printOrderBtn"><i class="fas fa-print"></i> Print Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/order_detail.js') }}"></script>
+</body>
+
+</html>

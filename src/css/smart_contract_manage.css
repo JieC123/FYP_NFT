@@ -1,0 +1,235 @@
+
+
+#recentMintsList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#recentMintsList li {
+    background-color: #1f2438;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* QR Code Container Styles */
+#qrCodesContainer {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.qr-code-item {
+    background: white;
+    margin: 15px 0;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.qr-code-item h4 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.qr-code-item img {
+    max-width: 200px;
+    margin: 10px auto;
+    display: block;
+}
+
+.qr-code-item p {
+    margin: 8px 0;
+    color: #34495e;
+}
+
+.qr-code-item ul {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+.qr-code-item ul li {
+    margin: 8px 0;
+}
+
+.qr-code-item ul li a {
+    color: #3498db;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background: #f0f7ff;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.qr-code-item ul li a:hover {
+    background: #e1efff;
+    transform: translateY(-1px);
+}
+
+/* Minting Result Styles */
+#mintingResult {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+#mintingResult.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#mintingResult.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+#mintingResult.progress {
+    background-color: #cce5ff;
+    color: #004085;
+    border: 1px solid #b8daff;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+.transferable-options {
+    margin-bottom: 10px;
+}
+
+.radio-group {
+    display: flex;
+    gap: 15px;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+    cursor: pointer;
+}
+
+.error {
+    background-color: #fee;
+    border: 1px solid #fcc;
+    color: #c00;
+    padding: 15px;
+    border-radius: 4px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.error i {
+    font-size: 20px;
+}
+
+/* Update the mint NFT button styling */
+.mint-nft-btn {
+    background-color: #00a8ff;
+    color: #ffffff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.mint-nft-btn:hover {
+    background-color: #0097e6;
+}
+
+.mint-nft-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Add loading state for the button */
+.mint-nft-btn.loading {
+    position: relative;
+    padding-left: 35px;
+}
+
+.mint-nft-btn.loading::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ffffff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.transfer-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.transferable-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.transfer-toggle label {
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+}
+
+.non-transferable-notice {
+    color: #ff4444;
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-left: 0.5rem;
+}
+
+/* Style for disabled resale options */
+.resale-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    position: relative;
+}
+
+.resale-disabled::after {
+    content: "Non-transferable ticket";
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    font-size: 12px;
+    color: #ff4444;
+}

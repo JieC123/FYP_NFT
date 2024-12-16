@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/OrgAlloBooth.css') }}"> <!-- Same CSS as for Event -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Event Planning Dashboard - Booth allocation</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events"> <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Allocation</h2>
+                
+            </div>
+
+            <a href="/OrgViewBooth" class="nav-btn">Exhibitor and booth</a>
+            <a href="{{ url_for('boothAllo.booth_page') }}" class="nav-btn active">Event Allocation</a>
+            <a href="{{ url_for('boothAllo.remove_booth_allo_page') }}"class="nav-btn">Event Allocation Removal</a>
+            <a href="{{ url_for('boothAllo.booth_map_planning') }}" class="nav-btn">Booth Map</a>
+            
+            <div class="tableList">
+                <div class="select-section">
+                    <form method="post" action="{{ url_for('boothAllo.booth_page') }}">
+                        <label for="eventSelect" class="event-label">Select an Event:</label>
+                        <select id="eventSelect" name="eventSelect" class="form-control" required>
+                            {% if events %}
+                                {% for event in events %}
+                                    <option value="{{ event['EventID'] }}" 
+                                            {% if selected_event_id == event['EventID'] %} selected {% endif %}>
+                                        {{ event['EventTitle'] }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option disabled>No events available</option>
+                            {% endif %}
+                        </select>
+                        <button type="submit" class="select-btn">Select</button>
+                    </form>
+                   
+                    
+                    <!-- Toggle Buttons Moved to the Right Side -->
+                    <div class="toggle-buttons">
+                        <button id="assignedToggleBtn" class="toggle-btn" onclick="toggleAssignedTable()">Hide Assigned Table</button>
+                        <button id="unassignedToggleBtn" class="toggle-btn" onclick="toggleUnassignedTable()">Hide Unassigned Table</button>
+                        
+                    </div>
+                </div>
+                
+                <div id="assignedSection" class="table-section">
+                    {% if event_details %}
+                        <h4>Event Duration: {{ event_details['EventStartDate'] }} - {{ event_details['EventEndDate'] }}</h4>
+                    {% endif %}
+                    <h3>Assigned Booths:</h3>
+                    <table id="assignedTable" class="booth-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="number">No.<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="exhibitorId">Exhibitor ID<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="name">Exhibitor Name<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="company">Company<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="boothCategory">Booth Category<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="boothSize">Booth Size<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="rentalFees">Booth Rental Fees (RM)<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="startDate">Rental Start Date<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="endDate">Rental End Date<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="totalDays">Total Rental Days<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="assignedDate">Date Assigned<span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if assigned_booths and assigned_booths|length > 0 %}
+                                {% for booth in assigned_booths %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ booth['ExhibitorID'] }}</td>
+                                        <td>{{ booth['ExhibitorName'] }}</td>
+                                        <td>{{ booth['Company'] }}</td>
+                                        <td>{{ booth['BoothCategory'] }}</td>
+                                        <td>{{ booth['BoothSize'] }}</td>
+                                        <td>{{ '%0.2f' | format(booth['BoothRentalFees']) }}</td>
+                                        <td>{{ booth['RentalStartDate'] }}</td>
+                                        <td>{{ booth['RentalEndDate'] }}</td>
+                                        <td>{{ booth['TotalRentalDays'] }}</td>
+                                        <td>{{ booth['DateAssigned'] }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="11" style="text-align: center;">No assigned booths found</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    
+                </div>
+                
+                <div id="unassignedSection" class="table-section">
+                    <h3>Unassigned Booths:</h3>
+                    <table id="unassignedTable" class="booth-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all" onclick="toggleAll(this)"></th>
+                                <th class="sortable" data-sort="number">No.<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="exhibitorId">Exhibitor ID<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="name">Exhibitor Name<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="company">Company<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="boothCategory">Booth Category<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="boothSize">Booth Size<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="rentalFees">Booth Rental Fees (RM)<span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="status">Status<span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if unassigned_booths and unassigned_booths|length > 0 %}
+                                {% for booth in unassigned_booths %}
+                                    <tr>
+                                        <td><input type="checkbox" class="row-checkbox" value="{{ booth['ExhibitorID'] }}"></td>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ booth['ExhibitorID'] }}</td>
+                                        <td>{{ booth['ExhibitorName'] }}</td>
+                                        <td>{{ booth['Company'] }}</td>
+                                        <td>{{ booth['BoothCategory'] }}</td>
+                                        <td>{{ booth['BoothSize'] }}</td>
+                                        <td>{{ '%0.2f' | format(booth['BoothRentalFees']) }}</td>
+                                        <td>Active</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="9" style="text-align: center;">No unassigned booths found</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+            
+                <!-- Confirm Button -->
+                <button class="confirm-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    // Function to toggle the visibility of the assigned sponsorship table content only
+    function toggleAssignedTable() {
+        const assignedTable = document.getElementById("assignedTable");
+        const toggleBtn = document.getElementById("assignedToggleBtn");
+        if (assignedTable.style.display === "none" || assignedTable.style.display === "") {
+            assignedTable.style.display = "table";
+            toggleBtn.textContent = "Hide Assigned Table";
+        } else {
+            assignedTable.style.display = "none";
+            toggleBtn.textContent = "Show Assigned Table";
+        }
+    }
+
+    // Function to toggle the visibility of the unassigned sponsorship table content only
+    function toggleUnassignedTable() {
+    const unassignedTable = document.getElementById("unassignedTable");
+    const toggleBtn = document.getElementById("unassignedToggleBtn");
+    if (unassignedTable.style.display === "none" || unassignedTable.style.display === "") {
+        unassignedTable.style.display = "table";
+        toggleBtn.textContent = "Hide Unassigned Table";
+    } else {
+        unassignedTable.style.display = "none";
+        toggleBtn.textContent = "Show Unassigned Table";
+    }
+}
+
+    // Function to toggle all checkboxes
+    function toggleAll(source) {
+        const checkboxes = document.querySelectorAll(".row-checkbox");
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = source.checked;
+        });
+    }
+
+    document.querySelector(".confirm-btn").addEventListener("click", function () {
+    const selectedBooths = [];
+    const checkboxes = document.querySelectorAll(".row-checkbox:checked");
+    checkboxes.forEach(checkbox => selectedBooths.push(checkbox.value));
+
+    if (selectedBooths.length === 0) {
+        alert("Please select at least one booth to assign.");
+        return;
+    }
+
+    const eventID = "{{ selected_event_id }}"; // Assuming this value is dynamically set from your server
+
+    const confirmation = confirm("Are you sure you want to assign the selected booth(s)?");
+    if (confirmation) {
+        fetch('/assign_booths', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                booths: selectedBooths,
+                eventID: eventID
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Booth(s) assigned successfully!");
+                location.reload();
+            } else {
+                alert(data.message || "An error occurred while assigning the booths.");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Failed to assign booths.");
+        });
+    }
+});
+
+    // Add sorting functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const setupTableSorting = (tableId) => {
+            const getCellValue = (tr, idx) => {
+                const cell = tr.children[idx];
+                let value = cell.textContent || cell.innerText;
+                
+                // For rental fees column (index 7 in unassigned table)
+                if (tableId === 'unassignedTable' && idx === 7) {
+                    return parseFloat(value.replace('RM', '').trim()) || 0;
+                }
+                
+                // For dates (Rental Start Date, Rental End Date, Date Assigned)
+                if (idx === 8 || idx === 9 || idx === 10) {
+                    // Check if date is in YYYY-MM-DD format
+                    if (value.includes('-')) {
+                        return new Date(value);
+                    }
+                    // Fallback for DD/MM/YYYY format
+                    const parts = value.split('/');
+                    if (parts.length === 3) {
+                        return new Date(parts[2], parts[1] - 1, parts[0]);
+                    }
+                    return new Date(0);
+                }
+
+                // For total rental days
+                if (idx === 10) {
+                    return parseInt(value) || 0;
+                }
+                
+                return value;
+            };
+
+            const comparer = (idx, asc) => (a, b) => {
+                const v1 = getCellValue(asc ? a : b, idx);
+                const v2 = getCellValue(asc ? b : a, idx);
+                
+                // Handle different types of sorting
+                if (idx === 1) { // No. column
+                    return parseInt(v1) - parseInt(v2);
+                } else if (tableId === 'unassignedTable' && idx === 7) { // Rental Fees column
+                    return v1 - v2;
+                } else { // Text columns
+                    return v1.toString().localeCompare(v2);
+                }
+            };
+
+            document.querySelectorAll(`#${tableId} th.sortable`).forEach(th => {
+                th.addEventListener('click', () => {
+                    const table = th.closest('table');
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const headerRow = th.parentElement;
+                    const columnIndex = Array.from(headerRow.children).indexOf(th);
+                    
+                    // Remove asc/desc classes from all headers
+                    headerRow.querySelectorAll('th').forEach(header => {
+                        if (header !== th) {
+                            header.classList.remove('asc', 'desc');
+                        }
+                    });
+                    
+                    // Toggle sort direction
+                    const isAsc = !th.classList.contains('asc');
+                    th.classList.toggle('asc', isAsc);
+                    th.classList.toggle('desc', !isAsc);
+                    
+                    // Sort rows
+                    rows.sort(comparer(columnIndex, isAsc));
+                    
+                    // Reorder rows in the table
+                    tbody.append(...rows);
+                    
+                    // Update the index numbers if not sorting by No. column
+                    if (columnIndex !== 1) { // Index 1 is the No. column in unassigned table
+                        rows.forEach((row, index) => {
+                            row.querySelector('td:nth-child(2)').textContent = index + 1;
+                        });
+                    }
+
+                    // Preserve checkbox states after sorting
+                    const checkboxes = tbody.querySelectorAll('input[type="checkbox"]');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = checkbox.getAttribute('data-checked') === 'true';
+                    });
+                });
+            });
+        };
+
+        // Setup sorting for both tables
+        setupTableSorting('assignedTable');
+        setupTableSorting('unassignedTable');
+
+        // Store checkbox states before sorting
+        document.querySelectorAll('#unassignedTable input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                this.setAttribute('data-checked', this.checked);
+            });
+        });
+    });
+
+</script>
+
+</html>

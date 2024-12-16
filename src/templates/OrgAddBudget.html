@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AddBudget.css') }}">
+    <title>Event Planning Dashboard - Add Budget</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant">
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Add New Budget</h2>
+                <a href="{{ url_for('budget.budget_page', selected_event=event_id) }}" class="back-btn">⬅️ Back</a>
+            </div>
+
+            <div id="errorMessages" style="color: red; margin-bottom: 20px; display: none;">
+                {% if error_message %}
+                    {% for message in error_message %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="budget-form">
+                <form id="budgetForm" method="POST" onsubmit="return validateAndSubmit(event)">
+                    <input type="hidden" name="event_id" value="{{ event_id }}">
+                    
+                    <div class="form-container">
+                        <div class="form-column">
+                            <!-- Left Column Fields -->
+                            <div class="form-row">
+                                <label for="budgetAmount">Budget Amount (RM):</label>
+                                <input type="number" id="budgetAmount" name="budgetAmount" 
+                                       step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                            <div class="form-row">
+                                <label for="expensesAmount">Expenses Amount (RM):</label>
+                                <input type="number" id="expensesAmount" name="expensesAmount" 
+                                       step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                            <div class="form-row">
+                                <label for="remainingAmount">Remaining Budget Amount (RM):</label>
+                                <input type="number" id="remainingAmount" disabled placeholder="0.00">
+                            </div>
+                            <div class="form-row">
+                                <label for="comments">Comments:</label>
+                                <textarea id="comments" name="comments" rows="3" placeholder="Comments here">No Comment</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-column">
+                            <!-- Right Column Fields -->
+                            <div class="form-row">
+                                <label for="categoryName">Category:</label>
+                                <select id="categoryName" name="categoryName" required>
+                                    
+                                    {% if categories %}
+                                        <!-- Categories available: {{ categories }} -->
+                                        {% for category in categories %}
+                                            <option value="{{ category['CategoryID'] }}">
+                                                {{ category['ExpensesName'] }}
+                                            </option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <!-- No categories available -->
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="paymentStatus">Payment Status:</label>
+                                <select id="paymentStatus" name="paymentStatus" required>
+                                    <option value="Paid">Paid</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Canceled">Canceled</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="vendor">Vendor:</label>
+                                <input type="text" id="vendor" name="vendor" required placeholder="Enter vendor name">
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="reset" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="save-btn">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function validateAndSubmit(event) {
+            event.preventDefault();
+            let errorMessages = [];
+            
+            // Budget Amount Validation
+            const budgetAmount = document.getElementById('budgetAmount').value.trim();
+            if (!budgetAmount) {
+                errorMessages.push('Budget Amount is required.');
+            } else if (isNaN(budgetAmount)) {
+                errorMessages.push('Budget Amount must be a valid number.');
+            }
+
+            // Expenses Amount Validation
+            const expensesAmount = document.getElementById('expensesAmount').value.trim();
+            if (!expensesAmount) {
+                errorMessages.push('Expenses Amount is required.');
+            } else if (isNaN(expensesAmount)) {
+                errorMessages.push('Expenses Amount must be a valid number.');
+            }
+
+            // Category Validation
+            const category = document.getElementById('categoryName').value;
+            if (!category) {
+                errorMessages.push('Category is required.');
+            }
+
+            // Payment Status Validation
+            const paymentStatus = document.getElementById('paymentStatus').value;
+            if (!paymentStatus) {
+                errorMessages.push('Payment Status is required.');
+            }
+
+            // Vendor Validation
+            const vendor = document.getElementById('vendor').value.trim();
+            if (!vendor) {
+                errorMessages.push('Vendor is required.');
+            }
+
+            // Comments Validation
+            const comments = document.getElementById('comments').value.trim();
+            if (comments === '') {
+                document.getElementById('comments').value = 'No Comment';
+            }
+
+            // If there are any errors, display them and return
+            if (errorMessages.length > 0) {
+                const errorDiv = document.getElementById('errorMessages');
+                errorDiv.innerHTML = errorMessages.map(msg => `<p>${msg}</p>`).join('');
+                errorDiv.style.display = 'block';
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                return false;
+            }
+
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Confirm Budget Creation',
+                text: 'Are you sure you want to add this budget information?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                },
+                buttonsStyling: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('budgetForm').submit();
+                }
+            });
+
+            return false;
+        }
+
+        // Calculate remaining budget amount
+        document.getElementById('budgetAmount').addEventListener('input', calculateRemaining);
+        document.getElementById('expensesAmount').addEventListener('input', calculateRemaining);
+
+        function calculateRemaining() {
+            const budgetAmount = parseFloat(document.getElementById('budgetAmount').value) || 0;
+            const expensesAmount = parseFloat(document.getElementById('expensesAmount').value) || 0;
+            const remainingAmount = budgetAmount - expensesAmount;
+            document.getElementById('remainingAmount').value = remainingAmount.toFixed(2);
+        }
+    </script>
+</body>
+</html>

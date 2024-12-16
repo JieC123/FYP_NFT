@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/eventSummaryReportStyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <title>Event Planning Dashboard - Event Summary Report</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Report</h2>
+            </div>
+
+            
+            <a href="{{ url_for('report.event_summary_report') }}" class="nav-btn active">Event Summary Report</a>
+            <a href="{{ url_for('report.staffAllocation_report') }}" class="nav-btn">Staff Allocation Report</a>
+            <a href="{{ url_for('report.exhibitorAllocation_report') }}" class="nav-btn">Exhibitor Allocation Report</a>
+            
+            
+            <div class="tableList">
+                <form method="post" action="" class="event-form">
+                    <div class="form-group">
+                        <label for="startDate">Select Date Range:</label>
+                        <input type="date" id="startDate" name="startDate" value="{{ default_date }}" required>
+                        <span class="date-separator">to</span>
+                        <input type="date" id="endDate" name="endDate" value="{{ default_date }}" required>
+                        <button type="submit" class="generate-btn">Generate</button>
+                        {% if events is not none and events|length > 0 %}
+                        <button type="button" class="print-btn" onclick="preparePrint()">
+                            <i class="fas fa-print"></i> Print Report
+                        </button>
+                        {% endif %}
+                    </div>
+                </form>
+                
+                {% if events is not none %}
+                    {% if events|length > 0 %}
+                        <div class="charts-section">
+                            <h3>Total number of events: {{ total_events }}</h3>
+                            <div class="charts-container">
+                                <div id="participantChart"></div>
+                                <div id="budgetChart"></div>
+                            </div>
+                        </div>
+
+                        <h3>List of Event Details</h3>  
+                        <table class="event-table">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Participant Counts</th>
+                                    <th>Budget(RM)</th>
+                                    <th>Expenses(RM)</th>
+                                    <th>Remaining Budget(RM)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in events %}
+                                <tr>
+                                    <td>{{ event.EventTitle }}</td>
+                                    <td>{{ event.EventStartDate }}</td>
+                                    <td>{{ event.EventEndDate }}</td>
+                                    <td>{{ event.ParticipantCount }}</td>
+                                    <td>{{ "%.2f"|format(event.Budget) }}</td>
+                                    <td>{{ "%.2f"|format(event.Expenses) }}</td>
+                                    <td>{{ "%.2f"|format(event.RemainingBudget) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="no-data-message">
+                            <p>No events found within the selected date range.</p>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="no-data-message">
+                        <p>Please select a date range to generate the report.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var events = JSON.parse('{{ events|tojson|safe }}' || '[]');
+        
+        if (events.length > 0) {
+            // Colors for participant chart (same as staff allocation)
+            var barColors = [
+                '#FF9999', '#66B2FF', '#99FF99', '#FFCC99', '#FF99CC', 
+                '#99CCFF', '#FFB366', '#99FF99', '#FF99FF', '#99FFCC', 
+                '#FFE5CC', '#B3B3FF', '#FFB3B3', '#B3FFB3', '#FFB3FF'
+            ];
+
+            // Participant Chart
+            var participantOptions = {
+                series: [{
+                    name: 'Participants',
+                    data: events.map(event => event.ParticipantCount)
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350,
+                    width: '90%',
+                    toolbar: { show: false },
+                    animations: { enabled: false },
+                    background: 'transparent',
+                    padding: {
+                        left: 60,  // Increased left padding for y-axis label
+                        right: 20,
+                        top: 40,   // Increased top padding for title
+                        bottom: 20
+                    }
+                },
+                title: {
+                    text: 'Event Participation Overview',
+                    align: 'center',
+                    style: {
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        color: '#2E2E2E'
+                    },
+                    margin: 20
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: '40%',
+                        borderRadius: 4,
+                        distributed: true,
+                        dataLabels: {
+                            position: 'top'
+                        }
+                    }
+                },
+                colors: [
+                    '#FF9999', '#66B2FF', '#99FF99', '#FFCC99', '#FF99CC', 
+                    '#99CCFF', '#FFB366', '#99FF99', '#FF99FF', '#99FFCC'
+                ],
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val) {
+                        return val;
+                    },
+                    style: {
+                        colors: ['#000000'],
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                    },
+                    offsetY: -20
+                },
+                yaxis: {
+                    title: {
+                        text: 'Participant Counts',
+                        style: {
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labels: {
+                        style: {
+                            fontSize: '12px'
+                        }
+                    }
+                },
+                xaxis: {
+                    categories: events.map(event => event.EventTitle),
+                    labels: {
+                        show: true,
+                        rotate: -45,
+                        style: {
+                            colors: '#000000',
+                            fontSize: '12px'
+                        }
+                    },
+                    axisBorder: {
+                        show: true
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                }
+            };
+
+            // Budget vs Expenses Chart
+            var budgetOptions = {
+                series: [{
+                    name: 'Budget',
+                    data: events.map(event => event.Budget),
+                    color: '#00E396' // Green for budget
+                }, {
+                    name: 'Expenses',
+                    data: events.map(event => event.Expenses),
+                    color: '#FF4560' // Red for expenses
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350,
+                    width: '90%',
+                    toolbar: { show: false },
+                    animations: { enabled: false },
+                    background: 'transparent',
+                    padding: {
+                        left: 40,
+                        right: 40,
+                        top: 20,
+                        bottom: 20
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: '40%',
+                        borderRadius: 4
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val) {
+                        return val.toFixed(2);
+                    },
+                    style: {
+                        colors: ['#000000'],
+                        fontSize: '14px'
+                    }
+                },
+                xaxis: {
+                    categories: events.map(event => event.EventTitle),
+                    labels: {
+                        rotate: -45,
+                        trim: false,
+                        hideOverlappingLabels: false,  // Prevent label hiding
+                        style: { 
+                            fontSize: '12px',
+                            fontFamily: 'Arial'
+                        }
+                    },
+                    axisBorder: {
+                        show: true
+                    },
+                    axisTicks: {
+                        show: true
+                    },
+                    tickAmount: events.length,
+                    tickPlacement: 'on'
+                },
+                yaxis: {
+                    title: {
+                        text: 'Amount (RM)',
+                        style: { fontSize: '14px' }
+                    },
+                    labels: {
+                        formatter: function(val) {
+                            return 'RM' + val.toFixed(2);
+                        }
+                    }
+                },
+                title: {
+                    text: 'Event Budget Against Expenses',
+                    align: 'center',
+                    style: { 
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        color: '#2E2E2E'
+                    }
+                },
+                responsive: [{
+                    breakpoint: 1000,
+                    options: {
+                        plotOptions: {
+                            bar: {
+                                columnWidth: '40%'
+                            }
+                        }
+                    }
+                }]
+            };
+
+            var participantChart = new ApexCharts(document.querySelector("#participantChart"), participantOptions);
+            var budgetChart = new ApexCharts(document.querySelector("#budgetChart"), budgetOptions);
+            
+            participantChart.render();
+            budgetChart.render();
+        }
+    });
+    </script>
+
+    <style>
+    .charts-section {
+        width: 90%;
+        margin: 20px auto;
+        position: relative;
+    }
+
+    .charts-container {
+        width: 90%;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    #participantChart, #budgetChart {
+        width: 90% !important;
+        height: 400px !important;
+        margin: 20px auto !important;
+        padding: 15px !important;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        overflow: hidden !important;
+    }
+
+    .apexcharts-canvas {
+        background: #e8dddc !important;
+    }
+
+    @media print {
+        #participantChartClone, #budgetChartClone {
+            width: 100% !important;
+            height: 600px !important;
+            transform: scale(0.9) !important;
+            transform-origin: left top !important;
+            overflow: visible !important;
+        }
+
+        .apexcharts-canvas {
+            width: 100% !important;
+            overflow: visible !important;
+        }
+    }
+    </style>
+
+    <!-- Add this modal HTML before the closing body tag -->
+    <div id="fileNameModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Save Report As</h3>
+            <div class="filename-input">
+                <input type="text" id="fileName" placeholder="Enter file name" value="Event_Summary_Report">
+                <span>.pdf</span>
+            </div>
+            <button onclick="printReport()" class="save-btn">Save and Print</button>
+        </div>
+    </div>
+
+    <script>
+    // Modal control functions
+    var modal = document.getElementById("fileNameModal");
+    var span = document.getElementsByClassName("close")[0];
+
+    function preparePrint() {
+        modal.style.display = "block";
+    }
+
+    span.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    async function printReport() {
+        var fileName = document.getElementById('fileName').value || 'Event_Summary_Report';
+        fileName = fileName + '.pdf';
+
+        try {
+            // Create a container for the report content
+            const content = document.createElement('div');
+            content.style.width = '100%';
+            content.style.backgroundColor = '#ffffff';
+            content.style.padding = '20px';
+
+            // Add title for the report
+            const titleElement = document.createElement('h2');
+            // titleElement.textContent = 'Event Summary Report';
+            // titleElement.style.textAlign = 'center';
+            // titleElement.style.marginBottom = '30px';
+            content.appendChild(titleElement);
+
+            // Create chart containers with adjusted dimensions
+            const participantChartContainer = document.createElement('div');
+            participantChartContainer.style.width = '1000px'; // Increased width
+            participantChartContainer.style.height = '450px';
+            participantChartContainer.style.margin = '20px auto';
+            participantChartContainer.style.pageBreakInside = 'avoid';
+            participantChartContainer.style.padding = '0 40px'; // Added padding
+
+            const budgetChartContainer = document.createElement('div');
+            budgetChartContainer.style.width = '1200px'; // Increased width
+            budgetChartContainer.style.height = '450px';
+            budgetChartContainer.style.margin = '20px auto';
+            budgetChartContainer.style.pageBreakInside = 'avoid';
+            budgetChartContainer.style.padding = '0 40px'; // Added padding
+
+            // Capture charts as images with adjusted settings
+            const participantChart = await html2canvas(document.querySelector("#participantChart"), {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                width: 1000,
+                height: 450,
+                logging: false,
+                onclone: (clonedDoc) => {
+                    const element = clonedDoc.querySelector("#participantChart");
+                    element.style.height = '450px';
+                    element.style.width = '1000px';
+                    element.style.padding = '0 0 0 60px';
+                }
+            });
+
+            const budgetChart = await html2canvas(document.querySelector("#budgetChart"), {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                width: 1200, // Further increased width from 1000px to 1100px
+                height: 450,
+                logging: false,
+                onclone: (clonedDoc) => {
+                    const element = clonedDoc.querySelector("#budgetChart");
+                    element.style.height = '450px';
+                    element.style.width = '1200px'; 
+                    element.style.padding = '0 120px'; //  to 80px
+                    element.style.marginRight = '60px';  //40px to 60px
+                }
+            });
+
+            // Add captured content to containers
+            participantChartContainer.appendChild(participantChart);
+            budgetChartContainer.appendChild(budgetChart);
+
+            // Assemble the content
+            content.appendChild(participantChartContainer);
+            content.appendChild(document.createElement('div')).className = 'html2pdf__page-break';
+            content.appendChild(budgetChartContainer);
+
+            // PDF generation options
+            const opt = {
+                margin: [15, 15, 15, 15],
+                filename: fileName,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'landscape',
+                    compress: true
+                },
+                pagebreak: { mode: ['avoid-all'] }
+            };
+
+            // Generate PDF
+            html2pdf().set(opt).from(content).save();
+            
+            // Close the modal
+            modal.style.display = "none";
+
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Error generating PDF: ' + error.message);
+        }
+    }
+    </script>
+
+    <style>
+    .page-break {
+        page-break-before: always !important;
+        margin-top: 0px;
+        padding-top: 20px;
+    }
+
+    @media print {
+        .page-break {
+            page-break-before: always !important;
+            margin-top: 0px;
+            padding-top: 20px;
+        }
+        
+        #budgetChart {
+            page-break-before: always !important;
+        }
+    }
+
+    .charts-container {
+        width: 100% !important;
+        position: relative;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        gap: 40px; /* Increased gap between charts */
+    }
+
+    #participantChart, #budgetChart {
+        width: 100% !important;
+        height: 400px !important;
+        margin: 0 auto !important;
+        padding: 10px !important;
+        transform-origin: center center;
+        page-break-inside: avoid !important;
+    }
+
+    #budgetChart {
+        margin-top: 40px !important; /* Added extra margin */
+    }
+    </style>
+
+    <style>
+    @media print {
+        #participantChartClone, #budgetChartClone {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        [style*="page-break-before"] {
+            page-break-before: always !important;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+    }
+
+    #participantChartClone svg, #budgetChartClone svg {
+        width: 100% !important;
+        height: 100% !important;
+    }
+    </style>
+
+    <style>
+    .html2pdf__page-break {
+        page-break-before: always !important;
+        page-break-after: always !important;
+        height: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    @media print {
+        .html2pdf__page-break {
+            page-break-before: always !important;
+            page-break-after: always !important;
+        }
+        
+        #chart2Container {
+            margin-top: 40px !important;
+        }
+    }
+    </style>
+
+    <style>
+    .html2pdf__page-break {
+        page-break-before: always;
+        margin-top: 40px;
+    }
+
+    @media print {
+        .html2pdf__page-break {
+            page-break-before: always !important;
+        }
+
+        #participantChartClone, #budgetChartClone {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+    }
+    </style>
+
+    <style>
+    /* Styles for PDF generation */
+    @media print {
+        canvas {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+    }
+
+    /* Chart container styles */
+    #participantChart, #budgetChart {
+        background: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    /* Ensure charts are visible during capture */
+    .apexcharts-canvas {
+        background: white !important;
+    }
+    </style>
+
+    <style>
+    /* PDF-specific styles */
+    @media print {
+        .html2pdf__page-break {
+            margin: 0;
+            height: 0;
+            page-break-before: always;
+            page-break-after: always;
+        }
+        
+        canvas {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+    }
+
+    /* Chart container styles for PDF */
+    .pdf-chart-container {
+        width: 800px !important;
+        height: 450px !important;
+        margin: 20px auto !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Ensure charts are visible during capture */
+    .apexcharts-canvas {
+        background: white !important;
+    }
+
+    /* Chart title and label styles */
+    .apexcharts-title-text {
+        font-size: 18px !important;
+        font-weight: bold !important;
+    }
+
+    .apexcharts-xaxis-label, .apexcharts-yaxis-label {
+        font-size: 12px !important;
+    }
+    </style>
+
+</body>
+</html>

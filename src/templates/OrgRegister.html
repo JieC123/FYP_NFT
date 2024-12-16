@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Planning - Account Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/registerStyle.css') }}">
+    
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+
+    <div class="header">
+        <img src="{{ url_for('static', filename='Image/MainIcon.png') }}" alt="Event Planning Logo" class="logo">
+        <h1>Event Pro</h1>
+    </div>
+
+    <div class="container">
+        <a href="{{ url_for('login.login') }}" class="back-arrow">←</a>
+        <div class="header-container">
+            <h2>Account Registration</h2>
+        </div>
+
+        <!-- Error messages display -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('register.register') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fullName">Full Name:</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="Full Name" value="{{ full_name or '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="icNo">IC No:</label>
+                    <input type="text" id="icNo" name="icNo" placeholder="123xx6-99-0000" value="{{ ic_no or '' }}" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" name="email" placeholder="Email Address" value="{{ email or '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactNo">Contact No:</label>
+                    <input type="text" id="contactNo" name="contactNo" placeholder="0123456789" value="{{ contact_no or '' }}" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <span id="togglePassword" class="toggle-icon">👁️</span>
+                    
+                    <div class="password-requirements">
+                        *Password must be at least 8 -12 characters<br>
+                        *Password must be at least 1 uppercase, lowercase character<br>
+                        *Password must be at least 1 special character
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="profileImage">Profile Image:</label>
+                    <input type="file" id="profileImage" name="profileImage" accept="image/*" required>
+                    <div class="image-preview-container">
+                        <img id="imagePreview" class="profile-image-preview" alt="Profile Image Preview">
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="display: flex; justify-content: center; width: 100%;">
+                    <div class="g-recaptcha" data-sitekey="6Ld5SJAqAAAAAN1n1wux7gh0MXukQqBz13-1gjgN"></div>
+                </div>
+            </div>
+            <button type="submit" class="register-btn">Register</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const form = document.querySelector("form");
+            const passwordInput = document.getElementById("password");
+            const togglePassword = document.getElementById("togglePassword");
+            const profileImageInput = document.getElementById("profileImage");
+            const imagePreview = document.getElementById("imagePreview");
+
+            form.addEventListener("submit", function(event) {
+                const fullName = document.getElementById("fullName").value.trim();
+                const icNo = document.getElementById("icNo").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const contactNo = document.getElementById("contactNo").value.trim();
+                const password = passwordInput.value.trim();
+                const profileImage = profileImageInput.files.length;
+
+                const icNoPattern = /^\d{6}-\d{2}-\d{4}$/;
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const contactNoPattern = /^\d{10,11}$/;
+                const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,12}$/;
+
+                // Add recaptcha validation
+                const recaptchaResponse = grecaptcha.getResponse();
+                if (!recaptchaResponse) {
+                    alert("Please complete the reCAPTCHA verification.");
+                    event.preventDefault();
+                    return;
+                }
+
+                // Check if all fields are filled
+                if (!fullName || !icNo || !email || !contactNo || !password || profileImage === 0) {
+                    alert("Please fill in all fields.");
+                    event.preventDefault();
+                    return;
+                }
+
+                // Validate IC number format
+                if (!icNoPattern.test(icNo)) {
+                    alert("IC No must be in the format 123xx6-99-0000.");
+                    event.preventDefault();
+                    return;
+                }
+
+                // Validate email format
+                if (!emailPattern.test(email)) {
+                    alert("Please enter a valid email address.");
+                    event.preventDefault();
+                    return;
+                }
+
+                // Validate contact number format
+                if (!contactNoPattern.test(contactNo)) {
+                    alert("Contact No must be a 10- to 11-digit number.");
+                    event.preventDefault();
+                    return;
+                }
+
+                // Validate password format
+                if (!passwordPattern.test(password)) {
+                    alert("Password must be 8-12 characters long, contain at least 1 uppercase, 1 lowercase, and 1 special character.");
+                    event.preventDefault();
+                    return;
+                }
+            });
+
+            togglePassword.addEventListener("click", function() {
+                const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+                passwordInput.setAttribute("type", type);
+                this.textContent = type === "password" ? "👁️" : "🙈";
+            });
+
+            profileImageInput.addEventListener("change", function() {
+                const file = this.files[0];
+                const imagePreview = document.getElementById("imagePreview");
+                
+                if (file) {
+                    const fileName = file.name.toLowerCase();
+                    const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+
+                    if (!allowedExtensions.exec(fileName)) {
+                        alert("Please select a valid image file (.jpg, .jpeg, .png, .gif).");
+                        this.value = ""; // Clear the file input
+                        imagePreview.style.display = 'none';
+                        return;
+                    }
+
+                    // Create preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

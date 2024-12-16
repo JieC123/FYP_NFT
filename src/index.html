@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Home</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo"></a>
+        </div>
+        <div class="nav-group">
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}" class="active">Home</a></li>
+                    <li><a href="{{ url_for('eventlist') }}">Events</a></li>
+                    <li><a href="{{ url_for('marketplace') }}">Marketplace</a></li>
+                    <li><a href="{{ url_for('myticket') }}">MyTicket</a></li>
+                    <li><a href="{{ url_for('orders') }}">Orders</a></li>
+                </ul>
+            </nav>
+            {% if session['user_id'] %}
+            <div class="user-info">
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <span class="user-title" style="text-transform: capitalize; font-weight: 550;">{{ session['username'] }}</span>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <button class="login-btn">Login</button>
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-particles"></div>
+            <div class="hero-hexagons"></div>
+            <div class="hero-noise"></div>
+            <div class="hero-content">
+                <h1 class="myticket-title">Welcome to TicketPro</h1>
+                <p>Discover and book amazing events near you</p>
+                <a href="{{ url_for('eventlist') }}" class="cta-button">Explore Events</a>
+            </div>
+        </section>
+
+        <section class="about-us">
+            <div class="about-content">
+                <h2 class="myticket-title">About TicketPro</h2>
+                <p class="about-description">
+                    TicketPro is revolutionizing the event ticketing industry with blockchain technology. Our platform offers secure, transparent, and easily transferable NFT tickets for a wide range of events.
+                </p>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="user-title">Secure Transactions</h3>
+                        <p>All ticket purchases are secured by blockchain technology.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <h3 class="user-title">Easy Transfers</h3>
+                        <p>Transfer your NFT tickets with just a few clicks.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-ticket-alt"></i>
+                        </div>
+                        <h3 class="user-title">Unique Collectibles</h3>
+                        <p>Each ticket is a unique NFT that can be collected and traded.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="featured-events">
+            <h2 class="section-title">Featured Events</h2>
+            <div class="event-grid">
+                {% for event in featured_events %}
+                <div class="event-card">
+                    <img src="{{ url_for('static', filename=event.EventImage) }}" alt="{{ event.EventTitle }}">
+                    <div class="event-details">
+                        <h3>{{ event.EventTitle }}</h3>
+                        <p class="price">{{ event.Price }} ETH</p>
+                        <p class="date"><i class="far fa-calendar"></i> {{ event.EventStartDate }}</p>
+                        <p class="location"><i class="fas fa-map-marker-alt"></i> {{ event.EventVenue }}</p>
+                        <a href="{{ url_for('eventdetail', id=event.EventID) }}" class="view-details">View Details</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="view-all-container">
+                <a href="{{ url_for('eventlist') }}" class="view-all-events">View All Events</a>
+            </div>
+        </section>
+
+        <section class="how-it-works">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3 class="user-title">Browse Events</h3>
+                    <p>Explore our wide range of events and find the ones that interest you.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3 class="user-title">Purchase Tickets</h3>
+                    <p>Buy your tickets securely using cryptocurrency or traditional payment methods.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3 class="user-title">Receive NFT</h3>
+                    <p>Your ticket will be minted as a unique NFT and sent to your wallet.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3 class="user-title">Attend Event</h3>
+                    <p>Show your NFT ticket at the event for seamless entry.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials">
+            <h2 class="test-title">What Our Users Say</h2>
+            <div class="testimonial-grid">
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <img src="{{ url_for('static', filename='image/org1.jpeg') }}" alt="John D." class="user-avatar">
+                        <p>"TicketPro has made buying and selling event tickets so much easier and secure. I love the NFT aspect!"</p>
+                    </div>
+                    <p class="author">- John D., Music Fan</p>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <img src="{{ url_for('static', filename='image/home4.jpg') }}" alt="Sarah L." class="user-avatar">
+                        <p>"As an event organizer, TicketPro has streamlined our ticketing process and reduced fraud significantly."</p>
+                    </div>
+                    <p class="author">- Sarah L., Event Planner</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a style="color:white" href="#">About Us</a></li>
+                    <li><a style="color:white" href="#">FAQs</a></li>
+                    <li><a style="color:white" href="#">Terms of Service</a></li>
+                    <li><a style="color:white" href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect With Us</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Newsletter</h3>
+                <p class="user-title">Stay updated with our latest events and offers.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Enter your email">
+                    <button type="submit">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <p class="copyright">&copy; 2024 TicketPro. All rights reserved.</p>
+    </footer>
+
+    {% include 'chatbot.html' %}
+
+    <script>
+        function checkLoginStatus() {
+            var isLoggedIn = "{{ 'true' if session.get('user_id') else 'false' }}";
+            if (isLoggedIn === "false") {
+                window.localStorage.clear();
+                window.sessionStorage.clear();
+                window.history.forward();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkLoginStatus();
+            
+            window.onpageshow = function(event) {
+                if (event.persisted) {
+                    checkLoginStatus();
+                }
+            };
+
+            const eventGrid = document.querySelector('.event-grid');
+            const originalCards = document.querySelectorAll('.event-card');
+            
+            // Clear existing content
+            eventGrid.innerHTML = '';
+            
+            // Create a wrapper for smooth infinite scroll
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.gap = '1.5rem';
+            eventGrid.appendChild(wrapper);
+            
+            // Clone cards and add to wrapper
+            function addCards() {
+                originalCards.forEach(card => {
+                    const clone = card.cloneNode(true);
+                    wrapper.appendChild(clone);
+                });
+            }
+
+            // Add multiple sets of cards for seamless loop
+            for (let i = 0; i < 4; i++) { // Create 4 sets of cards
+                addCards();
+            }
+
+            let position = 0;
+            const cardWidth = 316; // 300px card width + 16px gap
+            const singleSetWidth = cardWidth * originalCards.length;
+            let isPaused = false;
+
+            function slideAnimation() {
+                if (!isPaused) {
+                    position -= 0.7; // Adjust speed (smaller = slower)
+                    
+                    // Reset position for seamless loop
+                    if (Math.abs(position) >= singleSetWidth) {
+                        position += singleSetWidth; // Move back by one set width
+                        wrapper.style.transform = `translateX(${position}px)`;
+                    } else {
+                        wrapper.style.transform = `translateX(${position}px)`;
+                    }
+                }
+                requestAnimationFrame(slideAnimation);
+            }
+
+            // Pause animation on hover
+            eventGrid.addEventListener('mouseenter', () => {
+                isPaused = true;
+            });
+
+            eventGrid.addEventListener('mouseleave', () => {
+                isPaused = false;
+            });
+
+            // Start the animation
+            slideAnimation();
+
+            // Login button handler
+            const loginBtn = document.querySelector('.login-btn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', function() {
+                    window.location.href = '/login';
+                });
+            }
+
+            // Logout button handler
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function() {
+                    try {
+                        const response = await fetch('/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            cache: 'no-store'
+                        });
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            window.localStorage.clear();
+                            window.sessionStorage.clear();
+                            
+                            window.history.forward();
+                            
+                            window.location.replace(data.redirect);
+                        } else {
+                            alert('Logout failed: ' + (data.message || 'Please try again.'));
+                        }
+                    } catch (error) {
+                        console.error('Error during logout:', error);
+                        alert('An error occurred during logout. Please try again.');
+                    }
+                });
+            }
+
+        });
+    </script>
+</body>
+</html>

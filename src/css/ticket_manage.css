@@ -1,0 +1,325 @@
+/* Import the base styles from AddEvent.css */
+@import url('AddEvent.css');
+
+/* Additional styles specific to ticket management */
+.admin-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.admin-header {
+    margin-bottom: 20px;
+}
+
+.admin-header h2 {
+    color: #333;
+    margin: 0;
+}
+
+.ticket-form .form-group {
+    margin-bottom: 20px;
+}
+
+.ticket-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.ticket-form input,
+.ticket-form select,
+.ticket-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    font-size: 14px;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.ticket-form textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 200px;
+}
+
+.create-ticket-btn,
+.cancel-btn {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 4px;
+}
+
+.create-ticket-btn {
+    background-color: #ff5722;
+    color: white;
+}
+
+.cancel-btn {
+    background-color: black;
+    color: white;
+}
+
+/* Order detail specific styles */
+.order-detail {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-details {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.detail-section {
+    flex: 1;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.detail-section.full-width {
+    width: calc(100% - 40px);
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.detail-section h3 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.detail-section p {
+    margin: 10px 0;
+    color: #666;
+}
+
+.detail-section strong {
+    color: #333;
+}
+
+.status {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.ticket-detail-table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.ticket-detail-table th,
+.ticket-detail-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+    white-space: nowrap;
+}
+
+.ticket-detail-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #333;
+}
+
+.ticket-detail-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.admin-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #ff5722;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+.action-btn:hover {
+    background-color: #f4511e;
+}
+
+.action-btn.danger {
+    background-color: #dc3545;
+}
+
+.action-btn.danger:hover {
+    background-color: #c82333;
+}
+
+.action-btn i {
+    font-size: 16px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.ticket-detail-table th:nth-child(1),
+.ticket-detail-table td:nth-child(1) {
+    width: 25%;
+}
+
+.ticket-detail-table th:nth-child(2),
+.ticket-detail-table td:nth-child(2) {
+    width: 20%;
+}
+
+.ticket-detail-table th:nth-child(3),
+.ticket-detail-table td:nth-child(3) {
+    width: 15%;
+}
+
+.ticket-detail-table th:nth-child(4),
+.ticket-detail-table td:nth-child(4) {
+    width: 10%;
+}
+
+.ticket-detail-table th:nth-child(5),
+.ticket-detail-table td:nth-child(5),
+.ticket-detail-table th:nth-child(6),
+.ticket-detail-table td:nth-child(6) {
+    width: 15%;
+}
+
+/* Flash message styles */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+@media print {
+    /* Reset visibility for all elements */
+    body * {
+        visibility: hidden;
+    }
+    
+    /* Show and position the order content */
+    .order-detail,
+    .order-detail * {
+        visibility: visible !important;
+        position: relative !important;
+    }
+
+    /* Reset container styles */
+    .container {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .main-content {
+        margin: 0 !important;
+        padding: 20px !important;
+        width: 100% !important;
+        left: 0 !important;
+        position: relative !important;
+    }
+
+    /* Style the order detail section */
+    .order-detail {
+        width: 100% !important;
+        max-width: 800px !important;
+        margin: 0 auto !important;
+        padding: 20px !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Ensure table content is fully visible */
+    .table-responsive {
+        overflow: visible !important;
+        width: 100% !important;
+        page-break-inside: auto !important;
+    }
+
+    .ticket-detail-table {
+        width: 100% !important;
+        page-break-inside: auto !important;
+    }
+
+    .ticket-detail-table tr {
+        page-break-inside: avoid !important;
+    }
+
+    /* Hide unnecessary elements */
+    .sidebar, 
+    .topHeader,
+    .pageTitle,
+    .admin-actions,
+    .back-btn {
+        display: none !important;
+    }
+
+    /* Ensure proper spacing */
+    .order-details {
+        display: flex !important;
+        gap: 20px !important;
+        margin: 20px 0 !important;
+    }
+
+    .detail-section {
+        flex: 1 !important;
+        page-break-inside: avoid !important;
+    }
+
+    /* Add page break control */
+    .detail-section.full-width {
+        page-break-before: auto !important;
+        page-break-after: auto !important;
+    }
+}

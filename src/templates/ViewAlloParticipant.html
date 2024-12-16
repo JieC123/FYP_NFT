@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ViewAllocation.css') }}">
+    <title>Event Planning Dashboard - Track Participant Involvement</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item active">
+                <a href="/events">
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant">
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Involvement - Participant</h2>
+            </div>
+
+            <div class="nav-btns">
+                <a href="{{ url_for('track_involvement.view_allo_staff') }}" class="nav-btn">Event Staff and Authority</a>
+                <a href="{{ url_for('track_involvement.view_allo_booth') }}" class="nav-btn">Exhibitor and Booth</a>
+                <a href="{{ url_for('track_involvement.view_allo_sponsorship') }}" class="nav-btn">Sponsorship</a>
+                <a href="{{ url_for('track_involvement.view_allo_participant') }}" class="nav-btn active">Participant</a>
+            </div>
+
+            <div class="tableList">
+                <div class="search-bar">
+                    <button type="button" class="refresh-btn" onclick="refreshTable()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <form id="search-form" action="{{ url_for('track_involvement.search_allocated_participant') }}" method="GET">
+                        <input type="text" name="query" placeholder="Search by participant name">
+                        <button type="submit">Search</button>
+                    </form>
+                    <button type="button" class="communicate-btn" onclick="openEmailCommunication()">Contact</button>
+                </div>
+                <button class="back-btn" onclick="location.href='/events'">⬅️ Back</button>
+                <div id="assignedSection" class="table-section">
+                    <h3>Event: {{ event_name }} - Registered Participants</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all"></th>
+                                <th class="sortable" data-sort="index">No. <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="participantId">Participant ID <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="userId">User ID <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="name">Name <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="email">Email <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="contact">Contact No <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="date">Registration Date <span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if participants %}
+                                {% for participant in participants %}
+                                    <tr>
+                                        <td><input type="checkbox" class="participant-checkbox" value="{{ participant.ParticipantID }}" data-email="{{ participant.UserEmail }}"></td>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ participant.ParticipantID }}</td>
+                                        <td>{{ participant.UserID }}</td>
+                                        <td>{{ participant.UserName }}</td>
+                                        <td>{{ participant.UserEmail }}</td>
+                                        <td>{{ participant.UserContactInfo }}</td>
+                                        <td>{{ participant.RegistrationDate }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="no-records">
+                                        No participants registered for this event.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+
+                    <!-- Add pagination section -->
+                    <div class="pagination">
+                        <a href="{{ url_for(request.endpoint, page=current_page-1, query=request.args.get('query')) }}" 
+                           class="pagination-btn {% if current_page == 1 %}disabled{% endif %}">Previous</a>
+                        
+                        <span class="pagination-info">
+                            Page <span class="current-page">{{ current_page }}</span> of {{ total_pages }}
+                        </span>
+                        
+                        <a href="{{ url_for(request.endpoint, page=current_page+1, query=request.args.get('query')) }}" 
+                           class="pagination-btn {% if current_page == total_pages %}disabled{% endif %}">Next</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle all checkboxes
+        document.getElementById("select-all").addEventListener("click", function() {
+            const checkboxes = document.querySelectorAll(".participant-checkbox");
+            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
+
+        // Function to open email communication with selected participant emails
+        function openEmailCommunication() {
+            let selectedParticipants = [];
+            document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
+                selectedParticipants.push(checkbox.getAttribute('data-email'));
+            });
+
+            if (selectedParticipants.length === 0) {
+                alert('Please select at least one participant to communicate with.');
+                return;
+            }
+
+            // Pass selected emails as a single 'emails' query parameter
+            let emailUrl = '/email_communication?emails=' + encodeURIComponent(selectedParticipants.join(','));
+            window.location.href = emailUrl;
+        }
+
+        function refreshTable() {
+            window.location.href = "{{ url_for('track_involvement.view_allo_participant') }}";
+        }
+
+        let currentSort = {
+            column: null,
+            direction: 'asc'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const sortType = th.dataset.sort;
+                    
+                    // Remove all sorting classes first
+                    document.querySelectorAll('th.sortable').forEach(header => {
+                        header.classList.remove('asc', 'desc');
+                    });
+                    
+                    // Toggle sort direction if clicking the same column
+                    if (currentSort.column === sortType) {
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = sortType;
+                        currentSort.direction = 'asc';
+                    }
+
+                    // Add appropriate class for current sort
+                    th.classList.add(currentSort.direction);
+                    
+                    sortTable(sortType, currentSort.direction);
+                });
+            });
+        });
+
+        function sortTable(sortType, direction) {
+            const tbody = document.querySelector('table tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            const sortedRows = rows.sort((a, b) => {
+                let aVal, bVal;
+
+                switch(sortType) {
+                    case 'index':
+                        aVal = parseInt(a.cells[1].textContent);
+                        bVal = parseInt(b.cells[1].textContent);
+                        break;
+                    case 'participantId':
+                        aVal = a.cells[2].textContent;
+                        bVal = b.cells[2].textContent;
+                        break;
+                    case 'userId':
+                        aVal = a.cells[3].textContent;
+                        bVal = b.cells[3].textContent;
+                        break;
+                    case 'name':
+                        aVal = a.cells[4].textContent.toLowerCase();
+                        bVal = b.cells[4].textContent.toLowerCase();
+                        break;
+                    case 'email':
+                        aVal = a.cells[5].textContent.toLowerCase();
+                        bVal = b.cells[5].textContent.toLowerCase();
+                        break;
+                    case 'contact':
+                        aVal = a.cells[6].textContent.replace(/[^\d]/g, '');
+                        bVal = b.cells[6].textContent.replace(/[^\d]/g, '');
+                        break;
+                    case 'date':
+                        aVal = new Date(a.cells[7].textContent);
+                        bVal = new Date(b.cells[7].textContent);
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (direction === 'asc') {
+                    return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                } else {
+                    return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+                }
+            });
+
+            // Clear and re-append sorted rows
+            while (tbody.firstChild) {
+                tbody.removeChild(tbody.firstChild);
+            }
+            sortedRows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</body>
+</html>

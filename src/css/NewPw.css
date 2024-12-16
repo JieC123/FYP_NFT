@@ -1,0 +1,127 @@
+/* Global Settings */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e8dddc;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 120px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Header/Navbar */
+.header {
+    width: 100%;
+    background-color: #fff;
+    padding: 0px 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.header .logo {
+    height: 40px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.header h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+    margin-left: 10px;
+}
+
+/* Form Layout */
+.form-row {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    position: relative;
+}
+
+label {
+    font-weight: bold;
+    margin-right: 10px;
+    width: 30%;
+}
+
+input[type="text"],
+input[type="password"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    width: calc(100% - 150px);
+}
+
+/* Password toggle button */
+.password-group {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    color: #333;
+}
+
+.reset-btn {
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 60%;
+    margin: 25px auto;
+    display: block;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.back-arrow {
+    font-size: 24px;
+    text-decoration: none;
+    color: #333;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+h2 {
+    font-size: 24px;
+    margin: 0;
+    color: #333;
+    text-align: center;
+}
+
+.error-message {
+    color: red;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}

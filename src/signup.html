@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo" class="logo">
+    </header>
+    <div class="container">
+        <h1>Sign up</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form id="signupForm" method="POST" action="{{ url_for('signup') }}">
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <div class="password-requirements">
+                Password must contain:
+                <ul>
+                    <li id="length">At least 8 characters</li>
+                    <li id="uppercase">One uppercase letter</li>
+                    <li id="lowercase">One lowercase letter</li>
+                    <li id="special">One special character</li>
+                </ul>
+            </div>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+            <button type="submit">Register</button>
+        </form>
+        <p>Already have an account? <a href="{{ url_for('login') }}" class="login-link">Login</a></p>
+    </div>
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AddStaff.css') }}"> <!-- Using the same CSS -->
+    <title>Event Planning Dashboard - Add Staff</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Staff Registration Form</h2>
+                <button class="back-btn" onclick="location.href='/OrgViewStaff'">⬅️ Back</button>
+            </div>
+
+            <div class="event-form">
+                <form id="staffForm" method="POST" action="{{ url_for('event_staff.add_staff') }}" onsubmit="return validateAndSubmit(event)">
+
+                    <!-- General error messages block -->
+                    <div id="errorMessages" style="color: red;">
+                        {% if error_messages %}
+                            {% for field, message in error_messages.items() %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                
+                    <div class="form-container">
+                        <!-- Left Column Fields -->
+                        <div class="form-column">
+                            <div class="form-row">
+                                <label for="fullName">Full Name:</label>
+                                <input type="text" id="fullName" name="fullName" placeholder="Full name" value="{{ staff.fullName }}" required>
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" placeholder="Email address" value="{{ staff.email }}" required>
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="jobStartDate">Job Start Date:</label>
+                                <input type="datetime-local" id="jobStartDate" name="jobStartDate" value="{{ staff.jobStartDate }}" required>
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="salaryAmount">Salary Amount:</label>
+                                <input type="number" id="salaryAmount" name="salaryAmount" placeholder="Salary amount" value="{{ staff.salaryAmount }}" step="0.01" min="0" required>
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="role">Role:</label>
+                                <select id="role" name="role" required>
+                                    <option value="Speaker" {{ 'selected' if staff.role == 'Speaker' }}>Speaker</option>
+                                    <option value="Coordinator" {{ 'selected' if staff.role == 'Coordinator' }}>Coordinator</option>
+                                    <option value="Support" {{ 'selected' if staff.role == 'Support' }}>Support Staff</option>
+                                </select>
+                            </div>
+                        </div>
+                
+                        <!-- Right Column Fields -->
+                        <div class="form-column">
+                            <div class="form-row">
+                                <label for="icNo">IC No:</label>
+                                <input type="text" id="icNo" name="icNo" placeholder="123456-12-3456" value="{{ staff.icNo }}" required pattern="\d{6}-\d{2}-\d{4}">
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="contactNo">Contact No:</label>
+                                <input type="tel" id="contactNo" name="contactNo" placeholder="0123456789" value="{{ staff.contactNo }}" required pattern="\d{10,11}">
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="jobEndDate">Job End Date:</label>
+                                <input type="datetime-local" id="jobEndDate" name="jobEndDate" value="{{ staff.jobEndDate }}" required>
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="oneTimeFees">One Time Fees:</label>
+                                <input type="number" id="oneTimeFees" name="oneTimeFees" placeholder="One time fees" value="{{ staff.oneTimeFees }}" step="0.01" min="0" required>
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="status">Status:</label>
+                                <select id="status" name="status" required>
+                                    <option value="Active" {{ 'selected' if staff.status == 'Active' }}>Active</option>
+                                    <option value="Inactive" {{ 'selected' if staff.status == 'Inactive' }}>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="form-actions">
+                        <button type="reset" class="cancel-btn">Cancel</button>
+                        <button type="submit" class="save-btn">Save</button>
+                    </div>
+                </form>
+                
+            </div>
+            
+        </div>
+    </div>
+</body>
+
+
+<script>
+    function validateAndSubmit(event) {
+        event.preventDefault();
+
+        // Full Name Validation
+        const fullName = document.getElementById('fullName').value.trim();
+        if (!fullName) {
+            alert('Full name is required.');
+            return false;
+        }
+
+        // Email Validation
+        const email = document.getElementById('email').value.trim();
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            alert('Email address is required.');
+            return false;
+        } else if (!emailPattern.test(email)) {
+            alert('Please enter a valid email address.');
+            return false;
+        }
+
+        // IC Number Validation
+        const icNo = document.getElementById('icNo').value.trim();
+        const icPattern = /^\d{6}-\d{2}-\d{4}$/;
+        if (!icNo) {
+            alert('IC No is required.');
+            return false;
+        } else if (!icPattern.test(icNo)) {
+            alert('IC No must be in the format 123456-12-3456.');
+            return false;
+        }
+
+        // Contact Number Validation
+        const contactNo = document.getElementById('contactNo').value.trim();
+        const contactPattern = /^\d{10,11}$/;
+        if (!contactNo) {
+            alert('Contact number is required.');
+            return false;
+        } else if (!contactPattern.test(contactNo)) {
+            alert('Contact number must be 10 to 11 digits.');
+            return false;
+        }
+
+        // Job Date Validation
+        const jobStartDate = document.getElementById('jobStartDate').value.trim();
+        const jobEndDate = document.getElementById('jobEndDate').value.trim();
+        if (jobEndDate && new Date(jobEndDate) <= new Date(jobStartDate)) {
+            alert('Job End Date must be later than the Job Start Date.');
+            return false;
+        }
+
+        // Salary and Fees Validation
+        const salaryAmount = document.getElementById('salaryAmount').value.trim();
+        const oneTimeFees = document.getElementById('oneTimeFees').value.trim();
+        const formattedSalary = salaryAmount.replace(',', '.');
+        const formattedFees = oneTimeFees.replace(',', '.');
+
+        if (isNaN(formattedSalary) || Number(formattedSalary) < 0) {
+            alert('Salary amount must be a valid number and greater than or equal to 0.');
+            return false;
+        }
+
+        if (isNaN(formattedFees) || Number(formattedFees) < 0) {
+            alert('One-time fees must be a valid number and greater than or equal to 0.');
+            return false;
+        }
+
+        // Role Validation
+        const role = document.getElementById('role').value.trim();
+        if (!role) {
+            alert('Role is required.');
+            return false;
+        }
+
+        // Status Validation
+        const status = document.getElementById('status').value.trim();
+        if (!status) {
+            alert('Status is required.');
+            return false;
+        }
+
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Confirm Staff Registration',
+            text: 'Are you sure you want to register this staff member?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            },
+            buttonsStyling: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('staffForm').submit();
+            }
+        });
+
+        return false;
+    }
+</script>
+</html>

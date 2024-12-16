@@ -1,0 +1,318 @@
+/* Main container with enhanced cyber background */
+.ticket-detail-container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 80px auto 40px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Add cyber grid and glow effect to background */
+.ticket-detail-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        linear-gradient(90deg, rgba(0, 168, 255, 0.03) 1px, transparent 1px) 0 0 / 20px 20px,
+        linear-gradient(0deg, rgba(0, 168, 255, 0.03) 1px, transparent 1px) 0 0 / 20px 20px,
+        radial-gradient(circle at 50% 50%, rgba(0, 168, 255, 0.05), transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Enhanced ticket card */
+.ticket-card {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    background: linear-gradient(145deg, #1E2130, #2A2D3E);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+    border: 1px solid rgba(0, 168, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 168, 255, 0.2);
+}
+
+/* Add cyber border glow */
+.ticket-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        transparent 25%,
+        rgba(0, 168, 255, 0.1) 45%,
+        rgba(0, 168, 255, 0.2) 50%,
+        rgba(0, 168, 255, 0.1) 55%,
+        transparent 75%,
+        transparent
+    );
+    border-radius: 20px;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    animation: borderGlow 4s linear infinite;
+    pointer-events: none;
+}
+
+/* Left section styling */
+.ticket-left {
+    background: #1a1d2a;
+    padding: 25px;
+    border-right: 2px dashed rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+/* Add circuit board pattern */
+.ticket-left::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        linear-gradient(45deg, transparent 48%, rgba(0, 168, 255, 0.1) 49%, rgba(0, 168, 255, 0.1) 51%, transparent 52%) 0 0 / 20px 20px,
+        linear-gradient(-45deg, transparent 48%, rgba(0, 168, 255, 0.1) 49%, rgba(0, 168, 255, 0.1) 51%, transparent 52%) 0 0 / 20px 20px;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Enhanced event image without blue overlay */
+.event-image {
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+    border-radius: 15px;
+    position: relative;
+}
+
+.event-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.3s ease;
+}
+
+/* Enhanced QR section with larger scanning animation */
+.qr-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.qr-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4.5px;
+    background: linear-gradient(90deg, transparent, #00a8ff, transparent);
+    animation: scanLine 2s linear infinite;
+}
+
+/* Right section enhancements */
+.ticket-right {
+    padding: 30px;
+    position: relative;
+}
+
+/* Add data visualization lines */
+.info-section {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    border: 1px solid rgba(0, 168, 255, 0.1);
+}
+
+.info-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 48%, rgba(0, 168, 255, 0.1) 49%, transparent 51%) 0 0 / 20px 20px;
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+/* Enhanced status badge */
+.status.reselling {
+    background: linear-gradient(90deg, #ffc107, #ff9800);
+    color: #000;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-block;
+    margin-left: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.status.reselling::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: translateX(-100%);
+    animation: shine 2s infinite;
+}
+
+/* Enhanced action buttons */
+.btn {
+    padding: 10px 25px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.3);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: translateX(-100%);
+    animation: buttonShine 3s infinite;
+}
+
+/* Animations */
+@keyframes borderGlow {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes holographic {
+    0% { background-position: -200% -200%; }
+    100% { background-position: 200% 200%; }
+}
+
+@keyframes scanLine {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    20% { transform: translateX(100%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes buttonShine {
+    0% { transform: translateX(-100%); }
+    20% { transform: translateX(100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Add data flow lines */
+.info-row {
+    position: relative;
+    overflow: hidden;
+}
+
+.info-row::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 168, 255, 0.1), transparent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.info-row:hover::after {
+    transform: scaleX(1);
+}
+
+/* Add hover effects */
+.event-image:hover img {
+    transform: scale(1.05);
+}
+
+.info-section:hover {
+    border-color: rgba(0, 168, 255, 0.3);
+    box-shadow: 0 0 20px rgba(0, 168, 255, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 168, 255, 0.4);
+}
+
+/* Responsive design adjustments */
+@media (max-width: 992px) {
+    .ticket-card {
+        grid-template-columns: 1fr;
+    }
+    
+    .ticket-left {
+        border-right: none;
+        border-bottom: 2px dashed rgba(255, 255, 255, 0.1);
+    }
+} 
+
+.user-title {
+    position: relative;
+    display: inline-block; /* Important for gradient text */
+    background-image: linear-gradient(135deg, #00c3ff, #b700ff, #ff008c);
+    -webkit-background-clip: text;
+    -moz-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    /* Remove text-shadow as it can interfere with the gradient */
+    /* Add a filter for glow effect instead */
+    filter: drop-shadow(0 0 10px rgba(0, 195, 255, 0.3));
+}
+
+/* Optional: Add animation to make gradient move */
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.user-title {
+    /* Add these properties to the existing class */
+    background-size: 200% auto;
+    animation: gradient 3s linear infinite;
+}
+
+/* For the ticket listing in myticket.html */
+.ticket-image {
+    width: 347px;
+    height: 492px;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.ticket-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .event-image {
+        height: 250px;
+    }
+    
+    .ticket-image {
+        width: 100%;
+        height: 300px;
+    }
+}

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Smart Contract Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ticket_manage.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/smart_contract_manage.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="{{ url_for('static', filename='js/smart_contract_management.js') }}"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo">
+                <span>TicketPro</span>
+            </div>
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="{{ url_for('event_management') }}"><i class="fas fa-calendar-alt"></i> Events</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('order_management') }}"><i class="fas fa-chart-line"></i> Orders & Sales</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('participant_management') }}"><i class="fas fa-users"></i> Participants</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('ticket_management') }}"><i class="fas fa-ticket-alt"></i> Tickets</a>
+                </li>
+                <li class="active"> 
+                    <a href="{{ url_for('smart_contract_management') }}"><i class="fas fa-file-contract"></i> Smart Contracts</a>
+                </li>
+            </ul>
+            <button class="new-event-btn">+ New Event</button>
+        </nav>
+
+        <div id="content">
+            <header>
+                <h2>Smart Contract Management</h2>
+                <div class="user-info">
+                    <div class="dropdown">
+                        <button class="dropbtn">
+                            <span>{{ session['organiser_name'] }}</span>
+                            <img src="{{ url_for('static', filename='image/user-avatar.png') }}" alt="User Avatar" class="user-avatar">
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#"><i class="fas fa-user"></i> Profile</a>
+                            <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <div class="admin-container">
+                    <div class="admin-header">
+                        <h2>NFT Ticket Minting</h2>
+                    </div>
+
+                    <div class="contract-info">
+                        <p>Contract Address: <span id="contractAddress"></span></p>
+                    </div>
+
+                    <div class="minting-section">
+                        <h3>Pending Tickets</h3>
+                        <table class="ticket-table" id="pendingTicketTable">
+                            <thead>
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    <th>Event Name</th>
+                                    <th>Ticket Type</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Event Venue</th>
+                                    <th>Event Date</th>
+                                    <th>Transferable</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticket in pending_tickets %}
+                                <tr data-ticket-id="{{ ticket.TicketID }}">
+                                    <td>{{ ticket.TicketID }}</td>
+                                    <td>{{ ticket.EventTitle }}</td>
+                                    <td>{{ ticket.TicketType }}</td>
+                                    <td>{{ ticket.Price }}</td>
+                                    <td>{{ ticket.QuantityAvailable }}</td>
+                                    <td>{{ ticket.EventVenue }}</td>
+                                    <td>{{ ticket.EventStartDate }}</td>
+                                    <td>
+                                        <div class="transfer-toggle">
+                                            <input type="checkbox" 
+                                                   class="transferable-checkbox" 
+                                                   id="transferable_{{ ticket.TicketID }}"
+                                                   checked>
+                                            <label for="transferable_{{ ticket.TicketID }}">Allow Transfer</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button class="mint-nft-btn" onclick="mintNFT(
+                                            '{{ ticket.TicketID }}', 
+                                            '{{ ticket.EventTitle }}', 
+                                            '{{ ticket.Price }}', 
+                                            '{{ ticket.EventStartDate }}', 
+                                            '{{ ticket.TicketType }}', 
+                                            '{{ ticket.EventVenue }}',
+                                            '{{ ticket.QuantityAvailable }}',
+                                            document.getElementById('transferable_{{ ticket.TicketID }}').checked
+                                        )">Mint as NFT</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="minting-results-section">
+                        <div id="mintingResult"></div>
+                        <div id="qrCodesContainer"></div>
+                        <div id="recentMints"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/smart_contract_management.js') }}"></script>
+</body>
+
+</html>

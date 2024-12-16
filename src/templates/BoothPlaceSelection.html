@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/boothPlaceSelection.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <title>Event Planning Dashboard - Booth Plan</title>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events"> <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+            
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Booth Map Planning</h2>
+            </div>
+
+            <!-- Navigation Links -->
+            <a href="/OrgViewBooth" class="nav-btn">Exhibitor and booth</a>
+            <a href="{{ url_for('boothAllo.booth_page') }}" class="nav-btn">Event Allocation</a>
+            <a href="{{ url_for('boothAllo.remove_booth_allo_page') }}" class="nav-btn">Event Allocation Removal</a>
+            <a href="{{ url_for('boothAllo.booth_map_planning') }}" class="nav-btn active">Booth Map</a>
+            
+            
+            <div class="tableList">
+                <!-- New image upload input and button to add marker -->
+                <!-- <div class="btn-container"> -->
+                    <!-- <h3>Choose Local Map:</h3> -->
+                    
+                    <!-- <button id="addMarkerBtn">Add Booth Marker</button> -->
+                <!-- </div> -->
+                <div id="map-container">
+                    <div class="select-section">
+                        <form method="post" action="{{ url_for('boothAllo.booth_map_planning') }}">
+                            <label for="eventSelect" class="event-label">Select an Event:</label>
+                            <select id="eventSelect" name="eventSelect" class="form-control" required>
+                                {% if events %}
+                                    {% for event in events %}
+                                        <option value="{{ event['EventID'] }}" 
+                                                {% if selected_event_id == event['EventID'] %} selected {% endif %}>
+                                            {{ event['EventTitle'] }}
+                                        </option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option disabled>No events available</option>
+                                {% endif %}
+                            </select>
+                            <button type="submit" class="select-btn">Select</button>
+                        </form>
+                        
+                        
+                        <h4>Marker Font Color</h4>
+                        <input type="color" id="markerColorPicker" name="fontColor" value="{{ font_color or '#000000' }}" />
+    
+                        <h4>Marker Color</h4>
+                        <input type="color" id="markerBgColorPicker" name="bgColor" value="{{ bg_color or '#3498db' }}" />
+
+                        
+                    
+                        <h4>Upload Local Map:</h4>
+                        <input type="file" id="imageUpload" accept="image/*"/>
+                        <button id="saveMapBtn" class="save-map-btn">Save Map</button>
+                    </div>
+                        
+                        
+                    
+                    
+                   
+                    
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <!-- Leaflet.js JavaScript library -->
+     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+     <script src="https://unpkg.com/leaflet.polyline-measure/dist/leaflet.polyline-measure.js"></script>
+     
+     <script>
+         // Initialize variables for the map and image overlay
+         var map;
+         var imageOverlay;
+         var bounds = [[0, 0], [1000, 1000]];  // Adjust based on your image size
+ 
+         window.onload = function() {
+        map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: -1,
+        });
+
+        var imageUrl = '{{ url_for('static', filename='Image/event-floor-plan.jpeg') }}'; // Default map image
+        imageOverlay = L.imageOverlay(imageUrl, bounds).addTo(map);
+        map.setView([500, 500], 0);  // Adjust based on layout center
+
+        // Add booth markers if available
+        var booths = JSON.parse('{{ booths | tojson | safe }}');
+        if (booths && booths.length > 0) {
+            booths.forEach(function(booth) {
+                var customIcon = L.divIcon({
+                    className: 'booth-marker',
+                    html: `<div class="marker-label" style="color: ${booth.fontColor || '#000000'}; background-color: ${booth.bgColor || '#3498db'}">${booth.name}</div>`,
+                    iconSize: [20, 20],
+                    iconAnchor: [10, -10]
+                });
+
+                var marker = L.marker([booth.lat, booth.lon], { icon: customIcon, draggable: true }).addTo(map);
+                marker.on('dragend', function(e) {
+                    var newLatLng = e.target.getLatLng();
+                    updateBoothLocation(booth.id, newLatLng.lat, newLatLng.lng);
+                });
+            });
+        }
+
+        // Handle font color picker change
+        document.getElementById('markerColorPicker').addEventListener('input', function(event) {
+            var selectedColor = event.target.value;
+            document.querySelectorAll('.booth-marker .marker-label').forEach(function(label) {
+                label.style.color = selectedColor;
+            });
+        });
+
+        // Handle background color picker change
+        document.getElementById('markerBgColorPicker').addEventListener('input', function(event) {
+            var selectedBgColor = event.target.value;
+            document.querySelectorAll('.booth-marker .marker-label').forEach(function(label) {
+                label.style.backgroundColor = selectedBgColor;
+            });
+        });
+    };
+ 
+         // Handle image upload and update the map
+         document.getElementById('imageUpload').addEventListener('change', function(event) {
+             var file = event.target.files[0];
+             if (file) {
+                 var reader = new FileReader();
+                 reader.onload = function(e) {
+                     var newImageUrl = e.target.result;
+                     updateMapImage(newImageUrl);
+                 };
+                 reader.readAsDataURL(file);
+             }
+         });
+ 
+         function updateMapImage(newImageUrl) {
+             if (imageOverlay) {
+                 map.removeLayer(imageOverlay);  // Remove old image overlay
+             }
+             imageOverlay = L.imageOverlay(newImageUrl, bounds).addTo(map);  // Add the new image
+         }
+ 
+         // Save the map as an image using html2canvas
+         function saveMapAsImage() {
+             const mapContainer = document.getElementById('map');
+             
+             // Hide controls temporarily
+             const controls = mapContainer.querySelectorAll('.leaflet-control-container');
+             controls.forEach(control => control.style.display = 'none');
+             
+             html2canvas(mapContainer, {
+                 backgroundColor: '#ffffff',
+                 scale: 2,
+                 useCORS: true,
+                 allowTaint: true,
+                 onclone: function(clonedDoc) {
+                     // Ensure markers are visible in the clone
+                     const markers = clonedDoc.querySelectorAll('.booth-marker');
+                     markers.forEach(marker => {
+                         marker.style.display = 'block';
+                         marker.style.zIndex = '1000';
+                     });
+                 }
+             }).then(canvas => {
+                 // Show controls again
+                 controls.forEach(control => control.style.display = '');
+                 
+                 // Create download link
+                 const link = document.createElement('a');
+                 canvas.toBlob(function(blob) {
+                     link.href = URL.createObjectURL(blob);
+                     link.download = 'booth-map.png';
+                     link.click();
+                     URL.revokeObjectURL(link.href);
+                 }, 'image/png');
+             }).catch(error => {
+                 console.error("Error capturing map:", error);
+                 // Show controls again in case of error
+                 controls.forEach(control => control.style.display = '');
+             });
+         }
+ 
+         // Event listener for saving the map as an image
+         document.getElementById('saveMapBtn').addEventListener('click', saveMapAsImage);
+     </script>
+ 
+
+
+
+
+
+    </script>
+    
+
+
+</body>
+</html>

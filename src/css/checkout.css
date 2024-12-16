@@ -1,0 +1,823 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #0a0e1a;
+    color: white;
+}
+
+/* Header Styles */
+header {
+    background-color: rgba(10, 14, 26, 0.9);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #1e2130;
+    box-sizing: border-box;
+}
+
+.logo img {
+    height: 40px;
+}
+
+.nav-group {
+    display: flex;
+    align-items: center;
+}
+
+nav ul {
+    list-style-type: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    margin-right: 1.5rem;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: white;
+    font-weight: 550;
+    transition: color 0.3s ease;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+nav ul li a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00c3ff, #b700ff, #ff008c);
+    transition: width 0.3s ease;
+}
+
+nav ul li a:hover::after, nav ul li a.active::after {
+    width: 100%;
+}
+
+.login-btn {
+    background-color: transparent;
+    border: 2px solid #00a8ff;
+    color: #00a8ff;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 1rem;
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.login-btn:hover {
+    background-color: #00a8ff;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Main Content Styles */
+main {
+    max-width: 1200px;
+    margin: 100px auto 0;
+    padding: 2rem 5%;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    /* color: #00a8ff; */
+    font-size: 2.5rem;
+}
+
+.checkout-container {
+    background-color: rgba(30, 33, 48, 0.8);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.checkout-timer {
+    background-color: #00a8ff;
+    padding: 0.75rem 1rem;
+    text-align: right;
+    font-size: 0.9rem;
+    color: #fff;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.checkout-timer #timer {
+    font-family: monospace;
+    font-weight: bold;
+    margin-left: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.checkout-content {
+    display: flex;
+    padding: 2rem;
+    gap: 2rem;
+}
+
+.left-column, .right-column {
+    flex: 1;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    /* color: #00a8ff; */
+}
+
+p {
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.input-field {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.input-group {
+    display: flex;
+    background-color: #2c3e50;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.country-code, .email-icon {
+    background-color: #00a8ff;
+    padding: 0.75rem 1rem;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+input[type="tel"], input[type="email"] {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    background-color: #2c3e50;
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+/* Remove or comment out the first confirm-btn style */
+/* .confirm-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #00a8ff;
+    color: #ffffff;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+} */
+
+/* Keep and update this confirm-btn style */
+.confirm-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(90deg, #00a8ff, #0088d1);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: block; /* Add this to ensure visibility */
+    margin: 1rem 0; /* Add spacing */
+}
+
+.confirm-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 168, 255, 0.3);
+}
+
+.confirm-btn:disabled {
+    background: #1e2130;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.ticket-info {
+    background-color: #2c3e50;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.ticket-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: #00a8ff;
+}
+
+.ticket-info p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.quantity {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #00a8ff;
+}
+
+.price-breakdown {
+    margin-top: 1rem;
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.total {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #00a8ff;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #34495e;
+}
+
+@media (max-width: 768px) {
+    header {
+        padding: 1rem;
+    }
+
+    .nav-group {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-btn {
+        margin: 0.5rem 0;
+    }
+
+    .checkout-content {
+        flex-direction: column;
+    }
+}
+
+.payment-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background-color: rgba(30, 33, 48, 0.8);
+    border-radius: 15px;
+    border: 1px solid rgba(0, 168, 255, 0.1);
+}
+
+.wallet-section {
+    margin-top: 1.5rem;
+    padding: 1.2rem;
+    background-color: rgba(44, 62, 80, 0.3);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 168, 255, 0.1);
+}
+
+.metamask-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(30, 33, 48, 0.8);
+    padding: 1.2rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.metamask-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.metamask-logo {
+    width: 32px;
+    height: 32px;
+}
+
+.connect-btn {
+    background-color: #F6851B;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.connect-btn:hover {
+    background-color: #E77C1B;
+    transform: translateY(-1px);
+}
+
+.wallet-info {
+    background: var(--panel-bg);
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-top: 1rem;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);
+}
+
+.wallet-info p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem 0;
+    padding: 0.8rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 255, 0.05);
+}
+
+.wallet-info p:first-child {
+    margin-top: 0;
+}
+
+.wallet-info p:last-child {
+    margin-bottom: 0;
+}
+
+/* Address and Balance Labels */
+.wallet-info p::before {
+    content: attr(data-label);
+    color: var(--neon-primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Address and Balance Values */
+.wallet-info span {
+    font-family: 'Courier New', monospace;
+    color: #00a8ff;
+    font-size: 0.95rem;
+    padding: 0.3rem 0.8rem;
+    background: rgba(0, 168, 255, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    text-shadow: 0 0 10px rgba(0, 168, 255, 0.3);
+}
+
+/* Hover effect */
+.wallet-info p:hover {
+    border-color: rgba(0, 255, 255, 0.2);
+    transform: translateX(2px);
+    transition: all 0.3s ease;
+}
+
+/* ETH unit style */
+.wallet-info .eth-unit {
+    color: var(--neon-primary);
+    margin-left: 0.5rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.price-breakdown {
+    margin-top: 1.5rem;
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #ffffff;
+}
+
+.price-item.total {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #00a8ff;
+}
+
+/* Add animation for last minute warning */
+@keyframes warningPulse {
+    0% { background-color: #00a8ff; }
+    50% { background-color: #ff3860; }
+    100% { background-color: #00a8ff; }
+}
+
+.checkout-timer.warning {
+    animation: warningPulse 2s infinite;
+}
+
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: transparent;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.dropbtn span {
+    margin-right: 12px;
+    font-weight: 550;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.fa-caret-down {
+    margin-left: 5px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #2a2f45;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 5px;
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 12px 20px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    font-weight: 550;
+}
+
+.dropdown-content a i {
+    margin-right: 10px;
+}
+
+.dropdown-content a:hover {
+    background-color: #3a3f55;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover a:hover {
+        color: #00a8ff;
+}
+
+.user-info span {
+    margin-right: 10px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.user-title {
+    position: relative;
+    display: inline-block; /* Important for gradient text */
+    background-image: linear-gradient(135deg, #00c3ff, #b700ff, #ff008c);
+    -webkit-background-clip: text;
+    -moz-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    /* Remove text-shadow as it can interfere with the gradient */
+    /* Add a filter for glow effect instead */
+    filter: drop-shadow(0 0 10px rgba(0, 195, 255, 0.3));
+}
+
+/* Optional: Add animation to make gradient move */
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.user-title {
+    /* Add these properties to the existing class */
+    background-size: 200% auto;
+    animation: gradient 3s linear infinite;
+}
+
+:root {
+    --neon-primary: #0ff;
+    --neon-secondary: #0088ff;
+    --neon-glow: 0 0 10px rgba(0, 255, 255, 0.5);
+    --panel-bg: rgba(16, 24, 39, 0.8);
+    --border-glow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+/* Progress Bar */
+.cyber-progress-container {
+    margin: 2rem auto;
+    padding: 1rem;
+    background: var(--panel-bg);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    position: relative;
+}
+
+.progress-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--neon-primary), var(--neon-secondary));
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--panel-bg);
+    border: 2px solid var(--neon-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--neon-primary);
+}
+
+/* Timer */
+.cyber-timer {
+    background: var(--panel-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.timer-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--neon-primary);
+}
+
+.timer-display {
+    font-family: 'Courier New', monospace;
+    font-size: 1.2rem;
+    color: var(--neon-primary);
+    text-shadow: var(--neon-glow);
+}
+
+/* Panels */
+.checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.cyber-panel {
+    background: linear-gradient(145deg, rgba(26, 31, 53, 0.95), rgba(10, 14, 26, 0.95));
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-radius: 15px;
+    padding: 2rem;
+    position: relative;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 168, 255, 0.1);
+    overflow: hidden;
+}
+
+.cyber-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 15px;
+    padding: 1px;
+    background: linear-gradient(135deg, #00a8ff, #7b2ff7);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    color: var(--neon-primary);
+}
+
+/* Buttons */
+.cyber-button {
+    width: 100%;
+    padding: 1rem 2rem;
+    background: linear-gradient(90deg, #00a8ff, #7b2ff7);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.cyber-button::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(90deg, #00a8ff, #7b2ff7, #00a8ff);
+    background-size: 200% auto;
+    z-index: -1;
+    border-radius: 50px;
+    animation: borderGlow 3s linear infinite;
+}
+
+.cyber-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0, 168, 255, 0.4);
+}
+
+.button-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Input Fields */
+.cyber-input-group {
+    margin: 1.5rem 0;
+}
+
+.input-wrapper {
+    position: relative;
+    margin-top: 0.5rem;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+}
+
+.input-wrapper i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--neon-primary);
+}
+
+/* Summary Section */
+.ticket-summary {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.price-breakdown {
+    margin-bottom: 1.5rem;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+
+.price-row.total {
+    border-top: 1px solid rgba(0, 255, 255, 0.1);
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.eth-amount {
+    color: var(--neon-primary);
+    font-family: 'Courier New', monospace;
+    text-shadow: var(--neon-glow);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .checkout-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Add cyberpunk grid background */
+.checkout-grid::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(90deg, transparent 96%, rgba(0, 168, 255, 0.1) 97%, transparent 98%),
+        linear-gradient(0deg, transparent 96%, rgba(0, 168, 255, 0.1) 97%, transparent 98%);
+    background-size: 50px 50px;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Update timer styling */
+.cyber-timer {
+    background: linear-gradient(145deg, rgba(26, 31, 53, 0.95), rgba(10, 14, 26, 0.95));
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: #00a8ff;
+    text-shadow: 0 0 10px rgba(0, 168, 255, 0.3);
+}

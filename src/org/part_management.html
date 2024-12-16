@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Participant Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ticket_manage.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/part_manage.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo">
+                <span>TicketPro</span>
+            </div>
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="{{ url_for('event_management') }}"><i class="fas fa-calendar-alt"></i> Events</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('order_management') }}"><i class="fas fa-chart-line"></i> Orders & Sales</a>
+                </li>
+                <li class="active">
+                    <a href="{{ url_for('participant_management') }}"><i class="fas fa-users"></i> Participants</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('ticket_management') }}"><i class="fas fa-ticket-alt"></i> Tickets</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('smart_contract_management') }}"><i class="fas fa-file-contract"></i> Smart Contracts</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div id="content">
+            <header>
+                <h2>Participant Management</h2>
+                <div class="user-info">
+                    <div class="dropdown">
+                        <button class="dropbtn">
+                            <span>{{ session['organiser_name'] }}</span>
+                            <img src="{{ url_for('static', filename='image/user-avatar.png') }}" alt="User Avatar" class="user-avatar">
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#"><i class="fas fa-user"></i> Profile</a>
+                            <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <div class="admin-container">
+                    <div class="admin-header">
+                        <h2>Participants</h2>
+                    </div>
+                    <div class="search-bar">
+                        <input type="text" id="searchInput" placeholder="Search participants" onkeyup="filterTable()">
+                        <button><i class="fas fa-search"></i></button>
+                    </div>
+                    <table class="participant-table" id="participantTable">
+                        <thead>
+                            <tr>
+                                <th>Participant ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Contact Info</th>
+                                <th>Registration Date</th>
+                                <th>Event</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for participant in participants %}
+                            <tr>
+                                <td>{{ participant.UserID }}</td>
+                                <td>{{ participant.UserName }}</td>
+                                <td>{{ participant.UserEmail }}</td>
+                                <td>{{ participant.UserContactInfo }}</td>
+                                <td>{{ participant.RegistrationDate.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>{{ participant.EventTitle }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+        function filterTable() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("participantTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td");
+                for (var j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                            break;
+                        } else {
+                            tr[i].style.display = "none";
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

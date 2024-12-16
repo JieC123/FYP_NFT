@@ -1,0 +1,6 @@
+@echo off
+echo Starting IPFS daemon...
+start cmd /k "ipfs daemon"
+timeout /t 5
+echo Starting Flask application...
+python app2.py

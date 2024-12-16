@@ -1,0 +1,86 @@
+.participant-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.participant-table th, .participant-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #3a3f55;
+}
+
+.participant-table th {
+    background-color: #2a2f45;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+}
+
+.participant-table tbody tr {
+    background-color: #2a2f45;
+    transition: background-color 0.3s ease;
+}
+
+.participant-table tbody tr:hover {
+    background-color: #3a3f55;
+}
+
+.participant-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Style for the search bar */
+.search-bar {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.search-bar input {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 5px 0 0 5px;
+    background-color: #2a2f45;
+    color: #ffffff;
+}
+
+.search-bar button {
+    background-color: #00a8ff;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+}
+
+/* Style for the registration date */
+.registration-date {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+}
+
+/* Style for the event title */
+.event-title {
+    font-weight: bold;
+    color: #00a8ff;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .participant-table {
+        font-size: 0.9rem;
+    }
+
+    .participant-table th, .participant-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .search-bar input, .search-bar button {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+}

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/OrgAlloStaff.css') }}"> <!-- Same CSS as for Event -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Event Planning Dashboard - Staff Allocation</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                        <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                        <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Staff and Authority</h2>
+            </div>
+
+            <a href="/OrgViewStaff" class="nav-btn">Event Staff</a>
+            <a href="{{ url_for('staffAllo.staffAllocation_page') }}" class="nav-btn active">Event Allocation</a>
+            <a href="{{ url_for('staffAllo.staffAllocationRemoval_page') }}" class="nav-btn">Event Allocation Removal</a>
+
+            
+                       
+            <div class="tableList">
+                <div class="select-section">
+                
+                   
+                        <form method="post" action="{{ url_for('staffAllo.staffAllocation_page') }}">
+                            <label for="eventSelect" class="event-label">Select an Event:</label>
+                            <select id="eventSelect" name="eventSelect" class="form-control" required>
+                                {% if events %}
+                                    {% for event in events %}
+                                        <option value="{{ event['EventID'] }}" 
+                                                {% if selected_event_id == event['EventID'] %} selected {% endif %}>
+                                            {{ event['EventTitle'] }}
+                                        </option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option disabled>No events available</option>
+                                {% endif %}
+                            </select>
+                            <button type="submit" class="select-btn">Select</button>
+                        </form>
+                    
+                
+               
+                
+                <!-- Toggle Buttons Moved to the Right Side -->
+                <div class="toggle-buttons">
+                    <button id="assignedToggleBtn" class="toggle-btn" onclick="toggleAssignedTable()">Hide Assigned Table</button>
+                    <button id="unassignedToggleBtn" class="toggle-btn" onclick="toggleUnassignedTable()">Hide Unassigned Table</button>
+                    
+                </div>
+            </div>
+            <div id="assignedSection" class="table-section">
+                {% if event_details %}
+                    <h4>Event Duration: {{ event_details['EventStartDate'] }} - {{ event_details['EventEndDate'] }}</h4>
+                {% endif %}
+                
+                <h3>Assigned Staff:</h3>
+                <table id="assignedTable" class="staff-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-sort="number">No.<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="staffId">Staff ID<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="name">Staff Name<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="role">Role<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="startDate">Contract Start Date<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="endDate">Contract End Date<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="salary">Salary (RM)<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="fees">One Time Fees (RM)<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="hours">Hours Worked<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="assignedDate">Date Assigned<span class="sort-icon"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if assigned_staff and assigned_staff|length > 0 %}
+                            {% for staff in assigned_staff %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ staff['StaffID'] }}</td>
+                                    <td>{{ staff['StaffName'] }}</td>
+                                    <td>{{ staff['Role'] }}</td>
+                                    <td>{{ staff['JobStartPeriod'] }}</td>
+                                    <td>{{ staff['JobEndPeriod'] }}</td>
+                                    <td>{{ '%0.2f' | format(staff['Salary']) }}</td>
+                                    <td>{{ '%0.2f' | format(staff['OneTimeFees']) }}</td>
+                                    <td>{{ staff['HoursWorked'] }}</td>
+                                    <td>{{ staff['DateAssigned'] }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="10" style="text-align: center;">No assigned staff found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                
+            </div>
+            
+            <div id="unassignedSection" class="table-section">
+                <h3>Unassigned Staff:</h3>
+                <table id="unassignedTable" class="staff-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all" onclick="toggleAll(this)"></th>
+                            <th class="sortable" data-sort="number">No.<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="staffId">Staff ID<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="name">Staff Name<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="role">Role<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="startDate">Contract Start Date<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="endDate">Contract End Date<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="salary">Salary (RM)<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="fees">One Time Fees (RM)<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="status">Status<span class="sort-icon"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if unassigned_staff and unassigned_staff|length > 0 %}
+                            {% for staff in unassigned_staff %}
+                                <tr>
+                                    <td><input type="checkbox" class="row-checkbox" value="{{ staff['EventStaffID'] }}"></td>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ staff['EventStaffID'] }}</td>
+                                    <td>{{ staff['EventStaffName'] }}</td>
+                                    <td>{{ staff['Role'] }}</td>
+                                    <td>{{ staff['JobStartPeriod'] }}</td>
+                                    <td>{{ staff['JobEndPeriod'] }}</td>
+                                    <td>{{ '%0.2f' | format(staff['Salary']) }}</td>
+                                    <td>{{ '%0.2f' | format(staff['OneTimeFees']) }}</td>
+                                    <td>{{ staff['Status'] }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="10" style="text-align: center;">No unassigned staff found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            
+            
+            
+        
+           
+            <button class="confirm-btn" onclick="confirmAssignStaff()">Confirm</button>
+        </div>
+    </div>
+</div>
+</body>
+
+
+
+
+<script>
+    // Function to toggle the visibility of the assigned sponsorship table content only
+    function toggleAssignedTable() {
+        const assignedTable = document.getElementById("assignedTable");
+        const toggleBtn = document.getElementById("assignedToggleBtn");
+        if (assignedTable.style.display === "none" || assignedTable.style.display === "") {
+            assignedTable.style.display = "table";
+            toggleBtn.textContent = "Hide Assigned Table";
+        } else {
+            assignedTable.style.display = "none";
+            toggleBtn.textContent = "Show Assigned Table";
+        }
+    }
+
+    // Function to toggle the visibility of the unassigned sponsorship table content only
+    function toggleUnassignedTable() {
+    const unassignedTable = document.getElementById("unassignedTable");
+    const toggleBtn = document.getElementById("unassignedToggleBtn");
+    if (unassignedTable.style.display === "none" || unassignedTable.style.display === "") {
+        unassignedTable.style.display = "table";
+        toggleBtn.textContent = "Hide Unassigned Table";
+    } else {
+        unassignedTable.style.display = "none";
+        toggleBtn.textContent = "Show Unassigned Table";
+    }
+}
+
+    // Function to toggle all checkboxes
+    function toggleAll(source) {
+        const checkboxes = document.querySelectorAll(".row-checkbox");
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = source.checked;
+        });
+    }
+
+
+
+    function confirmAssignStaff() {
+    const selectedStaff = document.querySelectorAll('input.row-checkbox:checked');
+    if (selectedStaff.length > 0) {
+        const confirmAction = confirm('Are you sure you want to assign the selected staff(s) to the event?');
+        if (confirmAction) {
+            const staffData = [];
+            selectedStaff.forEach(staff => {
+                const staffId = staff.value;
+                const row = staff.closest('tr');
+                
+                // Get job start and end periods from the correct column indices
+                const jobStartPeriod = row.cells[5].innerText.trim();  // Column index for Job Start Period
+                const jobEndPeriod = row.cells[6].innerText.trim();    // Column index for Job End Period
+
+                staffData.push({ staffId, jobStartPeriod, jobEndPeriod });
+            });
+
+            const selectedEventId = document.getElementById('eventSelect').value;
+            const data = {
+                staffData: staffData,
+                eventID: selectedEventId
+            };
+
+            // Perform the AJAX request to assign staff
+            fetch('/assign_staff', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Staff(s) assigned successfully.');
+                    // Refresh the page to show the latest info
+                    location.reload();
+                } else {
+                    alert(result.message || 'Failed to assign staff(s).');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while trying to assign staff(s).');
+            });
+        }
+    } else {
+        alert('Please select at least one staff member to assign.');
+    }
+}
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const getCellValue = (tr, idx) => {
+            const cell = tr.children[idx];
+            let value = cell.textContent || cell.innerText;
+            
+            // For salary and fees columns
+            if (idx === 6 || idx === 7) {
+                return parseFloat(value.replace('RM', '').trim()) || 0;
+            }
+            
+            // For contract dates and assigned date
+            if (idx === 4 || idx === 5 || idx === 9) {
+                // Try parsing YYYY-MM-DD format first
+                if (value.includes('-')) {
+                    return new Date(value);
+                }
+                // Try parsing DD/MM/YYYY format
+                const parts = value.split('/');
+                if (parts.length === 3) {
+                    return new Date(parts[2], parts[1] - 1, parts[0]);
+                }
+                return new Date(0);
+            }
+
+            // For hours worked column
+            if (idx === 8) {
+                return parseInt(value) || 0;
+            }
+            
+            return value;
+        };
+
+        const comparer = (idx, asc) => (a, b) => {
+            const v1 = getCellValue(asc ? a : b, idx);
+            const v2 = getCellValue(asc ? b : a, idx);
+            
+            // Handle different types of sorting
+            if (v1 instanceof Date && v2 instanceof Date) {
+                return v1 - v2;
+            } else if (idx === 0) { // No. column
+                return parseInt(v1) - parseInt(v2);
+            } else if (idx === 6 || idx === 7) { // Salary and Fees columns
+                return v1 - v2;
+            } else if (idx === 8) { // Hours worked column
+                return v1 - v2;
+            } else { // Text columns
+                return v1.toString().localeCompare(v2);
+            }
+        };
+
+        // Setup sorting for both tables
+        const setupTableSorting = (tableId) => {
+            document.querySelectorAll(`#${tableId} th.sortable`).forEach(th => {
+                th.addEventListener('click', () => {
+                    const table = th.closest('table');
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const headerRow = th.parentElement;
+                    const columnIndex = Array.from(headerRow.children).indexOf(th);
+                    
+                    // Remove asc/desc classes from all headers
+                    headerRow.querySelectorAll('th').forEach(header => {
+                        if (header !== th) {
+                            header.classList.remove('asc', 'desc');
+                        }
+                    });
+                    
+                    // Toggle sort direction
+                    const isAsc = !th.classList.contains('asc');
+                    th.classList.toggle('asc', isAsc);
+                    th.classList.toggle('desc', !isAsc);
+                    
+                    // Sort rows
+                    rows.sort(comparer(columnIndex, isAsc));
+                    
+                    // Reorder rows in the table
+                    tbody.append(...rows);
+                    
+                    // Update the index numbers if not sorting by No. column
+                    if ((tableId === 'assignedTable' && columnIndex !== 0) || 
+                        (tableId === 'unassignedTable' && columnIndex !== 1)) {
+                        rows.forEach((row, index) => {
+                            const indexCell = tableId === 'assignedTable' ? 
+                                row.querySelector('td:first-child') :
+                                row.querySelector('td:nth-child(2)');
+                            indexCell.textContent = index + 1;
+                        });
+                    }
+
+                    // Preserve checkbox states for unassigned table
+                    if (tableId === 'unassignedTable') {
+                        rows.forEach(row => {
+                            const checkbox = row.querySelector('input[type="checkbox"]');
+                            if (checkbox) {
+                                checkbox.checked = checkbox.getAttribute('data-checked') === 'true';
+                            }
+                        });
+                    }
+                });
+            });
+        };
+
+        // Initialize sorting for both tables
+        setupTableSorting('assignedTable');
+        setupTableSorting('unassignedTable');
+
+        // Store checkbox states before sorting (for unassigned table only)
+        document.querySelectorAll('#unassignedTable input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                this.setAttribute('data-checked', this.checked);
+            });
+        });
+    });
+
+</script>
+</html>

@@ -1,0 +1,12 @@
+.sort-container.focused::before {
+    opacity: 0.4;
+}
+
+.sort-container.focused .sort-select {
+    border-color: #00a8ff;
+    box-shadow: 0 0 20px rgba(0, 168, 255, 0.3);
+}
+
+.sort-select {
+    transition: all 0.3s ease, background-position 0.3s steps(100);
+}

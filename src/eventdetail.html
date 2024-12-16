@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Event Details</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/eventdetail.css') }}">
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('index') }}"><img    src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo"></a>
+        </div>
+        <div class="nav-group">
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('eventlist') }}" class="active">Events</a></li>
+                    <li><a href="{{ url_for('marketplace') }}">Marketplace</a></li>
+                    <li><a href="{{ url_for('myticket') }}">MyTicket</a></li>
+                    <li><a href="{{ url_for('orders') }}">Orders</a></li>
+                </ul>
+            </nav>
+            {% if session['user_id'] %}
+            <div class="user-info">
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <span class="user-title" style="text-transform: capitalize; font-weight: 550;">{{ session['username'] }}</span>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <button class="login-btn">Login</button>
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        <div class="event-banner">
+            <div class="event-image-container">
+                <div class="cyber-frame">
+                    <div class="glitch-overlay"></div>
+                    <div class="cyber-corners">
+                        <span class="corner top-left"></span>
+                        <span class="corner top-right"></span>
+                        <span class="corner bottom-left"></span>
+                        <span class="corner bottom-right"></span>
+                    </div>
+                    <div class="event-visual">
+                        <div class="hex-grid"></div>
+                        <div class="event-title-overlay">
+                            <div class="glitch-text">{{ event.EventTitle }}</div>
+                            <div class="event-meta-overlay">
+                                <span class="cyber-chip"><i class="fas fa-ethereum"></i> Web3 Event</span>
+                                <span class="cyber-chip"><i class="fas fa-ticket-alt"></i> NFT Tickets</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="event-info-container">
+                <div class="circuit-pattern"></div>
+                <div class="hex-pattern"></div>
+                <div class="event-info-grid" style="margin-bottom: 1rem;">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="far fa-calendar"></i>
+                            <span class="info-label">Date</span>
+                        </div>
+                        <div class="info-value">{{ event.EventStartDate }} - {{ event.EventEndDate }}</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="far fa-clock"></i>
+                            <span class="info-label">Time</span>
+                        </div>
+                        <div class="info-value">{{ event.EventStartTime }} - {{ event.EventEndTime }}</div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span class="info-label">Location</span>
+                        </div>
+                        <div class="info-value">{{ event.EventVenue }}</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="info-label">Organizer</span>
+                        </div>
+                        <div class="info-value">{{ event.OrganiserName }}</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span class="info-label">Event Type</span>
+                        </div>
+                        <div class="info-value">Web3 Concert</div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-users"></i>
+                            <span class="info-label">Capacity</span>
+                        </div>
+                        <div class="info-value">Limited NFT Tickets</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="event-details">
+            <div class="left-column">
+                <div class="about-organizer">
+                    <span class="cyber-corner corner-tl"></span>
+                    <span class="cyber-corner corner-tr"></span>
+                    <span class="cyber-corner corner-bl"></span>
+                    <span class="cyber-corner corner-br"></span>
+                    <h2>About the Organiser</h2>
+                    <div class="organizer-info">
+                        <img src="{{ url_for('static', filename='image/org1.jpeg') }}" alt="Organizer">
+                        <span>{{ event.OrganiserName }}</span>
+                    </div>
+                    <p>Email: {{ event.OrganiserEmail }}</p>
+                    <p>Contact: {{ event.OrganiserContactNo }}</p>
+                    <p>Organised Events: {{ event.EventHistoryCount }}</p>
+                </div>
+                <div class="about-event" style="margin-top: 10px;">
+                    <h2>About This Event</h2>
+                    <p>{{ event.EventDescription }}</p>
+                </div>
+            </div>
+            <div class="right-column">
+                <div class="buy-tickets">
+                    <h2>Buy tickets for this event</h2>
+                    <p>Please select your ticket type and quantity, then proceed to "Buy now".</p>
+                    {% for ticket in tickets %}
+                    <div class="ticket-selection">
+                        <div class="ticket-type">
+                            <span style="text-transform: capitalize;">{{ ticket.TicketType }}</span>
+                            <div class="eth-price">
+                                <span class="eth-icon"></span>
+                                <span class="price" data-ticket-price="{{ ticket.Price }}">RM {{ ticket.Price * exchange_rate }} ({{ ticket.Price }} ETH)</span>
+                            </div>
+                            <div class="ticket-status">
+                                {% if ticket.IsTransferrable == "1" %}
+                                <span class="transferrable-badge"><i class="fas fa-exchange-alt"></i> Transferrable</span>
+                                {% else %}
+                                <span class="non-transferrable-badge"><i class="fas fa-ban"></i> Non-Transferrable</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if ticket.QuantityAvailable == 0 or ticket.QuantityAvailable < 1 %}
+                        <span class="sold-out">Sold Out</span>
+                        {% else %}
+                        <select class="ticket-quantity" data-ticket-type="{{ ticket.TicketType }}" data-available="{{ ticket.QuantityAvailable }}">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <button class="buy-btn" id="initialBuyBtn">Buy Now</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {% include 'chatbot.html' %}
+
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.ticket-quantity').forEach(select => {
+                select.addEventListener('change', updateTotalCost);
+            });
+
+            function updateTotalCost() {
+                let total = 0;
+                let hasSelectedTickets = false;
+
+                document.querySelectorAll('.ticket-quantity').forEach(select => {
+                    const quantity = parseInt(select.value);
+                    if (quantity > 0) {
+                        hasSelectedTickets = true;
+                        const price = parseFloat(select.closest('.ticket-selection')
+                            .querySelector('.price')
+                            .dataset.ticketPrice);
+                        total += quantity * price;
+                    }
+                });
+
+                const totalCostSection = document.getElementById('totalCostSection');
+                const totalCostSpan = document.getElementById('totalCost');
+                
+                if (hasSelectedTickets) {
+                    totalCostSection.classList.remove('hidden');
+                    totalCostSpan.textContent = total.toFixed(4);
+                } else {
+                    totalCostSection.classList.add('hidden');
+                }
+            }
+
+            document.getElementById('initialBuyBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                let selectedTickets = [];
+                let isValid = true;
+                
+                document.querySelectorAll('.ticket-quantity').forEach(select => {
+                    const quantity = parseInt(select.value);
+                    if (quantity > 0) {
+                        const available = parseInt(select.dataset.available);
+                        const ticketType = select.dataset.ticketType;
+                        const price = parseFloat(select.closest('.ticket-selection')
+                            .querySelector('.price')
+                            .dataset.ticketPrice);
+                        
+                        // Validate quantity
+                        if (quantity > available) {
+                            showAlert(`Only ${available} tickets available for ${ticketType} ticket type.`);
+                            isValid = false;
+                            return;
+                        }
+                        
+                        selectedTickets.push({
+                            ticketType: ticketType,
+                            quantity: quantity,
+                            price: price
+                        });
+                    }
+                });
+
+                if (!isValid) return;
+
+                if (selectedTickets.length === 0) {
+                    showAlert('Please select at least one ticket before proceeding to checkout.');
+                    return;
+                }
+
+                // Store selected tickets information
+                sessionStorage.setItem('selectedTickets', JSON.stringify(selectedTickets));
+                sessionStorage.setItem('eventTitle', '{{ event.EventTitle }}');
+                sessionStorage.setItem('eventId', '{{ event.EventID }}');
+
+                // Debug log to verify data
+                console.log('Selected Tickets:', selectedTickets);
+                console.log('Event Title:', '{{ event.EventTitle }}');
+
+                // Proceed to checkout
+                window.location.href = '{{ url_for("checkout") }}';
+            });
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/eventdetail.js') }}"></script>
+</body>
+
+</html>

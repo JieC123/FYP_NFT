@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Track Sales</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/eventSummaryReportStyle.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/track_sales.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant">
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            
+            <div class="pageTitle">
+                <h2>Track Sales</h2>
+            </div>
+
+            <div class="tableList">
+                <div class="admin-container">
+                    <div class="admin-header">
+                        <h2>Sales Report</h2>
+                        <div class="report-controls">
+                            <button class="btn" data-period="daily">Daily</button>
+                            <button class="btn active" data-period="weekly">Weekly</button>
+                            <button class="btn" data-period="monthly">Monthly</button>
+                            <button class="btn print-btn" id="printReport">
+                                <i class="fas fa-print"></i> Print Report
+                            </button>
+                        </div>
+                    </div>
+                    <div class="report-summary">
+                        <div class="summary-card">
+                            <h3>Total Sales This Week</h3>
+                            <p class="large-number">
+                                RM 0.00
+                                <span class="eth-value">(0.0000 ETH)</span>
+                            </p>
+                            <p class="change positive">0.0% vs last week</p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>New Orders</h3>
+                            <p class="large-number">{{ summary.NewOrders }}</p>
+                            <p class="change {{ 'positive' if orders_change >= 0 else 'negative' }}">
+                                {{ "%.1f"|format(orders_change) }}% since last week
+                            </p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Number of Events</h3>
+                            <p class="large-number">{{ summary.NumberOfEvents }}</p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>New Customers</h3>
+                            <p class="large-number">{{ summary.NewCustomers }}</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div style="height: 400px;">
+                            <canvas id="salesChart" 
+                                data-sales='{{ daily_sales|tojson|safe }}'
+                                data-eth-to-myr-rate="{{ eth_to_myr_rate }}">
+                            </canvas>
+                        </div>
+                    </div>
+                    <div class="ticket-sales-summary">
+                        <h3>Total Tickets Sold - All Time</h3>
+                        <div class="event-selector">
+                            <select id="eventSelector">
+                                <option value="all">All events</option>
+                                {% for event in event_sales|from_json %}
+                                <option value="{{ event.EventID }}">{{ event.EventTitle }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="progress-container">
+                            {% set events = event_sales|from_json %}
+                            {% set total_sold = events|sum(attribute='TotalSold') %}
+                            {% set total_capacity = events|sum(attribute='TotalCapacity') %}
+                            {% set percentage = (total_sold / total_capacity * 100)|round|int if total_capacity > 0 else 0 %}
+                            
+                            <div class="progress-circle" data-percentage="{{ percentage }}">
+                                <span class="progress-text">{{ percentage }}%</span>
+                            </div>
+                            <div class="progress-bars">
+                                {% for event in event_sales|from_json %}
+                                <div class="progress-bar" 
+                                     data-event-id="{{ event.EventID }}"
+                                     data-ticket-type="{{ event.TicketType }}">
+                                    <div class="progress-label">
+                                        {% if event.TicketType %}
+                                            {{ event.EventTitle }} - {{ event.TicketType }}
+                                        {% else %}
+                                            {{ event.EventTitle }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="progress-info">
+                                        Orders: {{ event.OrderCount }} | Revenue: RM{{ "%.2f"|format(event.TotalRevenue * 14000) }}
+                                        <span class="eth-value">({{ "%.4f"|format(event.TotalRevenue) }} ETH)</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        {% set event_percentage = (event.TotalSold / event.TotalCapacity * 100)|round|int if event.TotalCapacity > 0 else 0 %}
+                                        <div class="progress-fill" style="width: {{ event_percentage }}%;"></div>
+                                    </div>
+                                    <div class="progress-text">{{ event.TotalSold }}/{{ event.TotalCapacity }} tickets sold</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/track_sales.js') }}"></script>
+</body>
+
+</html>

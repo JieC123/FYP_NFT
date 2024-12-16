@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ViewEvent.css') }}"> <!-- Using the same CSS -->
+    <title>Event Planning Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item  active">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                        <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                        <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                        <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event</h2>
+                
+            </div>
+            <div class="tableList">
+                
+                <div class="search-bar">
+                    <button type="button" class="refresh-btn" onclick="refreshTable()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <form id="search-form" action="{{ url_for('event.search_events') }}" method="GET">
+                        <input type="text" name="query" placeholder="Search by event name">
+                        <button type="submit">Search</button>
+                    </form>
+                    <button type="button" class="filter-btn" onclick="openFilterModal()">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+                
+                <div class="search-delete-bar">
+                    
+
+                    <button class="delete-btn">Delete</button>
+                    <a class="add-event-btn" href="{{ url_for('event.add_event') }}">Add Event ➕</a>
+                    <!-- <button class="add-event-btn" onclick="location.href='OrgAddParticipant.html'">Add Participant ➕</button>
+                    <button class="back-btn" onclick="location.href='/events'">⬅️ Back</button> -->
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th> <!-- Top checkbox for "Delete All" -->
+                            <th class="sortable" data-sort="index">No. <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="eventId">Event ID <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="title">Event Title <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="type">Event Type <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="venue">Event Venue <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="startDate">Event Start Date <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="endDate">Event End Date <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="capacity">Event Capacity <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="status">Event Status <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="description">Event Description <span class="sort-icon"></span></th>
+                            <th>Event Poster</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td><input type="checkbox" class="event-checkbox" value="{{ event.EventID }}"></td>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ event.EventID }}</td>
+                            <td>{{ event.EventTitle }}</td>
+                            <td>{{ event.EventType }}</td>
+                            <td>{{ event.EventVenue }}</td>
+                            <td>{{ event.EventStartDate }}</td>
+                            <td>{{ event.EventEndDate }}</td>
+                            <td>{{ event.EventCapacity }}</td>
+                            <td>{{ event.EventStatus }}</td>
+                            <td>{{ event.EventDescription }}</td>
+                            
+                            <!-- Display the Event Image -->
+                            <td>
+                                {% if event.EventImagePath %}
+                                    <img src="{{ event.EventImagePath }}" 
+                                         alt="Event Poster" 
+                                         style="width: 125px; height: 125px; object-fit: cover;">
+                                {% else %}
+                                    <span>No Image</span>
+                                {% endif %}
+                            </td>
+                            
+                            
+                            
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn modify-btn">
+                                        <a href="{{ url_for('event.edit_event', event_id=event.EventID) }}" class="btn">
+                                            <i class="fas fa-edit"></i> Modify
+                                        </a>
+                                    </button>
+                                    <button class="action-btn track-btn">
+                                        <a href="{{ url_for('track_involvement.set_event_id', event_id=event.EventID) }}" class="btn">
+                                            <i class="fas fa-chart-line"></i> Track Involvement
+                                        </a>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            <!-- Add this right after your table, inside the tableList div -->
+            <div class="pagination">
+                {% if current_page > 1 %}
+                    <a href="{{ url_for('event.index', page=current_page-1, types=request.args.get('types'), statuses=request.args.get('statuses'), query=request.args.get('query')) }}" 
+                    class="pagination-btn">Previous</a>
+                {% else %}
+                    <span class="pagination-btn disabled">Previous</span>
+                {% endif %}
+
+                <span class="pagination-info">
+                    Page <span class="current-page">{{ current_page }}</span> of {{ total_pages }}
+                </span>
+
+                {% if current_page < total_pages %}
+                    <a href="{{ url_for('event.index', page=current_page+1, types=request.args.get('types'), statuses=request.args.get('statuses'), query=request.args.get('query')) }}" 
+                    class="pagination-btn">Next</a>
+                {% else %}
+                    <span class="pagination-btn disabled">Next</span>
+                {% endif %}
+            </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div id="filterModal" class="modal">
+        <div class="modal-content filter-modal">
+            <h2>Filter Events</h2>
+            
+            <div class="filter-sections-container">
+                <!-- Event Type Filter -->
+                <div class="filter-section">
+                    <h3>Event Type</h3>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="type_all" class="type-filter-checkbox-all" 
+                                   {% if not selected_types %}checked{% endif %}>
+                            <label for="type_all">All Types</label>
+                        </div>
+                        <div class="filter-divider"></div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="type_concert" value="Concert" class="type-filter-checkbox">
+                            <label for="type_concert">Concert</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="type_conference" value="Conference" class="type-filter-checkbox">
+                            <label for="type_conference">Conference</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="type_seminar" value="Seminar" class="type-filter-checkbox">
+                            <label for="type_seminar">Seminar</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="type_workshop" value="Workshop" class="type-filter-checkbox">
+                            <label for="type_workshop">Workshop</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Status Filter -->
+                <div class="filter-section">
+                    <h3>Event Status</h3>
+                    <div class="filter-options">
+                        <div class="filter-option">
+                            <input type="checkbox" id="status_all" class="status-filter-checkbox-all"
+                                   {% if not selected_statuses %}checked{% endif %}>
+                            <label for="status_all">All Statuses</label>
+                        </div>
+                        <div class="filter-divider"></div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="status_upcoming" value="Upcoming" class="status-filter-checkbox">
+                            <label for="status_upcoming">Upcoming</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="status_ongoing" value="Ongoing" class="status-filter-checkbox">
+                            <label for="status_ongoing">Ongoing</label>
+                        </div>
+                        <div class="filter-option">
+                            <input type="checkbox" id="status_completed" value="Completed" class="status-filter-checkbox">
+                            <label for="status_completed">Completed</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button type="button" class="cancel-btn" onclick="closeFilterModal()">Cancel</button>
+                <button type="button" class="apply-btn" onclick="applyFilters()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add these functions at the beginning of your script section
+        function openFilterModal() {
+            const modal = document.getElementById("filterModal");
+            if (modal) {
+                modal.style.display = "flex";
+            }
+        }
+
+        function closeFilterModal() {
+            const modal = document.getElementById("filterModal");
+            if (modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById("filterModal");
+            if (event.target === modal) {
+                closeFilterModal();
+            }
+        };
+
+        // Select/Deselect all checkboxes
+        document.getElementById('select-all').addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.event-checkbox');
+            for (let checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
+    
+        // Delete selected events
+        document.querySelector('.delete-btn').addEventListener('click', function() {
+            let selectedEvents = [];
+            document.querySelectorAll('.event-checkbox:checked').forEach(checkbox => {
+                selectedEvents.push(checkbox.value);
+            });
+    
+            if (selectedEvents.length === 0) {
+                alert('No events selected for deletion.');
+                return;
+            }
+    
+            if (confirm('Are you sure you want to delete the selected event(s)?')) {
+                fetch('/delete_events', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ event_ids: selectedEvents }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Events deleted successfully!');
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Error deleting events.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete events: ' + error);
+                });
+            }
+        });
+
+
+        function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    function refreshTable() {
+        window.location.href = "{{ url_for('event.index') }}";
+    }
+
+    let currentSort = {
+        column: null,
+        direction: 'asc'
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const sortType = th.dataset.sort;
+                
+                // Remove all sorting classes first
+                document.querySelectorAll('th.sortable').forEach(header => {
+                    header.classList.remove('asc', 'desc');
+                });
+                
+                // Toggle sort direction if clicking the same column
+                if (currentSort.column === sortType) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.column = sortType;
+                    currentSort.direction = 'asc';
+                }
+
+                // Add appropriate class for current sort
+                th.classList.add(currentSort.direction);
+                
+                sortTable(sortType, currentSort.direction);
+            });
+        });
+    });
+
+    function sortTable(sortType, direction) {
+        const tbody = document.querySelector('table tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        const sortedRows = rows.sort((a, b) => {
+            let aVal, bVal;
+
+            switch(sortType) {
+                case 'index':
+                    aVal = parseInt(a.cells[1].textContent);
+                    bVal = parseInt(b.cells[1].textContent);
+                    break;
+                case 'eventId':
+                    aVal = a.cells[2].textContent;
+                    bVal = b.cells[2].textContent;
+                    break;
+                case 'title':
+                    aVal = a.cells[3].textContent.toLowerCase();
+                    bVal = b.cells[3].textContent.toLowerCase();
+                    break;
+                case 'type':
+                    aVal = a.cells[4].textContent.toLowerCase();
+                    bVal = b.cells[4].textContent.toLowerCase();
+                    break;
+                case 'venue':
+                    aVal = a.cells[5].textContent.toLowerCase();
+                    bVal = b.cells[5].textContent.toLowerCase();
+                    break;
+                case 'startDate':
+                    aVal = new Date(a.cells[6].textContent);
+                    bVal = new Date(b.cells[6].textContent);
+                    break;
+                case 'endDate':
+                    aVal = new Date(a.cells[7].textContent);
+                    bVal = new Date(b.cells[7].textContent);
+                    break;
+                case 'capacity':
+                    aVal = parseInt(a.cells[8].textContent) || 0;
+                    bVal = parseInt(b.cells[8].textContent) || 0;
+                    break;
+                case 'status':
+                    aVal = a.cells[9].textContent.toLowerCase();
+                    bVal = b.cells[9].textContent.toLowerCase();
+                    break;
+                case 'description':
+                    aVal = a.cells[10].textContent.toLowerCase();
+                    bVal = b.cells[10].textContent.toLowerCase();
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (direction === 'asc') {
+                return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+            } else {
+                return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+            }
+        });
+
+        // Clear and re-append sorted rows
+        while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+        }
+        sortedRows.forEach(row => tbody.appendChild(row));
+    }
+
+    function applyFilters() {
+        const selectedTypes = [];
+        const selectedStatuses = [];
+        
+        if (!document.querySelector('.type-filter-checkbox-all').checked) {
+            document.querySelectorAll('.type-filter-checkbox:checked').forEach(checkbox => {
+                selectedTypes.push(checkbox.value);
+            });
+        }
+        
+        if (!document.querySelector('.status-filter-checkbox-all').checked) {
+            document.querySelectorAll('.status-filter-checkbox:checked').forEach(checkbox => {
+                selectedStatuses.push(checkbox.value);
+            });
+        }
+        
+        const url = new URL(window.location.href);
+        url.searchParams.delete('types');
+        url.searchParams.delete('statuses');
+        
+        if (selectedTypes.length > 0) {
+            url.searchParams.append('types', selectedTypes.join(','));
+        }
+        if (selectedStatuses.length > 0) {
+            url.searchParams.append('statuses', selectedStatuses.join(','));
+        }
+        
+        window.location.href = url.toString();
+    }
+
+    // Handle checkbox behavior
+    document.addEventListener('DOMContentLoaded', function() {
+        // Event Type checkboxes
+        const typeAllCheckbox = document.querySelector('.type-filter-checkbox-all');
+        const typeCheckboxes = document.querySelectorAll('.type-filter-checkbox');
+        
+        if (typeAllCheckbox) {
+            typeAllCheckbox.addEventListener('change', function() {
+                typeCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                    checkbox.disabled = this.checked;
+                });
+            });
+        }
+
+        typeCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    typeAllCheckbox.checked = false;
+                }
+                const anyChecked = Array.from(typeCheckboxes).some(cb => cb.checked);
+                if (!anyChecked) {
+                    typeAllCheckbox.checked = true;
+                }
+            });
+        });
+
+        // Event Status checkboxes
+        const statusAllCheckbox = document.querySelector('.status-filter-checkbox-all');
+        const statusCheckboxes = document.querySelectorAll('.status-filter-checkbox');
+        
+        if (statusAllCheckbox) {
+            statusAllCheckbox.addEventListener('change', function() {
+                statusCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                    checkbox.disabled = this.checked;
+                });
+            });
+        }
+
+        statusCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    statusAllCheckbox.checked = false;
+                }
+                const anyChecked = Array.from(statusCheckboxes).some(cb => cb.checked);
+                if (!anyChecked) {
+                    statusAllCheckbox.checked = true;
+                }
+            });
+        });
+    });
+
+    </script>
+
+
+</body>
+</html>

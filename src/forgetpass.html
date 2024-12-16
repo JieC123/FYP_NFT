@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forget Password</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/forgetpass.css') }}">
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo" class="logo">
+    </header>
+    <div class="container">
+        <h1>Forget Password</h1>
+        <form method="POST" action="{{ url_for('forgot_password') }}" id="forgotForm">
+            <input type="email" name="email" placeholder="Enter Your Registered Email" required>
+            <button type="submit">Reset Password</button>
+        </form>
+        <p>Remember your password? <a href="{{ url_for('login') }}" class="login-link">Login</a></p>
+    </div>
+
+    <script>
+        document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;  // Disable button to prevent double submission
+            submitButton.textContent = 'Processing...';  // Visual feedback
+            
+            const email = this.querySelector('input[name="email"]').value.trim();
+            
+            if (!email) {
+                showAlert('Please enter your email address.');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Reset Password';
+                return;
+            }
+            
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: new URLSearchParams(new FormData(this))
+                });
+                
+                const data = await response.json();
+                showAlert(data.message, data.success ? 'success' : 'error');
+                
+                if (data.success && data.redirect) {
+                    window.location.href = data.redirect;
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Reset Password';
+            }
+        });
+    </script>
+</body>
+</html>

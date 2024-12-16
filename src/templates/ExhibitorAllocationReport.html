@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ExhibitorAllocationReportStyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <title>Event Planning Dashboard - Exhibitor Allocation Report</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                        <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Report</h2>
+            </div>
+
+            <a href="{{ url_for('report.event_summary_report') }}" class="nav-btn">Event Summary Report</a>
+            <a href="{{ url_for('report.staffAllocation_report') }}" class="nav-btn">Staff Allocation Report</a>
+            <a href="{{ url_for('report.exhibitorAllocation_report') }}" class="nav-btn active">Exhibitor Allocation Report</a>
+
+            <div class="tableList">
+                <form method="post" action="{{ url_for('report.exhibitorAllocation_report') }}" class="event-form">
+                    <div class="form-group">
+                        <label for="eventSelect">Select an Event:</label>
+                        <select id="eventSelect" name="eventSelect" required>
+                            {% if events %}
+                                {% for event in events %}
+                                    <option value="{{ event['EventID'] }}" 
+                                            {% if selected_event_id == event['EventID'] %} selected {% endif %}>
+                                        {{ event['EventTitle'] }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>No events available</option>
+                            {% endif %}
+                        </select>
+                        <button type="submit" class="generate-btn">Generate</button>
+                        {% if exhibitor_records and exhibitor_records|length > 0 %}
+                            <button type="button" class="print-btn" onclick="preparePrint()">
+                                <i class="fas fa-print"></i> Print Report
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+
+                {% if not selected_event_id %}
+                    <div class="no-data-message">
+                        <p>Please select an event to generate report.</p>
+                    </div>
+                {% elif exhibitor_records and exhibitor_records|length > 0 %}
+                    <div class="charts-section">
+                        <h3>Total Exhibitors: {{ exhibitor_records|length }}</h3>
+                        <div class="charts-container">
+                            <div id="exhibitorCostChart"></div>
+                        </div>
+                    </div>
+
+                    <h3>List of Exhibitors and Booths:</h3>
+                    <table class="event-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Name</th>
+                                <th>Company</th>
+                                <th>Rental Start Date</th>
+                                <th>Rental End Date</th>
+                                <th>Rental Duration (Days)</th>
+                                <th>Rental Fees (RM/Day)</th>
+                                <th>Total Rental Charges (RM)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if exhibitor_records %}
+                                {% for exhibitor in exhibitor_records %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ exhibitor.ExhibitorName }}</td>
+                                        <td>{{ exhibitor.Company }}</td>
+                                        <td>{{ exhibitor.RentalStartDate }}</td>
+                                        <td>{{ exhibitor.RentalEndDate }}</td>
+                                        <td>{{ exhibitor.TotalRentalDays }}</td>
+                                        <td>{{ "%.2f"|format(exhibitor.BoothRentalFees) }}</td>
+                                        <td>{{ "%.2f"|format(exhibitor.TotalRentalCharges) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="no-data">No exhibitor data available for this event</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="no-data-message">
+                        <p>No data found for this selected event.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var exhibitorRecords = JSON.parse('{{ exhibitor_records|tojson|safe }}' || '[]');
+            
+            var exhibitorNames = exhibitorRecords.map(function(exhibitor) { return exhibitor.Company; });
+            var rentalCharges = exhibitorRecords.map(function(exhibitor) { return exhibitor.TotalRentalCharges; });
+
+            // Define an array of colors for the bars (same as staff report)
+            var barColors = [
+                '#FF9999', // Light Red
+                '#66B2FF', // Light Blue
+                '#99FF99', // Light Green
+                '#FFCC99', // Light Orange
+                '#FF99CC', // Light Pink
+                '#99CCFF', // Sky Blue
+                '#FFB366', // Light Brown
+                '#99FF99', // Mint Green
+                '#FF99FF', // Light Purple
+                '#99FFCC', // Aqua
+                '#FFE5CC', // Peach
+                '#B3B3FF', // Lavender
+                '#FFB3B3', // Salmon
+                '#B3FFB3', // Pale Green
+                '#FFB3FF'  // Light Magenta
+            ];
+
+            var options = {
+                series: [{
+                    name: 'Rental Charges',
+                    data: rentalCharges
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 400,
+                    width: '100%',
+                    toolbar: {
+                        show: false
+                    },
+                    offsetX: -10,
+                    foreColor: '#000000'
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: '35%',
+                        borderRadius: 4,
+                        distributed: true,
+                        dataLabels: {
+                            position: 'top'
+                        }
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val) {
+                        return 'RM ' + parseFloat(val).toFixed(2);
+                    },
+                    style: {
+                        colors: ['#000000'],
+                        fontSize: '14px'
+                    },
+                    offsetY: -20
+                },
+                colors: barColors,
+                xaxis: {
+                    categories: exhibitorNames,
+                    labels: {
+                        rotate: -45,
+                        style: {
+                            colors: '#000000',
+                            fontSize: '14px'
+                        }
+                    },
+                    tickPlacement: 'on',
+                    axisTicks: {
+                        show: false
+                    },
+                    axisBorder: {
+                        show: true
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Total Rental Charges (RM)',
+                        style: {
+                            color: '#000000',
+                            fontSize: '16px'
+                        }
+                    },
+                    labels: {
+                        formatter: function (value) {
+                            return 'RM ' + parseFloat(value).toFixed(2);
+                        },
+                        style: {
+                            colors: ['#000000'],
+                            fontSize: '14px'
+                        }
+                    }
+                },
+                title: {
+                    text: 'Rental Charges Overview',
+                    align: 'center',
+                    style: {
+                        fontSize: '20px',
+                        color: '#000000'
+                    }
+                },
+                grid: {
+                    padding: {
+                        left: 20,
+                        right: 20,
+                        top: 0,
+                        bottom: 0
+                    }
+                },
+                legend: {
+                    show: false
+                }
+            };
+
+            if (exhibitorRecords.length > 0) {
+                var chart = new ApexCharts(document.querySelector("#exhibitorCostChart"), options);
+                chart.render();
+            }
+        });
+    </script>
+
+    <div id="fileNameModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Save Report As</h3>
+            <div class="filename-input">
+                <input type="text" id="fileName" placeholder="Enter file name" value="Exhibitor_Allocation_Report">
+                <span>.pdf</span>
+            </div>
+            <button onclick="printReport()" class="save-btn">Save and Print</button>
+        </div>
+    </div>
+
+    <script>
+        // Get modal elements
+        var modal = document.getElementById("fileNameModal");
+        var span = document.getElementsByClassName("close")[0];
+
+        function preparePrint() {
+            modal.style.display = "block";
+        }
+
+        // Close modal when clicking (x)
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        async function printReport() {
+            var fileName = document.getElementById('fileName').value || 'Exhibitor_Allocation_Report';
+            fileName = fileName + '.pdf';
+
+            try {
+                const pdfContent = document.createElement('div');
+                pdfContent.style.cssText = 'background: white; width: 100%; max-width: 1200px; margin: 0 auto;';
+
+                const page = document.createElement('div');
+                page.style.cssText = 'width: 95%; margin: 0 auto; padding: 20px;';
+                page.innerHTML = `
+                    <h3 style="text-align: center; margin-bottom: 20px;">Total Exhibitors: ${document.querySelector('.charts-section h3').textContent.split(': ')[1]}</h3>
+                    <div id="chartContainer" style="width: 100%; height: 500px; margin: 20px auto; padding: 0;"></div>
+                `;
+
+                pdfContent.appendChild(page);
+
+                await new Promise(resolve => setTimeout(resolve, 2500));
+
+                const exhibitorChart = document.querySelector('#exhibitorCostChart');
+                const chartClone = exhibitorChart.cloneNode(true);
+
+                page.querySelector('#chartContainer').appendChild(chartClone);
+
+                const opt = {
+                    margin: [20, 20, 20, 20],
+                    filename: fileName,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        letterRendering: true,
+                        scrollY: -window.scrollY,
+                        windowWidth: 1400,
+                        width: 1400,
+                        x: 0,
+                        scrollX: 0
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'landscape'
+                    }
+                };
+
+                await html2pdf()
+                    .set(opt)
+                    .from(pdfContent)
+                    .save()
+                    .then(() => {
+                        modal.style.display = "none";
+                        pdfContent.remove();
+                    });
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error details: ' + error.message);
+            }
+        }
+    </script>
+
+    <style>
+        .charts-section {
+            width: 100%;
+            position: relative;
+            overflow: visible !important;
+        }
+
+        .charts-container {
+            width: 100% !important;
+            position: relative;
+            margin: 0 auto !important;
+            padding: 0 !important;
+        }
+
+        #exhibitorCostChart {
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 auto !important;
+            padding: 10px !important;
+            transform-origin: center center;
+        }
+
+        @media print {
+            .charts-section {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0px !important;
+                background-color: white !important;
+                overflow: visible !important;
+            }
+
+            .charts-container {
+                width: 100% !important;
+                margin: 0 auto !important;
+            }
+
+            #exhibitorCostChart {
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 auto !important;
+                padding: 10px !important;
+                page-break-inside: avoid !important;
+            }
+        }
+    </style>
+</body>
+</html>

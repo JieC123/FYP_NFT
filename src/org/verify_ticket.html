@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Verify Ticket</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: #f5f5f5;
+        }
+
+        .scan-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .wallet-status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #connect-wallet {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #reader {
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #result-container {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 500px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .success {
+            color: #155724;
+            background-color: #d4edda !important;
+        }
+
+        .error {
+            color: #721c24;
+            background-color: #f8d7da !important;
+        }
+
+        .status-icon {
+            font-size: 48px;
+            margin: 10px 0;
+        }
+
+        .success .status-icon {
+            color: #28a745;
+        }
+
+        .error .status-icon {
+            color: #dc3545;
+        }
+
+        #rescan-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .loading i {
+            font-size: 24px;
+            color: #007bff;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scan-container">
+        <h1>Verify Ticket</h1>
+
+        <div class="wallet-status">
+            <div id="wallet-info">
+                <button id="connect-wallet">Connect Wallet</button>
+            </div>
+        </div>
+
+        <div id="scanner-container" style="display: none;">
+            <div id="reader"></div>
+        </div>
+
+        <div class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Verifying ticket...</p>
+        </div>
+
+        <div id="result-container">
+            <div class="status-icon"></div>
+            <h2 class="result-message"></h2>
+            <div class="ticket-details"></div>
+        </div>
+
+        <button id="rescan-button">Scan Another Ticket</button>
+    </div>
+
+    <script>
+        let html5QrcodeScanner;
+        let web3;
+        let contract;
+        let currentAccount;
+
+        // Add to your JavaScript
+        let isValidatorApproved = false;
+
+        async function setupValidator() {
+            try {
+                // Check if already approved
+                isValidatorApproved = await contract.methods.approvedValidators(currentAccount).call();
+
+                if (!isValidatorApproved) {
+                    // Request one-time approval
+                    const approveTx = await contract.methods.setValidatorApproval(true)
+                        .send({ from: currentAccount });
+                    isValidatorApproved = true;
+                    console.log('Validator approved:', approveTx);
+                }
+            } catch (error) {
+                console.error('Failed to setup validator:', error);
+            }
+        }
+
+        // Modify the connect wallet function
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    throw new Error('MetaMask is not installed');
+                }
+
+                web3 = new Web3(window.ethereum);
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                currentAccount = accounts[0];
+
+                document.getElementById('wallet-info').innerHTML = `
+            <p>Connected: ${currentAccount.substring(0, 6)}...${currentAccount.substring(38)}</p>
+        `;
+
+                // Initialize contract
+                const response = await fetch('/get_contract_data');
+                const data = await response.json();
+                contract = new web3.eth.Contract(data.abi, data.address);
+
+                // Setup validator approval
+                await setupValidator();
+
+                // Show scanner
+                document.getElementById('scanner-container').style.display = 'block';
+                startScanner();
+
+            } catch (error) {
+                alert('Failed to connect wallet: ' + error.message);
+            }
+        }
+
+        // Modified scan success function
+
+
+        async function startScanner() {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 },
+                    showTorchButtonIfSupported: true
+                }
+            );
+
+            html5QrcodeScanner.render(onScanSuccess, onScanError);
+        }
+
+        async function validateTicket(ticketId, tokenId) {
+            try {
+                // First check if ticket has been used
+                const isUsed = await contract.methods.isTicketUsed(tokenId).call();
+                if (isUsed) {
+                    throw new Error("Ticket has already been used");
+                }
+
+                // Get ticket metadata to check event date
+                const metadata = await contract.methods.ticketMetadata(ticketId).call();
+
+                // Validate and mark ticket as used
+                const validateTx = await contract.methods.validateAndUseTicket(ticketId, tokenId)
+                    .send({ from: currentAccount });
+
+                return validateTx;
+            } catch (error) {
+                console.error("Validation error:", error);
+                throw error;
+            }
+        }
+
+        async function onScanSuccess(decodedText, decodedResult) {
+            try {
+                // Stop scanning and show loading state
+                await html5QrcodeScanner.clear();
+                document.querySelector('.loading').style.display = 'block';
+                
+                // Parse and validate QR code data
+                let ticketData;
+                try {
+                    ticketData = JSON.parse(decodedText);
+                    console.log('Raw QR data:', decodedText); // Debug log
+                    console.log('Parsed ticket data:', ticketData);
+                } catch (e) {
+                    throw new Error("Invalid QR code format. Please ensure you're scanning a valid ticket QR code.");
+                }
+
+                // Validate required fields
+                if (!ticketData.ticketId || !ticketData.tokenId) {
+                    throw new Error("Missing required ticket information in QR code");
+                }
+
+                const ticketId = ticketData.ticketId;
+                const tokenId = parseInt(ticketData.tokenId);
+
+                if (isNaN(tokenId)) {
+                    throw new Error("Invalid token ID format in QR code");
+                }
+
+                // Debug logging
+                console.log('Processing Ticket:', {
+                    ticketId: ticketId,
+                    tokenId: tokenId,
+                    currentAccount: currentAccount
+                });
+
+                // Verify contract is initialized
+                if (!contract || !currentAccount) {
+                    throw new Error("Wallet not connected. Please connect your wallet first.");
+                }
+
+                // Check if token is valid for use
+                const isValid = await contract.methods.isTokenValidForUse(ticketId, tokenId).call();
+                if (!isValid) {
+                    const usageStatus = await contract.methods.getTokenUsageStatus(tokenId).call();
+                    if (usageStatus.isUsed) {
+                        throw new Error(`Ticket has already been used at ${new Date(usageStatus.usedTime * 1000).toLocaleString()}`);
+                    } else {
+                        throw new Error("Invalid ticket or token ID");
+                    }
+                }
+
+                // Verify ownership
+                const tokenOwner = await contract.methods.ownerOf(tokenId).call();
+                console.log('Token Owner:', tokenOwner);
+                console.log('Current Account:', currentAccount);
+                
+                if (tokenOwner.toLowerCase() !== currentAccount.toLowerCase()) {
+                    throw new Error("You are not authorized to validate this ticket. Please ensure you're using the correct wallet.");
+                }
+
+                // Validate and mark as used
+                const validateTx = await contract.methods.validateAndUseTicket(ticketId, tokenId)
+                    .send({ 
+                        from: currentAccount,
+                        gas: 200000
+                    });
+
+                console.log('Validation Transaction:', validateTx);
+
+                // Get updated usage status
+                const usageDetails = await contract.methods.getTokenUsageStatus(tokenId).call();
+                
+                // Show success message with details
+                showSuccess({
+                    ticketId: ticketId,
+                    tokenId: tokenId,
+                    eventName: ticketData.eventName || 'N/A',
+                    ticketType: ticketData.ticketType || 'N/A',
+                    venue: ticketData.venue || 'N/A',
+                    eventDate: ticketData.eventDate || 'N/A',
+                    usedTime: new Date(parseInt(usageDetails.usedTime) * 1000).toLocaleString(),
+                    transactionHash: validateTx.transactionHash
+                });
+
+            } catch (error) {
+                console.error('Verification error:', error);
+                showError(error.message || "Failed to verify ticket");
+            } finally {
+                document.querySelector('.loading').style.display = 'none';
+                document.getElementById('rescan-button').style.display = 'block';
+            }
+        }
+
+        // Updated success display to show transaction details
+        function showSuccess(ticketData) {
+            const resultContainer = document.getElementById('result-container');
+            resultContainer.className = 'success';
+            resultContainer.style.display = 'block';
+
+            resultContainer.innerHTML = `
+                <div class="status-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 class="result-message">Ticket Validated Successfully!</h2>
+                <div class="ticket-details">
+                    <p><strong>Status:</strong> <span class="validated-status">✓ VALIDATED</span></p>
+                    <p><strong>Ticket ID:</strong> ${ticketData.ticketId}</p>
+                    <p><strong>Token ID:</strong> ${ticketData.tokenId}</p>
+                    <p><strong>Event:</strong> ${ticketData.eventName}</p>
+                    <p><strong>Type:</strong> ${ticketData.ticketType}</p>
+                    <p><strong>Venue:</strong> ${ticketData.venue}</p>
+                    <p><strong>Event Date:</strong> ${new Date(ticketData.eventDate).toLocaleString()}</p>
+                    <p><strong>Validation Time:</strong> ${ticketData.usedTime}</p>
+                    <div class="transaction-info">
+                        <p><strong>Transaction Hash:</strong></p>
+                        <p class="hash-text">${ticketData.transactionHash}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Add some CSS for better validation display
+
+
+        async function getNumericTokenId(tokenId) {
+            // Get the numeric part after the underscore
+            // Example: "ET000015_3" -> "3"
+            const numericPart = tokenId
+            if (!numericPart) {
+                throw new Error('Invalid token ID format');
+            }
+
+            // Convert to number and ensure it's valid
+            const num = parseInt(numericPart);
+            if (isNaN(num)) {
+                throw new Error('Invalid token ID number');
+            }
+
+            return num;
+        }
+
+
+
+
+        function onScanError(error) {
+            // Handle scan errors silently
+        }
+
+        function showError(message) {
+            const resultContainer = document.getElementById('result-container');
+            resultContainer.className = 'error';
+            resultContainer.style.display = 'block';
+
+            resultContainer.innerHTML = `
+                <div class="status-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h2 class="result-message">Invalid Ticket</h2>
+                <div class="ticket-details">
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function resetScanner() {
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('rescan-button').style.display = 'none';
+            startScanner();
+        }
+
+        // Event Listeners
+        document.getElementById('connect-wallet').addEventListener('click', connectWallet);
+        document.getElementById('rescan-button').addEventListener('click', resetScanner);
+
+        // Handle wallet account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', function (accounts) {
+                window.location.reload();
+            });
+        }
+    </script>
+</body>
+
+</html>

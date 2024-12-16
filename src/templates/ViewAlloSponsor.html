@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ViewAllocation.css') }}">
+    <title>Event Planning Dashboard - Track Sponsorship Involvement</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item active">
+                <a href="/events">
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant">
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                        <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Involvement - Sponsorship</h2>
+            </div>
+
+            <div class="nav-btns">
+                
+                
+                
+                <a href="{{ url_for('track_involvement.view_allo_staff') }}" class="nav-btn">Event Staff and Authority</a>
+                <a href="{{ url_for('track_involvement.view_allo_booth') }}" class="nav-btn">Exhibitor and Booth</a>
+                <a href="{{ url_for('track_involvement.view_allo_sponsorship') }}" class="nav-btn active">Sponsorship</a>
+                <a href="{{ url_for('track_involvement.view_allo_participant') }}" class="nav-btn">Participant</a>
+            </div>
+
+            <div class="tableList">
+                
+            <div class="search-bar">
+                <button type="button" class="refresh-btn" onclick="refreshTable()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                
+                <form id="search-form" action="{{ url_for('track_involvement.search_allocated_sponsorship') }}" method="GET">
+                    <input type="text" name="query" placeholder="Search by sponsor name">
+                    <button type="submit">Search</button>
+                </form>
+                <button class="sponsorship-filter-btn" onclick="openSponsorshipFilterModal()">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <button type="button" class="communicate-btn" onclick="openEmailCommunication()">Contact</button>
+            </div>
+                <button class="back-btn" onclick="location.href='/events'">⬅️ Back</button>
+                <div id="assignedSection" class="table-section">
+                    <h3>Event: {{ event_name }} - Assigned Sponsorship</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all"></th>
+                                <th class="sortable" data-sort="index">No. <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="sponsorId">Sponsorship ID <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="name">Name <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="email">Email <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="contact">Contact No <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="company">Company <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="detail">Sponsor Detail <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="amount">Amount Contributed (RM) <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="schedule">Payment Schedule <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="status">Status <span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if sponsors %}
+                                {% for sponsor in sponsors %}
+                                    <tr>
+                                        <td><input type="checkbox" class="sponsor-checkbox" value="{{ sponsor.SponsorshipID }}" data-email="{{ sponsor.SponsorshipEmail }}"></td>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ sponsor.SponsorshipID }}</td>
+                                        <td>{{ sponsor.SponsorshipName }}</td>
+                                        <td>{{ sponsor.SponsorshipEmail }}</td>
+                                        <td>{{ sponsor.SponsorshipContactInfo }}</td>
+                                        <td>{{ sponsor.Company }}</td>
+                                        <td>{{ sponsor.SponsorDetail }}</td>
+                                        <td>{{ sponsor.AmountContributed }}</td>
+                                        <td>{{ sponsor.PaymentSchedule }}</td>
+                                        <td>{{ sponsor.Status }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="11" class="no-records">
+                                        No sponsorships assigned for this event.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                       
+                    </table>
+                    <div class="pagination">
+                        <a href="{{ url_for(request.endpoint, page=current_page-1, query=request.args.get('query'), packages=request.args.get('packages'), schedules=request.args.get('schedules'), statuses=request.args.get('statuses')) }}" 
+                           class="pagination-btn {% if current_page == 1 %}disabled{% endif %}">Previous</a>
+                        
+                        <span class="pagination-info">
+                            Page <span class="current-page">{{ current_page }}</span> of {{ total_pages }}
+                        </span>
+                        
+                        <a href="{{ url_for(request.endpoint, page=current_page+1, query=request.args.get('query'), packages=request.args.get('packages'), schedules=request.args.get('schedules'), statuses=request.args.get('statuses')) }}" 
+                           class="pagination-btn {% if current_page == total_pages %}disabled{% endif %}">Next</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sponsorshipFilterModal" class="modal">
+        <div class="sponsorship-filter-modal">
+            <span class="close" onclick="closeSponsorshipFilterModal()">&times;</span>
+            <h2>Filter Sponsorships</h2>
+            
+            <div class="sponsorship-filter-sections">
+                <!-- Package Filter -->
+                <div class="sponsorship-filter-section">
+                    <h3>Package</h3>
+                    <div class="sponsorship-filter-options">
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="package_all" checked>
+                            <label for="package_all">All Packages</label>
+                        </div>
+                        <div class="sponsorship-filter-divider"></div>
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="package_gold" value="Gold Package" class="package-filter-checkbox">
+                            <label for="package_gold">Gold Package</label>
+                        </div>
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="package_silver" value="Silver Package" class="package-filter-checkbox">
+                            <label for="package_silver">Silver Package</label>
+                        </div>
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="package_supply" value="Supply Package" class="package-filter-checkbox">
+                            <label for="package_supply">Supply Package</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Schedule Filter -->
+                <div class="sponsorship-filter-section">
+                    <h3>Payment Schedule</h3>
+                    <div class="sponsorship-filter-options">
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="schedule_all" checked>
+                            <label for="schedule_all">All Schedules</label>
+                        </div>
+                        <div class="sponsorship-filter-divider"></div>
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="schedule_monthly" value="Monthly" class="schedule-filter-checkbox">
+                            <label for="schedule_monthly">Monthly</label>
+                        </div>
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="schedule_quarterly" value="Quarterly" class="schedule-filter-checkbox">
+                            <label for="schedule_quarterly">Quarterly</label>
+                        </div>
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="schedule_onetime" value="One-time" class="schedule-filter-checkbox">
+                            <label for="schedule_onetime">One-time</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="sponsorship-filter-section">
+                    <h3>Status</h3>
+                    <div class="sponsorship-filter-options">
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="status_all" checked>
+                            <label for="status_all">All Statuses</label>
+                        </div>
+                        <div class="sponsorship-filter-divider"></div>
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="status_active" value="Active" class="status-filter-checkbox">
+                            <label for="status_active">Active</label>
+                        </div>
+                        <div class="sponsorship-filter-option">
+                            <input type="checkbox" id="status_inactive" value="Inactive" class="status-filter-checkbox">
+                            <label for="status_inactive">Inactive</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sponsorship-filter-actions">
+                <button onclick="closeSponsorshipFilterModal()">Cancel</button>
+                <button onclick="applySponsorshipFilters()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle all checkboxes
+        document.getElementById("select-all").addEventListener("click", function() {
+            const checkboxes = document.querySelectorAll(".sponsor-checkbox");
+            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
+
+
+        // Function to open email communication with selected sponsor emails
+function openEmailCommunication() {
+    let selectedSponsors = [];
+    document.querySelectorAll('.sponsor-checkbox:checked').forEach(checkbox => {
+        selectedSponsors.push(checkbox.getAttribute('data-email'));
+    });
+
+    if (selectedSponsors.length === 0) {
+        alert('Please select at least one sponsorship to communicate with.');
+        return;
+    }
+
+    // Pass selected emails as a single 'emails' query parameter
+    let emailUrl = '/email_communication?emails=' + encodeURIComponent(selectedSponsors.join(','));
+    window.location.href = emailUrl;
+}
+
+function refreshTable() {
+    window.location.href = "{{ url_for('track_involvement.view_allo_sponsorship') }}";
+}
+
+let currentSort = {
+    column: null,
+    direction: 'asc'
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const sortType = th.dataset.sort;
+            
+            // Remove all sorting classes first
+            document.querySelectorAll('th.sortable').forEach(header => {
+                header.classList.remove('asc', 'desc');
+            });
+            
+            // Toggle sort direction if clicking the same column
+            if (currentSort.column === sortType) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = sortType;
+                currentSort.direction = 'asc';
+            }
+
+            // Add appropriate class for current sort
+            th.classList.add(currentSort.direction);
+            
+            sortTable(sortType, currentSort.direction);
+        });
+    });
+});
+
+function sortTable(sortType, direction) {
+    const tbody = document.querySelector('table tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    const sortedRows = rows.sort((a, b) => {
+        let aVal, bVal;
+
+        switch(sortType) {
+            case 'index':
+                aVal = parseInt(a.cells[1].textContent);
+                bVal = parseInt(b.cells[1].textContent);
+                break;
+            case 'sponsorId':
+                aVal = a.cells[2].textContent;
+                bVal = b.cells[2].textContent;
+                break;
+            case 'name':
+                aVal = a.cells[3].textContent.toLowerCase();
+                bVal = b.cells[3].textContent.toLowerCase();
+                break;
+            case 'email':
+                aVal = a.cells[4].textContent.toLowerCase();
+                bVal = b.cells[4].textContent.toLowerCase();
+                break;
+            case 'contact':
+                aVal = a.cells[5].textContent.replace(/[^\d]/g, '');
+                bVal = b.cells[5].textContent.replace(/[^\d]/g, '');
+                break;
+            case 'company':
+                aVal = a.cells[6].textContent.toLowerCase();
+                bVal = b.cells[6].textContent.toLowerCase();
+                break;
+            case 'detail':
+                aVal = a.cells[7].textContent.toLowerCase();
+                bVal = b.cells[7].textContent.toLowerCase();
+                break;
+            case 'amount':
+                aVal = parseFloat(a.cells[8].textContent.replace(/[^\d.-]/g, '')) || 0;
+                bVal = parseFloat(b.cells[8].textContent.replace(/[^\d.-]/g, '')) || 0;
+                break;
+            case 'schedule':
+                aVal = a.cells[9].textContent.toLowerCase();
+                bVal = b.cells[9].textContent.toLowerCase();
+                break;
+            case 'status':
+                aVal = a.cells[10].textContent.toLowerCase();
+                bVal = b.cells[10].textContent.toLowerCase();
+                break;
+            default:
+                return 0;
+        }
+
+        if (direction === 'asc') {
+            return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+        } else {
+            return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+        }
+    });
+
+    // Clear and re-append sorted rows
+    while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+    }
+    sortedRows.forEach(row => tbody.appendChild(row));
+}
+
+function openSponsorshipFilterModal() {
+    document.getElementById('sponsorshipFilterModal').style.display = 'flex';
+}
+
+function closeSponsorshipFilterModal() {
+    document.getElementById('sponsorshipFilterModal').style.display = 'none';
+}
+
+function applySponsorshipFilters() {
+    const selectedPackages = [];
+    const selectedSchedules = [];
+    const selectedStatuses = [];
+
+    // Get selected packages
+    if (!document.getElementById('package_all').checked) {
+        document.querySelectorAll('.package-filter-checkbox:checked').forEach(checkbox => {
+            selectedPackages.push(checkbox.value);
+        });
+    }
+
+    // Get selected schedules
+    if (!document.getElementById('schedule_all').checked) {
+        document.querySelectorAll('.schedule-filter-checkbox:checked').forEach(checkbox => {
+            selectedSchedules.push(checkbox.value);
+        });
+    }
+
+    // Get selected statuses
+    if (!document.getElementById('status_all').checked) {
+        document.querySelectorAll('.status-filter-checkbox:checked').forEach(checkbox => {
+            selectedStatuses.push(checkbox.value);
+        });
+    }
+
+    // Build the URL with filter parameters
+    const url = new URL(window.location.origin + '/filter_allocated_sponsorship');
+    
+    if (selectedPackages.length > 0) {
+        url.searchParams.append('packages', selectedPackages.join(','));
+    }
+    if (selectedSchedules.length > 0) {
+        url.searchParams.append('schedules', selectedSchedules.join(','));
+    }
+    if (selectedStatuses.length > 0) {
+        url.searchParams.append('statuses', selectedStatuses.join(','));
+    }
+
+    // Redirect to the filtered URL
+    window.location.href = url.toString();
+}
+
+// Add checkbox group functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Package checkboxes
+    const packageAllCheckbox = document.getElementById('package_all');
+    const packageCheckboxes = document.querySelectorAll('.package-filter-checkbox');
+
+    packageAllCheckbox.addEventListener('change', function() {
+        packageCheckboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    packageCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                packageAllCheckbox.checked = false;
+            }
+            const anyChecked = Array.from(packageCheckboxes).some(cb => cb.checked);
+            if (!anyChecked) {
+                packageAllCheckbox.checked = true;
+            }
+        });
+    });
+
+    // Schedule checkboxes
+    const scheduleAllCheckbox = document.getElementById('schedule_all');
+    const scheduleCheckboxes = document.querySelectorAll('.schedule-filter-checkbox');
+
+    scheduleAllCheckbox.addEventListener('change', function() {
+        scheduleCheckboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    scheduleCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                scheduleAllCheckbox.checked = false;
+            }
+            const anyChecked = Array.from(scheduleCheckboxes).some(cb => cb.checked);
+            if (!anyChecked) {
+                scheduleAllCheckbox.checked = true;
+            }
+        });
+    });
+
+    // Status checkboxes
+    const statusAllCheckbox = document.getElementById('status_all');
+    const statusCheckboxes = document.querySelectorAll('.status-filter-checkbox');
+
+    statusAllCheckbox.addEventListener('change', function() {
+        statusCheckboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    statusCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                statusAllCheckbox.checked = false;
+            }
+            const anyChecked = Array.from(statusCheckboxes).some(cb => cb.checked);
+            if (!anyChecked) {
+                statusAllCheckbox.checked = true;
+            }
+        });
+    });
+});
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</body>
+</html>

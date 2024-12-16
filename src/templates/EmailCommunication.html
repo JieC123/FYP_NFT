@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/emailCommunication.css') }}"> <!-- Adjust CSS path if necessary -->
+    <title>Event Planning - Compose Email</title>
+    
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Compose Email</h2>
+                <button class="back-btn" onclick="goBack()">⬅️ Back</button>
+            </div>
+            <div class="email-form">
+                
+                <form id="emailForm" action="{{ url_for('communication.send_email') }}" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="referrer" id="referrer" value="{{ request.referrer }}">
+                    <div class="form-row">
+                        <label for="to">To:</label>
+                        <input type="text" name="to" id="to" value="{{ ', '.join(emails) }}" readonly>
+                        
+                    </div>
+                    <div class="form-row">
+                        <label for="subject">Subject:</label>
+                        <input type="text" name="subject" id="subject" required>
+                    </div>
+                    <div class="form-row">
+                        <label for="message">Message:</label>
+                        <textarea name="message" id="message" placeholder="Write your message here..." required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label for="attachment">Attachment (Max: 5MB): (Optional)</label>
+                        <input type="file" name="attachment" id="attachment">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">Send Email</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+document.getElementById("emailForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevent form submission until validation is complete
+
+    const subject = document.getElementById("subject").value.trim();
+    const message = document.getElementById("message").value.trim();
+    const attachment = document.getElementById("attachment").files[0];
+
+    // Validation for required fields
+    if (!subject || subject.length < 5) {
+        alert("Please enter a subject with at least 5 characters.");
+        return;
+    }
+    if (!message || message.length < 5) {
+        alert("Please enter a message with at least 5 characters.");
+        return;
+    }
+
+    // Attachment validation
+    if (attachment) {
+        const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "image/jpeg", "image/png", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-powerpoint", "application/zip"];
+        const maxFileSize = 5 * 1024 * 1024; // 5 MB in bytes
+
+        if (!allowedTypes.includes(attachment.type)) {
+            alert("Only PDF, DOC, DOCX, JPG, PNG, XLSX, PPT, and ZIP files are allowed.");
+            return;
+        }
+        if (attachment.size > maxFileSize) {
+            alert("Attachment must be 5 MB or smaller.");
+            return;
+        }
+    }
+
+    // If all validations pass, submit the form
+    alert("Email sent successfully!");
+    this.submit(); // Submit the form or trigger email sending logic
+});
+
+function goBack() {
+    // Get the referrer from the browser
+    var previousPage = document.referrer;
+
+    // If a referrer exists, navigate back to that page, otherwise fallback to a default page
+    if (previousPage) {
+        window.location.href = previousPage;
+    } else {
+        window.location.href = '/OrgViewStaff';  // Default fallback page if no referrer is available
+    }
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+    // Get the referrer (previous page URL)
+    var referrer = document.referrer;
+
+    // Select all sidebar items
+    var sidebarItems = document.querySelectorAll('.sidebar-item a');
+
+    // Loop through the sidebar items to check if the referrer matches their href
+    sidebarItems.forEach(function(item) {
+        if (referrer.includes(item.getAttribute('href'))) {
+            // Remove 'active' class from all sidebar items
+            document.querySelectorAll('.sidebar-item').forEach(function(item) {
+                item.classList.remove('active');
+            });
+            // Add 'active' class to the corresponding sidebar item
+            item.parentElement.classList.add('active');
+        }
+    });
+});
+
+</script>
+</html>

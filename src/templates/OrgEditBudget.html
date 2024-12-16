@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AddBudget.css') }}">
+    <title>Event Planning Dashboard - Edit Budget</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        
+            <div class="sidebar">
+                <div class="sidebar-item">
+                    <a href="/events">  <!-- Update this link to point to /events -->
+                        <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                        Event
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                        <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                        Participant
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="/OrgViewSponsorship">
+                        <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                        Sponsorship
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="/OrgViewBooth">
+                        <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                        Exhibitor & Booth
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="/OrgViewStaff">
+                        <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                        Event Staff & Authority
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="/OrgEventBudget">
+                        <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                        Event Budget
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ url_for('ticket_management') }}">
+                        <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                        Ticket
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ url_for('order_management') }}">
+                        <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                        Order & Sales
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="{{ url_for('smart_contract_management') }}">
+                        <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                        Mint NFT
+                    </a>
+                </div>
+                <div class="sidebar-item">
+                    <a href="/EventSummaryReport">
+                        <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                        Reporting
+                    </a>
+                </div>
+            </div>
+        
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Edit Budget</h2>
+                <a href="{{ url_for('budget.budget_page', selected_event=budget['EventID']) }}" class="back-btn">⬅️ Back</a>
+            </div>
+
+            <div id="errorMessages" style="color: red; margin-bottom: 20px; display: none;">
+                {% if error_message %}
+                    <p>{{ error_message }}</p>
+                {% endif %}
+            </div>
+
+            <div class="budget-form">
+                <form id="budgetForm" method="POST" action="{{ url_for('budget.edit_budget', budget_id=budget['BudgetID']) }}" onsubmit="return validateAndSubmit(event)">
+                    <input type="hidden" name="budgetID" value="{{ budget['BudgetID'] }}">
+                    <div class="form-container">
+                        <div class="form-column">
+                            <!-- Left Column Fields -->
+                            <div class="form-row">
+                                <label for="budgetID">Budget ID:</label>
+                                <input type="text" id="budgetID" value="{{ budget['BudgetID'] }}" disabled>
+                            </div>
+                            <div class="form-row">
+                                <label for="budgetAmount">Budget Amount (RM):</label>
+                                <input type="number" id="budgetAmount" name="budgetAmount" 
+                                       value="{{ '%.2f' | format(budget['BudgetAmount']) }}" 
+                                       step="0.01" min="0" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="expensesAmount">Expenses Amount (RM):</label>
+                                <input type="number" id="expensesAmount" name="expensesAmount" 
+                                       value="{{ '%.2f' | format(budget['ExpensesAmount']) }}" 
+                                       step="0.01" min="0" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="remainingAmount">Remaining Budget Amount (RM):</label>
+                                <input type="number" id="remainingAmount" 
+                                       value="{{ '%.2f' | format(budget['RemainingBudgetAmount']) }}" 
+                                       disabled>
+                            </div>
+                        </div>
+
+                        <div class="form-column">
+                            <!-- Right Column Fields -->
+                            <div class="form-row">
+                                <label for="categoryName">Category:</label>
+                                <select id="categoryName" name="categoryName" required>
+                                    {% for category in categories %}
+                                        <option value="{{ category['CategoryID'] }}"
+                                            {% if category['CategoryID'] == budget['CategoryID'] %}selected{% endif %}>
+                                            {{ category['ExpensesName'] }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-row">
+                                <label for="paymentStatus">Payment Status:</label>
+                                <select id="paymentStatus" name="paymentStatus" required>
+                                    <option value="Paid" {% if budget['PaymentStatus'] == 'Paid' %}selected{% endif %}>Paid</option>
+                                    <option value="Pending" {% if budget['PaymentStatus'] == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="Canceled" {% if budget['PaymentStatus'] == 'Canceled' %}selected{% endif %}>Canceled</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="vendor">Vendor:</label>
+                                <input type="text" id="vendor" name="vendor" 
+                                       value="{{ budget['Vendor'] }}" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="comments">Comments:</label>
+                                <textarea id="comments" name="comments" rows="3">{{ budget['Comments'] }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function validateAndSubmit(event) {
+            event.preventDefault();
+            
+            // Budget Amount Validation
+            const budgetAmount = document.getElementById('budgetAmount').value.trim();
+            if (!budgetAmount || isNaN(budgetAmount) || Number(budgetAmount) < 0) {
+                alert('Please enter a valid budget amount.');
+                return false;
+            }
+
+            // Expenses Amount Validation
+            const expensesAmount = document.getElementById('expensesAmount').value.trim();
+            if (!expensesAmount || isNaN(expensesAmount) || Number(expensesAmount) < 0) {
+                alert('Please enter a valid expenses amount.');
+                return false;
+            }
+
+            // Category Validation
+            const category = document.getElementById('categoryName').value;
+            if (!category) {
+                alert('Category is required.');
+                return false;
+            }
+
+            // Vendor Validation
+            const vendor = document.getElementById('vendor').value.trim();
+            if (!vendor) {
+                alert('Vendor is required.');
+                return false;
+            }
+
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Confirm Update',
+                text: 'Are you sure you want to update this budget information?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                },
+                buttonsStyling: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('budgetForm').submit();
+                }
+            });
+
+            return false;
+        }
+
+        // Keep your existing calculateRemaining function
+        function calculateRemaining() {
+            const budgetAmount = parseFloat(document.getElementById('budgetAmount').value) || 0;
+            const expensesAmount = parseFloat(document.getElementById('expensesAmount').value) || 0;
+            const remainingAmount = budgetAmount - expensesAmount;
+            document.getElementById('remainingAmount').value = remainingAmount.toFixed(2);
+        }
+
+        // Add event listeners for calculation
+        document.getElementById('budgetAmount').addEventListener('input', calculateRemaining);
+        document.getElementById('expensesAmount').addEventListener('input', calculateRemaining);
+    </script>
+</body>
+</html>

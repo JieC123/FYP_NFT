@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - My Orders</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/orders.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo"></a>
+        </div>
+        <div class="nav-group">
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('eventlist') }}">Events</a></li>
+                    <li><a href="{{ url_for('marketplace') }}">Marketplace</a></li>
+                    <li><a href="{{ url_for('myticket') }}">MyTicket</a></li>
+                    <li><a href="{{ url_for('orders') }}" class="active">Orders</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <span class="user-title" style="text-transform: capitalize; font-weight: 550;">{{ session['username'] }}</span>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="orders-section">
+            <h1>My Orders</h1>
+            <div class="orders-container">
+                {% if orders %}
+                    {% for order in orders %}
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <h3>Order #{{ order.OrderID }}</h3>
+                                <span class="order-date">{{ order.OrderDate.strftime('%B %d, %Y') }}</span>
+                                {% if order.Type == 'RESALE' %}
+                                    {% if order.IsSeller %}
+                                    <span class="order-type seller">Resale (Sold)</span>
+                                    {% else %}
+                                    <span class="order-type buyer">Resale (Bought)</span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="order-status {{ order.Status.lower() }}">
+                                {{ order.Status }}
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            {% for item in order.Items %}
+                            <div class="order-item">
+                                <img src="{{ url_for('static', filename=item.EventImage) }}" alt="{{ item.EventTitle }}">
+                                <div class="item-details">
+                                    <h4>{{ item.EventTitle }}</h4>
+                                    <p class="ticket-type">{{ item.TicketType }}</p>
+                                    <p class="quantity">Quantity: {{ item.Quantity }}</p>
+                                    <p class="price">{{ item.Price }} ETH</p>
+                                    {% if item.TokenIDs %}
+                                    <p class="token-ids">
+                                        <small>Token ID: 
+                                        {% for token_id in item.TokenIDs %}
+                                            <span class="token-id">{{ token_id }}</span>{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                        </small>
+                                    </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="order-footer">
+                            <div class="transaction-info">
+                                <p class="transaction-hash">
+                                    <i class="fas fa-receipt"></i>
+                                    Transaction: 
+                                    <a href="https://sepolia.etherscan.io/tx/{{ order.TransactionHash }}" target="_blank">
+                                        {{ order.TransactionHash[:8] }}...{{ order.TransactionHash[-6:] }}
+                                    </a>
+                                </p>
+                            </div>
+                            <div class="order-total">
+                                <span>Total:</span>
+                                <span class="total-amount">{{ order.TotalAmount }} ETH</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-orders">
+                        <i class="fas fa-shopping-cart"></i>
+                        <p>You haven't made any orders yet</p>
+                        <a href="{{ url_for('eventlist') }}" class="browse-events-btn">Make Order Now</a>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    {% include 'chatbot.html' %}
+
+    <!-- <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Connect With Us</h3>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Newsletter</h3>
+                <p>Stay updated with our latest events and offers.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Enter your email">
+                    <button type="submit">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <p class="copyright">&copy; 2024 TicketPro. All rights reserved.</p>
+    </footer> -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Logout button handler
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async function() {
+                    try {
+                        const response = await fetch('/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            window.location.href = data.redirect;
+                        } else {
+                            alert('Logout failed: ' + (data.message || 'Please try again.'));
+                        }
+                    } catch (error) {
+                        console.error('Error during logout:', error);
+                        alert('An error occurred during logout. Please try again.');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

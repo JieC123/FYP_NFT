@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Event List</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/eventlist.css') }}">
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/eventlist.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro"></a>
+        </div>
+        <div class="nav-group">
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('eventlist') }}" class="active">Events</a></li>
+                    <li><a href="{{ url_for('marketplace') }}">Marketplace</a></li>
+                    <li><a href="{{ url_for('myticket') }}">MyTicket</a></li>
+                    <li><a href="{{ url_for('orders') }}">Orders</a></li>
+                </ul>
+            </nav>
+            {% if session['user_id'] %}
+            <div class="user-info">
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <span class="user-title" style="text-transform: capitalize; font-weight: 550;">{{ session['username'] }}</span>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <button class="login-btn">Login</button>
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        <aside class="filters">
+            <h2 class="myticket-title">Event Filters</h2>
+            <div class="filter-section">
+                <h3>Price Range (ETH)</h3>
+                <div class="price-inputs">
+                    <input type="number" step="1" min="0" placeholder="Min" id="priceFrom">
+                    <input type="number" step="1" min="0" placeholder="Max" id="priceTo">
+                </div>
+            </div>
+            <div class="filter-section">
+                <h3>Event Date</h3>
+                <div class="date-inputs">
+                    <input type="date" id="dateFrom" placeholder="From">
+                    <input type="date" id="dateTo" placeholder="To">
+                </div>
+            </div>
+            <div class="filter-buttons">
+                <button class="apply-btn" onclick="applyFilters()">Apply</button>
+                <button class="reset-btn" onclick="resetFilters()">Reset</button>
+            </div>
+        </aside>
+
+        <section class="event-list">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search by event title or seller">
+                <button onclick="searchEvents()">Search</button>
+            </div>
+
+            {% for event in events %}
+            <div class="event-card">
+                <a href="{{ url_for('eventdetail', id=event.EventID) }}">
+                    <img src="{{ url_for('static', filename=event.EventImage) }}" alt="Event Image">
+                </a>
+                <div class="event-details">
+                    <h3>{{ event.EventVenue }}</h3>
+                    <p class="price">{{ event.Price }} ETH</p>
+                    <p class="date"><i class="far fa-calendar"></i> {{ event.EventStartDate.strftime('%Y-%m-%d') }}</p>
+                    <p class="time"><i class="far fa-clock"></i>{{ event.EventStartTime }} - {{ event.EventEndTime }}</p>
+                    <p class="location"><i class="fas fa-map-marker-alt"></i> {{ event.EventVenue }}</p>
+                </div>
+                <div class="tickets-left">Tickets left: 50+</div>
+            </div>
+            {% endfor %}
+        </section>
+    </main>
+
+    <!-- {% include 'chatbot.html' %} -->
+
+    <script>
+        document.querySelector('.login-btn').addEventListener('click', async function() {
+        window.location.href = '/login';
+    });
+
+    document.querySelector('.logout-btn').addEventListener('click', async function() {
+        try {
+            const response = await fetch('/logout');
+            const data = await response.json();
+            
+            if (data.success) {
+                // Show success message if you want
+                alert(data.message);
+                // Redirect to login page
+                window.location.href = data.redirect;
+            } else {
+                alert('Logout failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+            alert('An error occurred during logout. Please try again.');
+        }
+    });
+</script>
+</body>
+</html>

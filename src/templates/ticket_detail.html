@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Details - {{ ticket.EventTitle }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/myticket.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <!-- Same header as myticket.html -->
+        <div class="logo">
+            <img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo">
+        </div>
+        <div class="nav-group">
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('eventlist') }}">Events</a></li>
+                    <li><a href="{{ url_for('marketplace') }}">Marketplace</a></li>
+                    <li><a href="{{ url_for('myticket') }}" class="active">MyTicket</a></li>
+                    <li><a href="{{ url_for('profile') }}">Profile</a></li>
+                    <li><a href="{{ url_for('cart') }}">Cart</a></li>
+                </ul>
+            </nav>
+            <button class="logout-btn">Logout</button>
+        </div>
+    </header>
+
+    <main class="ticket-detail-container">
+        <div class="ticket-card">
+            <div class="ticket-header">
+                <h1>{{ ticket.EventTitle }}</h1>
+                <div class="ticket-status">
+                    {% if ticket.IsReselling %}
+                        <span class="status reselling">Currently Reselling</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="ticket-info">
+                <div class="event-image">
+                    <img src="{{ url_for('static', filename=ticket.EventImage) }}" alt="{{ ticket.EventTitle }}">
+                </div>
+
+                <div class="ticket-details">
+                    <div class="detail-group">
+                        <h3>Event Details</h3>
+                        <p><i class="fas fa-calendar"></i> Date: {{ ticket.EventStartDate }} - {{ ticket.EventEndDate }}</p>
+                        <p><i class="fas fa-clock"></i> Time: {{ ticket.EventStartTime }} - {{ ticket.EventEndTime }}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Venue: {{ ticket.EventVenue }}</p>
+                    </div>
+
+                    <div class="detail-group">
+                        <h3>Ticket Information</h3>
+                        <p><i class="fas fa-ticket-alt"></i> Ticket Type: {{ ticket.TicketType }}</p>
+                        <p><i class="fas fa-tag"></i> Price: {{ ticket.Price }} ETH</p>
+                        <p><i class="fas fa-fingerprint"></i> Ticket ID: {{ ticket.TicketID }}</p>
+                        <p><i class="fas fa-key"></i> Token ID: {{ ticket.TokenID }}</p>
+                    </div>
+
+                    <div class="detail-group">
+                        <h3>Event Description</h3>
+                        <p>{{ ticket.EventDescription }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-actions">
+                <button onclick="window.history.back()" class="back-btn">
+                    <i class="fas fa-arrow-left"></i> Back to My Tickets
+                </button>
+                {% if not ticket.IsReselling %}
+                    <button class="resell-btn" 
+                            data-ticket-id="{{ ticket.TicketID }}"
+                            data-token-id="{{ ticket.TokenID }}"
+                            data-event-title="{{ ticket.EventTitle }}"
+                            data-original-price="{{ ticket.Price }}"
+                            onclick="initiateResell(this)">
+                        <i class="fas fa-tags"></i> Resell Ticket
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .ticket-detail-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .ticket-card {
+            background-color: #1E2130;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .ticket-header h1 {
+            color: #fff;
+            margin: 0;
+        }
+
+        .status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .status.reselling {
+            background-color: #2A2D3E;
+            color: #ffd700;
+        }
+
+        .ticket-info {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 25px;
+        }
+
+        .event-image img {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .ticket-details {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .detail-group {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .detail-group h3 {
+            color: #00a8ff;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .detail-group p {
+            margin: 8px 0;
+            color: #fff;
+        }
+
+        .detail-group i {
+            width: 20px;
+            color: #00a8ff;
+            margin-right: 10px;
+        }
+
+        .ticket-actions {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .back-btn, .resell-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn {
+            background-color: #2A2D3E;
+            color: #fff;
+        }
+
+        .resell-btn {
+            background-color: #00a8ff;
+            color: #fff;
+        }
+
+        .back-btn:hover, .resell-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .ticket-info {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-actions {
+                flex-direction: column;
+            }
+
+            .ticket-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>

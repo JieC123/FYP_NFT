@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/EditProfile.css') }}"> <!-- Using the same CSS -->
+    <title>Event Planning Dashboard - Edit Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Add inline CSS for the image preview */
+        .profile-image-preview {
+            margin-top: 10px;
+            max-width: 100px;
+            max-height: 100px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Edit Profile</h2>
+                <button class="back-btn" onclick="location.href='/OrgProfile'">⬅️ Back</button>
+            </div>
+
+            <div class="event-form">
+                <form id="editProfileForm" method="POST" action="{{ url_for('profile.edit_profile') }}" enctype="multipart/form-data" onsubmit="return validateAndSubmit(event)">
+                    <div class="form-container">
+                        <div class="form-column">
+                            <h3 class="section-title">Personal Information</h3>
+                            <div class="form-row">
+                                <label for="fullName">Name:</label>
+                                <input type="text" id="fullName" name="name" value="{{ organiser.name }}" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="email">Email Address:</label>
+                                <input type="email" id="email" name="email" value="{{ organiser.email }}" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="icNo">IC No:</label>
+                                <input type="text" id="icNo" name="ic" value="{{ organiser.ic }}" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="contactNo">Contact No:</label>
+                                <input type="tel" id="contactNo" name="contact" value="{{ organiser.contact_no }}" required>
+                            </div>
+                        </div>
+
+                        <div class="form-column">
+                            <h3 class="section-title">Security & Avatar</h3>
+                            <div class="form-row">
+                                <label for="password">New Password:</label>
+                                <div class="password-container">
+                                    <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">
+                                    <span class="password-toggle" onclick="togglePassword()">👁️</span>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <label for="profileImage">Upload New Image:</label>
+                                <div class="upload-container">
+                                    <img id="imagePreview" class="profile-image-preview" 
+                                         src="{{ url_for('profile.profile_images', filename=organiser.profile_image) }}" 
+                                         alt="Profile Image Preview">
+                                    <div class="upload-actions">
+                                        <input type="file" id="profileImage" name="profile_image" accept="image/*" class="file-input">
+                                        <label for="profileImage" class="upload-btn">Choose File</label>
+                                        <button type="button" id="removeImage" class="remove-btn" style="display: none;">Remove Image</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" onclick="location.href='/OrgProfile'">Cancel</button>
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById("password");
+            const passwordType = passwordField.getAttribute("type");
+            passwordField.setAttribute("type", passwordType === "password" ? "text" : "password");
+        }
+
+        const profileImageInput = document.getElementById("profileImage");
+    const imagePreview = document.getElementById("imagePreview");
+
+    profileImageInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            const fileName = file.name.toLowerCase();
+            const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+
+            // Check if the selected file is an image based on extension
+            if (!allowedExtensions.exec(fileName)) {
+                alert("Please select a valid image file (.jpg, .jpeg, .png, .gif).");
+                this.value = ""; // Clear the file input
+                imagePreview.style.display = 'none';
+                return;
+            }
+
+            // Display the image preview if valid
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+        function validateAndSubmit(event) {
+            event.preventDefault();
+
+            const fullName = document.getElementById("fullName").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const icNo = document.getElementById("icNo").value.trim();
+            const contactNo = document.getElementById("contactNo").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            const icNoPattern = /^\d{6}-\d{2}-\d{4}$/;
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const contactNoPattern = /^\d{10,11}$/;
+            const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,12}$/;
+
+            // Validate all required fields
+            if (!fullName || !email || !icNo || !contactNo) {
+                alert("All fields except New Password and Profile Image are required.");
+                return false;
+            }
+
+            // Validate IC number format
+            if (!icNoPattern.test(icNo)) {
+                alert("IC No must be in the format 123xx6-99-0000.");
+                return false;
+            }
+
+            // Validate email format
+            if (!emailPattern.test(email)) {
+                alert("Please enter a valid email address.");
+                return false;
+            }
+
+            // Validate contact number format
+            if (!contactNoPattern.test(contactNo)) {
+                alert("Contact No must be a 10- to 11-digit number.");
+                return false;
+            }
+
+            // Validate password format if a new password is provided
+            if (password && !passwordPattern.test(password)) {
+                alert("Password must be 8-12 characters long, contain at least 1 uppercase, 1 lowercase, and 1 special character.");
+                return false;
+            }
+
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Confirm Update',
+                text: 'Are you sure you want to update your profile?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                },
+                buttonsStyling: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('editProfileForm').submit();
+                }
+            });
+
+            return false;
+        }
+    </script>
+</body>
+</html>

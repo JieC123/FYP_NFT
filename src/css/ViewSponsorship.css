@@ -1,0 +1,839 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    background-color:#e8dddc;
+    overflow-y: auto;
+}
+.container {
+    display: flex;
+    height: 100%;
+    position: relative;
+    
+}
+.sidebar {
+    width: 200px;
+    background-color: #2c3e50;
+    color: white;
+    padding: 7px 0;
+    position: fixed;
+    top: 73.5px;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    overflow-y: auto;
+}
+.sidebar-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-bottom: 1px solid white;
+}
+.sidebar-item img {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.sidebar-item.active {
+    background-color: #16a085;
+}
+.sidebar-item:hover {
+    background-color: #16a085;
+}
+
+.sidebar-item a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-item a img {
+    margin-right: 10px;
+}
+
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    padding-left: 220px;
+    min-height: calc(100vh - 60px);
+    position: relative;
+    z-index: 2;
+    height: 100vh;
+}
+
+/* Header Styling */
+.header {
+    width: 100%;
+    background-color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+    height: 73.5px;
+}
+
+.header .logo {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.header h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+    margin-left: 10px;
+    flex-grow: 1;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #333;
+}
+
+.user-actions .icon {
+    margin-left: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #bdc3c7;
+}
+
+.pageTitle {
+    margin-top: 80px;
+    padding: 20px 0;
+}
+
+.pageTitle h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #333;
+    font-weight: bold;
+}
+
+.search-delete-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-bar form {
+    display: flex;
+    align-items: center;
+}
+
+.search-bar input {
+    width: 250px;
+    padding: 10px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+}
+
+.search-bar button {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.file-upload-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.communicate-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.tableList {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    position: relative;
+    z-index: 1;
+    overflow-y: auto;
+    max-width: 100%;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    position: relative;
+}
+
+th, td {
+    border: 1px solid #bdc3c7;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 140px;
+}
+
+.action-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.action-btn.modify-btn {
+    background-color: #3498db;
+    color: white;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    opacity: 0.9;
+}
+
+.action-btn.modify-btn:hover {
+    background-color: #2980b9;
+}
+
+.action-btn .btn {
+    text-decoration: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    justify-content: center;
+}
+
+td:last-child {
+    padding: 12px;
+}
+
+.track-btn { background-color: #f1c40f; }
+.delete-btn { background-color: #e74c3c; color: white; }
+
+.add-event-btn {
+    background-color: #2ecc71; /* Same background color */
+    color: white; /* Text color */
+    border: none; /* No border */
+    padding: 10px 20px; /* Padding for button-like appearance */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Change cursor to pointer */
+    margin-bottom: 20px; /* Space below the button */
+    text-decoration: none; /* Remove underline */
+    display: inline-block; /* Makes it behave like a button */
+}
+
+.add-event-btn:hover {
+    background-color: #27ae60; /* Darker shade on hover */
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+
+
+
+.nav-btn {
+    padding: 10px 15px; /* Adjust padding for better alignment */
+    background-color: #f8f9fa;
+    border: 1px solid black; /* Add black border */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Transition for hover effect */
+    display: inline-block; /* Allow button to only take up needed width */
+    margin: 0; /* Remove margin between buttons */
+    text-decoration: none;
+    color: black;
+}
+
+.nav-btn.active {
+    background-color: #D3D3D3;
+}
+
+/* Remove the separator line between buttons */
+.nav-btn:not(:last-child)::after {
+    content: none; /* Remove the separator line */
+}
+
+/* Hover effect */
+.nav-btn:hover {
+    background-color: #D3D3D3; /* Change to specified color on hover */
+}
+
+/* Ensure space between h1 and nav bar */
+.header {
+    margin-bottom: 20px; /* Add margin to create space */
+}
+
+
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* For the success message */
+.success-message {
+    /* color: green; */
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.modal {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.separator {
+    border: none;
+    border-top: 2px dotted #ccc; /* Dotted line */
+    margin: 20px 0;
+}
+
+/* Alternatively, you can use a solid line */
+.separator-solid {
+    border: none;
+    border-top: 2px solid #ccc; /* Solid line */
+    margin: 20px 0;
+}
+
+
+/* Modal content */
+.modal-content {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Close button */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Modal title */
+.modal-content h2 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* File input styling */
+.file-upload-label {
+    display: inline-block;
+    cursor: pointer;
+    padding: 10px 20px;
+    background-color: #D3D3D3;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    width:38%;
+    text-align: center;
+    font-size: 16px;
+    color: black;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.file-name {
+    display: block;
+    margin-top: 8px;
+    color: #333;
+    font-size: 14px;
+}
+
+.upload-form {
+    border: 3px solid #f3f3f3;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+/* Hover effect for file input */
+.file-upload-label:hover {
+    background-color: #e6e6e6;
+}
+
+/* Hide default file input */
+#file-upload {
+    display: none;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;  /* Center buttons horizontally */
+    margin-top: 20px;
+}
+
+/* Upload button styling */
+.upload-btn {
+    padding: 12px 30px;
+    background-color: #D3D3D3;
+    color: #000000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    width: 50%;
+}
+
+/* Hover effect for upload button */
+.upload-btn:hover {
+    background-color: #e6e6e6;
+}
+
+/* Download link styling */
+.download-link {
+    text-align: center;
+    color: #007BFF;
+    font-size: 15px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+/* Hover effect for download link */
+.download-link:hover {
+    color: #0056b3;
+}
+
+.refresh-btn {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.refresh-btn:hover {
+    background-color: #2980b9;
+}
+
+.refresh-btn i {
+    font-size: 16px;
+}
+
+/* Add these sorting styles after your existing table styles */
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 25px;
+    background-color: #f2f2f2;
+    transition: background-color 0.3s;
+}
+
+th.sortable:hover {
+    background-color: #e8e8e8;
+}
+
+.sort-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+th.sortable.asc .sort-icon::after {
+    font-family: "Font Awesome 5 Free";
+    content: '\f0de'; /* fa-sort-up */
+    font-weight: 900;
+    color: #3498db;
+}
+
+th.sortable.desc .sort-icon::after {
+    font-family: "Font Awesome 5 Free";
+    content: '\f0dd'; /* fa-sort-down */
+    font-weight: 900;
+    color: #3498db;
+}
+
+th.sortable:not(.asc):not(.desc) .sort-icon::after {
+    font-family: "Font Awesome 5 Free";
+    content: '\f0dc'; /* fa-sort */
+    font-weight: 900;
+}
+
+.filter-btn {
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 10px;  /* Add margin to match spacing */
+}
+
+.filter-btn:hover {
+    background-color: #2980b9;
+}
+
+.filter-modal {
+    max-width: 800px; /* Match the event modal width */
+    padding: 25px;
+    background-color: white;
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+.filter-sections-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    width: calc(33.33% - 20px); /* Adjust width to fit three columns with spacing */
+}
+
+.filter-section h3 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 16px;
+}
+
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 15px; /* Add padding to align with container */
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+}
+
+.filter-option input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
+.filter-option label {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.filter-divider {
+    height: 1px;
+    background-color: #ddd;
+    margin: 15px 0;
+}
+
+.filter-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.cancel-btn, .apply-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.apply-btn {
+    background-color: #3498db;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.apply-btn:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.package-filter-checkbox-all,
+.package-filter-checkbox,
+.schedule-filter-checkbox-all,
+.schedule-filter-checkbox,
+.status-filter-checkbox-all,
+.status-filter-checkbox {
+    accent-color: #3498db;
+}
+
+.sponsorship-filter-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.sponsorship-filter-modal {
+    max-width: 800px;
+    padding: 25px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sponsorship-filter-sections {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.sponsorship-filter-section {
+    flex: 1;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.sponsorship-filter-section h3 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    font-size: 16px;
+    text-align: center;
+}
+
+.sponsorship-filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sponsorship-filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sponsorship-filter-option input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #3498db;
+}
+
+.sponsorship-filter-divider {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 10px 0;
+}
+
+.sponsorship-filter-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.sponsorship-filter-btn:hover {
+    background-color: #2980b9;
+}
+
+/* Modal specific styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Add these pagination styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.pagination-btn {
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.pagination-btn:hover {
+    background-color: #2980b9;
+}
+
+.pagination-btn.disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    margin: 0 15px;
+    color: #666;
+}
+
+.current-page {
+    font-weight: bold;
+    color: #3498db;
+}
+
+/* Add sticky header styles */
+thead {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 2;
+}
+
+th {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.alert {
+    padding: 15px;
+    margin: 15px 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}

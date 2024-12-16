@@ -1,0 +1,96 @@
+<div class="header">
+    <img src="{{ url_for('static', filename='Image/MainIcon.png') }}" alt="Event Planning Logo" class="logo">
+    <h1>Event Pro</h1>
+    <div class="user-actions">
+        <span>Welcome Back, {{ g.organiser_name if g.organiser_name else 'Guest' }}</span>
+        <div class="header-links">
+            <a href="{{ url_for('org_profile') }}" class="header-link" title="View Profile">
+                <span class="header-icon">👤</span>
+                <span class="header-text">Profile</span>
+            </a>
+            <div class="vertical-divider"></div>
+            <a href="{{ url_for('login.logout') }}" class="header-link" onclick="return confirmLogout()" title="Logout">
+                <span class="header-icon">↪️</span>
+                <span class="header-text">Logout</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.header {
+    display: flex;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.logo {
+    height: 40px;
+    margin-right: 1rem;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-left: auto;
+}
+
+.header-links {
+    display: flex;
+    gap: 1rem;
+}
+
+.header-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #333;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.header-link:hover {
+    background-color: #f5f5f5;
+    color: #007bff;
+}
+
+.header-icon {
+    font-size: 1.2rem;
+}
+
+.header-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.vertical-divider {
+    height: 24px;
+    width: 1px;
+    background-color: #e0e0e0;
+    margin: 0 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .header-text {
+        display: none;
+    }
+    
+    .header-link {
+        padding: 0.5rem;
+    }
+    .vertical-divider {
+        height: 20px;
+    }
+}
+</style>
+
+<script>
+    function confirmLogout() {
+        return confirm("Are you sure you want to log out?");
+    }
+</script>

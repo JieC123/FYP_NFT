@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/OrgAlloSponsorship.css') }}"> <!-- Same CSS as for Event -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Event Planning Dashboard - Sponsorship</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events"> <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                        <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Allocation</h2>
+                
+            </div>
+
+            <a href="/OrgViewSponsorship" class="nav-btn">Sponsorship</a>
+            <a href="{{ url_for('sponsorshipAllo.sponsorship_page') }}" class="nav-btn active">Event Allocation</a>
+            <a href="{{ url_for('sponsorshipAllo.remove_allo_page') }}" class="nav-btn">Remove Event Allocation</a>
+            
+            <div class="tableList">
+                <div class="select-section">
+                    <form method="post" action="{{ url_for('sponsorshipAllo.sponsorship_page') }}">
+                        <label for="eventSelect" class="event-label">Select an Event:</label>
+                        <select id="eventSelect" name="eventSelect" class="form-control" required>
+                            {% if events %}
+                                {% for event in events %}
+                                    <option value="{{ event['EventID'] }}" 
+                                            {% if selected_event_id == event['EventID'] %} selected {% endif %}>
+                                        {{ event['EventTitle'] }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option disabled>No events available</option>
+                            {% endif %}
+                        </select>
+                        <button type="submit" class="select-btn">Select</button>
+                    </form>
+                   
+                    
+                    <!-- Toggle Buttons Moved to the Right Side -->
+                    <div class="toggle-buttons">
+                        <button id="assignedToggleBtn" class="toggle-btn" onclick="toggleAssignedTable()">Hide Assigned Table</button>
+                        <button id="unassignedToggleBtn" class="toggle-btn" onclick="toggleUnassignedTable()">Hide Unassigned Table</button>
+                        
+                    </div>
+                </div>
+                
+                <div id="assignedSection" class="table-section">
+                    <h3>Assigned Sponsorship:</h3>
+                    {% if event_details %}
+                        <h4>Event Duration: {{ event_details['EventStartDate'] }} - {{ event_details['EventEndDate'] }}</h4>
+                    {% endif %}
+                    <div class="table-content">
+                        
+                        
+                        <table id="assignedTable" class="sponsorship-table">
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-sort="number">No.<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="sponsorshipId">Sponsorship ID<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="name">Name<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="company">Company<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="packageDetails">Package Details<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="paymentSchedule">Payment Schedule<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="amount">Amount Contributed (RM)<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="assignedDate">Assigned Date<span class="sort-icon"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if assigned_sponsorships and assigned_sponsorships|length > 0 %}
+                                {% for sponsorship in assigned_sponsorships %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ sponsorship['SponsorshipID'] }}</td>
+                                    <td>{{ sponsorship['SponsorshipName'] }}</td>
+                                    <td>{{ sponsorship['Company'] }}</td>
+                                    <td>{{ sponsorship['SponsorDetail'] }}</td>
+                                    <td>{{ sponsorship['PaymentSchedule'] }}</td>
+                                    <td>{{ '%0.2f' | format(sponsorship['AmountContributed']) }}</td>
+                                    <td>{{ sponsorship['DateAssigned'] }}</td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" style="text-align: center;">No assigned sponsorships found</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+            
+                <div id="unassignedSection" class="table-section">
+                    <h3>Unassigned Sponsorships:</h3>
+                    <div class="table-content">
+                       
+                        
+                        <table id="unassignedTable" class="sponsorship-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="select-all" onclick="toggleAll(this)"></th>
+                                    <th class="sortable" data-sort="number">No.<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="sponsorshipId">Sponsorship ID<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="name">Sponsorship Name<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="company">Company<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="packageDetails">Package Details<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="paymentSchedule">Payment Schedule<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="amount">Amount Contributed (RM)<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="status">Status<span class="sort-icon"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if unassigned_sponsorships and unassigned_sponsorships|length > 0 %}
+                                {% for sponsorship in unassigned_sponsorships %}
+                                <tr>
+                                    <td><input type="checkbox" class="row-checkbox" value="{{ sponsorship['SponsorshipID'] }}"></td>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ sponsorship['SponsorshipID'] }}</td>
+                                    <td>{{ sponsorship['SponsorshipName'] }}</td>
+                                    <td>{{ sponsorship['Company'] }}</td>
+                                    <td>{{ sponsorship['SponsorDetail'] }}</td>
+                                    <td>{{ sponsorship['PaymentSchedule'] }}</td>
+                                    <td>{{ '%0.2f' | format(sponsorship['AmountContributed']) }}</td>
+                                    <td>{{ sponsorship['Status'] }}</td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="9" style="text-align: center;">No sponsorships found</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+            
+                <!-- Confirm Button -->
+                <button class="confirm-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    // Function to toggle the visibility of the assigned sponsorship table content only
+    function toggleAssignedTable() {
+        const content = document.querySelector('#assignedSection .table-content');
+        const toggleBtn = document.getElementById("assignedToggleBtn");
+        
+        if (!content) return; // Guard clause if element not found
+        
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            toggleBtn.textContent = "Hide Assigned Table";
+        } else {
+            content.classList.add('hidden');
+            toggleBtn.textContent = "Show Assigned Table";
+        }
+    }
+
+    // Function to toggle the visibility of the unassigned sponsorship table content only
+    function toggleUnassignedTable() {
+        const content = document.querySelector('#unassignedSection .table-content');
+        const toggleBtn = document.getElementById("unassignedToggleBtn");
+        
+        if (!content) return; // Guard clause if element not found
+        
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            toggleBtn.textContent = "Hide Unassigned Table";
+        } else {
+            content.classList.add('hidden');
+            toggleBtn.textContent = "Show Unassigned Table";
+        }
+    }
+
+    // Function to toggle all checkboxes
+    function toggleAll(source) {
+        const checkboxes = document.querySelectorAll(".row-checkbox");
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = source.checked;
+        });
+    }
+
+    document.querySelector(".confirm-btn").addEventListener("click", function() {
+    // Get all checked checkboxes
+    const selectedSponsorships = [];
+    const checkboxes = document.querySelectorAll(".row-checkbox:checked");
+    checkboxes.forEach((checkbox) => {
+        selectedSponsorships.push(checkbox.value);  // Collect the SponsorshipID of the selected checkboxes
+    });
+
+    if (selectedSponsorships.length === 0) {
+        alert("Please select at least one sponsorship to assign.");
+        return;
+    }
+
+    // Get the selected event ID (from the dropdown or other method)
+    const eventID = "{{ selected_event_id }}";  // Assuming this value is passed from the server
+
+    // Confirm the action
+    const confirmation = confirm(`Are you sure you want to assign the selected sponsorship(s)?`);
+
+    if (confirmation) {
+        // Send the selected sponsorships and eventID to the backend via AJAX
+        fetch('/assign_sponsorships', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sponsorships: selectedSponsorships,
+                eventID: eventID
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Sponsorship(s) assigned successfully!");
+                location.reload();  // Reload the page to show the updated list
+            } else {
+                alert("An error occurred while assigning the sponsorship(s).");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Failed to assign sponsorship(s).");
+        });
+    }
+});
+    
+    // Unified sorting functionality for both tables
+    document.addEventListener('DOMContentLoaded', function() {
+        const setupTableSorting = (tableId) => {
+            const getCellValue = (tr, idx) => {
+                const cell = tr.children[idx];
+                let value = cell.textContent || cell.innerText;
+                
+                // For SponsorshipID column
+                if (idx === 1) { // SponsorshipID column
+                    // Extract the numeric part for sorting while keeping original value
+                    const numericPart = value.replace(/\D/g, '');
+                    return parseInt(numericPart) || 0;
+                }
+                
+                // For amount columns
+                if ((tableId === 'assignedTable' && idx === 6) || 
+                    (tableId === 'unassignedTable' && idx === 7)) {
+                    return parseFloat(value.replace('RM', '').trim()) || 0;
+                }
+                
+                // For assigned date column in assigned table
+                if (tableId === 'assignedTable' && idx === 7) {
+                    const dateValue = value.trim();
+                    if (dateValue) {
+                        return new Date(dateValue);
+                    }
+                    return new Date(0);
+                }
+                
+                return value;
+            };
+
+            const comparer = (idx, asc) => (a, b) => {
+                const v1 = getCellValue(asc ? a : b, idx);
+                const v2 = getCellValue(asc ? b : a, idx);
+                
+                // Handle different types of sorting
+                if (idx === 0) { // No. column
+                    return parseInt(v1) - parseInt(v2);
+                } else if (idx === 1) { // SponsorshipID column
+                    return v1 - v2;
+                } else if ((tableId === 'assignedTable' && idx === 6) || 
+                          (tableId === 'unassignedTable' && idx === 7)) { // Amount columns
+                    return v1 - v2;
+                } else if (tableId === 'assignedTable' && idx === 7) { // Date column
+                    if (v1 instanceof Date && v2 instanceof Date) {
+                        return v1.getTime() - v2.getTime();
+                    }
+                    return 0;
+                } else { // Text columns
+                    return v1.toString().localeCompare(v2);
+                }
+            };
+
+            document.querySelectorAll(`#${tableId} th.sortable`).forEach(th => {
+                th.addEventListener('click', () => {
+                    const table = th.closest('table');
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const headerRow = th.parentElement;
+                    const columnIndex = Array.from(headerRow.children).indexOf(th);
+                    
+                    // Skip if no data or only "No sponsorships found" row
+                    if (rows.length === 0 || (rows.length === 1 && rows[0].querySelector('td').colSpan)) {
+                        return;
+                    }
+                    
+                    // Remove asc/desc classes from all headers
+                    headerRow.querySelectorAll('th').forEach(header => {
+                        if (header !== th) {
+                            header.classList.remove('asc', 'desc');
+                        }
+                    });
+                    
+                    // Toggle sort direction
+                    const isAsc = !th.classList.contains('asc');
+                    th.classList.toggle('asc', isAsc);
+                    th.classList.toggle('desc', !isAsc);
+                    
+                    // Sort rows
+                    rows.sort(comparer(columnIndex, isAsc));
+                    
+                    // Reorder rows in the table
+                    tbody.append(...rows);
+                    
+                    // Update only the index numbers (first column)
+                    if (columnIndex !== 0) {
+                        rows.forEach((row, index) => {
+                            const indexCell = row.querySelector('td:first-child');
+                            if (indexCell) {
+                                indexCell.textContent = index + 1;
+                            }
+                        });
+                    }
+                });
+            });
+        };
+
+        // Setup sorting for both tables
+        setupTableSorting('assignedTable');
+        setupTableSorting('unassignedTable');
+
+        // Store checkbox states for unassigned table
+        document.querySelectorAll('#unassignedTable input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                this.setAttribute('data-checked', this.checked);
+            });
+        });
+    });
+</script>
+
+</html>

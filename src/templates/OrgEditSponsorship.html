@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/EditSponsorship.css') }}"> <!-- Using the same CSS with modifications -->
+    <title>Event Planning Dashboard - Modify Sponsorship</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                        <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                        <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                        <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                        <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Modify Sponsorship Form</h2>
+                <button class="back-btn" onclick="location.href='/OrgViewSponsorship'">⬅️ Back</button>
+            </div>
+
+            <div class="event-form">
+                <form id="sponsorshipForm" method="POST" action="{{ url_for('sponsorship.edit_sponsorship', sponsorship_id=sponsorship.SponsorshipID) }}" onsubmit="return validateForm(event)">
+                    
+                    <div id="errorMessages" style="color: red;">
+                        {% if error_messages %}
+                            {% for field, message in error_messages.items() %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-container">
+                        <!-- Left Column Fields -->
+                        <div class="form-column">
+                            <div class="form-row">
+                                <label for="fullName">Full Name:</label>
+                                <input type="text" id="fullName" name="fullName" value="{{ sponsorship.SponsorshipName }}" placeholder="Full name" required>
+                                <small class="error" id="fullNameError"></small>
+                            </div>
+                            <div class="form-row">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" value="{{ sponsorship.SponsorshipEmail }}" placeholder="Email address" required>
+                                <small class="error" id="emailError"></small>
+                            </div>
+                            <div class="form-row">
+                                <label for="paymentSchedule">Payment Schedule:</label>
+                                <select id="paymentSchedule" name="paymentSchedule" required>
+                                    <option value="Monthly" {% if sponsorship.PaymentSchedule == 'Monthly' %}selected{% endif %}>Monthly</option>
+                                    <option value="Quarterly" {% if sponsorship.PaymentSchedule == 'Quarterly' %}selected{% endif %}>Quarterly</option>
+                                    <option value="One-time" {% if sponsorship.PaymentSchedule == 'One-time' %}selected{% endif %}>One-time</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="sponsorAmount">Sponsor Amount:</label>
+                                <input type="text" id="sponsorAmount" name="sponsorAmount" value="{{ sponsorship.AmountContributed }}" placeholder="Amount" required>
+                                <small class="error" id="amountError"></small>
+                            </div>
+                        </div>
+                
+                        <!-- Right Column Fields -->
+                        <div class="form-column">
+                            <div class="form-row">
+                                <label for="company">Company:</label>
+                                <input type="text" id="company" name="company" value="{{ sponsorship.Company }}" placeholder="Company name" required>
+                                <small class="error" id="companyError"></small>
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="contactNo">Contact No:</label>
+                                <input type="tel" id="contactNo" name="contactNo" value="{{ sponsorship.SponsorshipContactInfo }}" placeholder="Contact number" required>
+                                <small class="error" id="contactNoError"></small>
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="sponsorDetail">Sponsor Detail:</label>
+                                <select id="sponsorDetail" name="sponsorDetail" required>
+                                    <option value="Gold Package" {% if sponsorship.SponsorDetail == 'Gold Package' %}selected{% endif %}>Gold Package</option>
+                                    <option value="Silver Package" {% if sponsorship.SponsorDetail == 'Silver Package' %}selected{% endif %}>Silver Package</option>
+                                    <option value="Supply Package" {% if sponsorship.SponsorDetail == 'Supply Package' %}selected{% endif %}>Supply Package</option>
+                                </select>
+                            </div>
+                
+                            <div class="form-row">
+                                <label for="status">Status:</label>
+                                <select id="status" name="status" required>
+                                    <option value="Active" {% if sponsorship.Status == 'Active' %}selected{% endif %}>Active</option>
+                                    <option value="Inactive" {% if sponsorship.Status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="form-actions">
+                        <button type="submit" class="update-btn">Update</button>
+                    </div>
+                </form>
+                
+               
+            </div>
+        </div>
+    </div>
+</body>
+
+ <script>
+    function validateForm(event) {
+        event.preventDefault();
+        
+        // Full Name Validation
+        const fullName = document.getElementById('fullName').value.trim();
+        if (!fullName) {
+            alert('Full name is required.');
+            return false;
+        }
+
+        // Email Validation
+        const email = document.getElementById('email').value.trim();
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            alert('Please enter a valid email address.');
+            return false;
+        }
+
+        // Contact Number Validation (10-11 digits)
+        const contactNo = document.getElementById('contactNo').value.trim();
+        const contactPattern = /^\d{10,11}$/;
+        if (!contactPattern.test(contactNo)) {
+            alert('Contact number must be 10 to 11 digits.');
+            return false;
+        }
+
+        // Sponsor Amount Validation
+        const sponsorAmount = document.getElementById('sponsorAmount').value.trim();
+        const regex = /^[0-9]+(\.[0-9]+)?$/;
+        if (!regex.test(sponsorAmount) || Number(sponsorAmount) <= 0) {
+            alert('Sponsor amount must be a valid number greater than 0.');
+            return false;
+        }
+
+        // Company Validation
+        const company = document.getElementById('company').value.trim();
+        if (!company) {
+            alert('Company name is required.');
+            return false;
+        }
+
+        // Sponsor Detail Validation
+        const sponsorDetail = document.getElementById('sponsorDetail').value.trim();
+        if (!sponsorDetail) {
+            alert('Sponsor detail is required.');
+            return false;
+        }
+
+        // Payment Schedule Validation
+        const paymentSchedule = document.getElementById('paymentSchedule').value.trim();
+        if (!paymentSchedule) {
+            alert('Payment schedule is required.');
+            return false;
+        }
+
+        // Status Validation
+        const status = document.getElementById('status').value.trim();
+        if (!status) {
+            alert('Status is required.');
+            return false;
+        }
+
+        // If all validations pass, show confirmation dialog
+        Swal.fire({
+            title: 'Confirm Update',
+            text: 'Are you sure you want to update this sponsorship information?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            },
+            buttonsStyling: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('sponsorshipForm').submit();
+            }
+        });
+
+        return false;
+    }
+</script>
+    
+</html>

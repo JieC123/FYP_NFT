@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ViewBooth.css') }}"> <!-- Same CSS as for Event -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Event Planning Dashboard - Exhibitor</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant 
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Exhibitor & Booth</h2>
+            </div>
+
+            <a href="/OrgViewBooth" class="nav-btn active">Exhibitor and booth</a>
+            <a href="{{ url_for('boothAllo.booth_page') }}" class="nav-btn">Event Allocation</a>
+            <a href="{{ url_for('boothAllo.remove_booth_allo_page') }}"class="nav-btn">Event Allocation Removal</a>
+            <a href="{{ url_for('boothAllo.booth_map_planning') }}" class="nav-btn">Booth Map</a>
+            
+            <div class="tableList">
+                
+                <div class="search-bar">
+                    <button type="button" class="refresh-btn" onclick="refreshTable()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <form action="{{ url_for('booth.search_exhibitors') }}" method="get">
+                        <input type="text" name="query" placeholder="Search by exhibitor name" value="{{ request.args.get('query', '') }}">
+                        <button type="submit">Search</button>
+                    </form>
+                    <button class="filter-btn" onclick="openFilterModal()">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+                
+                <div class="search-delete-bar">
+                    <div class="action-bar">
+                        <button class="delete-btn">Delete</button>
+                        <button class="file-upload-btn" onclick="openUploadDialog()">File Upload</button>
+                        <button class="communicate-btn" onclick="openEmailCommunication()">Contact</button>
+                        
+                    </div>
+                    <a class="add-event-btn" href="{{ url_for('booth.add_exhibitor') }}">Add Exhibitor ➕</a>
+                </div>
+                
+                {% if request.args.get('success') %}
+                <div class="alert alert-success">
+                    {{ request.args.get('success') }}
+                </div>
+                {% endif %}
+
+                {% if request.args.get('error') %}
+                <div class="alert alert-danger">
+                    {{ request.args.get('error')|safe }}
+                </div>
+                {% endif %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th class="sortable" data-sort="index">No. <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="exhibitorId">Exhibitor ID <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="name">Name <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="email">Email <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="contact">Contact No <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="company">Company <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="category">Category <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="size">Booth Size (meters) <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="fees">Rental Fees (RM) <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="status">Status <span class="sort-icon"></span></th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booth in booths %}
+                        <tr>
+                            <td><input type="checkbox" class="exhibitor-checkbox" value="{{ booth['ExhibitorID'] }}" data-email="{{ booth['ExhibitorEmail'] }}"></td>
+
+                            <td>{{ loop.index }}</td>
+                            <td>{{ booth['ExhibitorID'] }}</td>
+                            <td>{{ booth['ExhibitorName'] }}</td>
+                            <td>{{ booth['ExhibitorEmail'] }}</td>
+                            <td>{{ booth['ExhibitorContactInfo'] }}</td>
+                            <td>{{ booth['Company'] }}</td>
+                            <td>{{ booth['BoothCategory'] }}</td>
+                            <td>{{ booth['BoothSize'] }}</td>
+                            <td>{{ booth['BoothRentalFees'] }}</td>
+                            <td>{{ booth['Status'] }}</td>
+                            
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn modify-btn">
+                                        <a href="{{ url_for('booth.edit_booth', exhibitor_id=booth.ExhibitorID) }}" class="btn">
+                                            <i class="fas fa-edit"></i> Modify
+                                        </a>
+                                    </button>
+                                </div>
+                            </td>
+                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div class="pagination">
+                    <a href="{{ url_for(request.endpoint, page=current_page-1, query=request.args.get('query'), categories=request.args.get('categories'), sizes=request.args.get('sizes'), statuses=request.args.get('statuses')) }}" 
+                       class="pagination-btn {% if current_page == 1 %}disabled{% endif %}"
+                       {% if current_page == 1 %}onclick="return false;"{% endif %}>
+                        Previous
+                    </a>
+                    
+                    <span class="pagination-info">
+                        Page <span class="current-page">{{ current_page }}</span> of {{ total_pages }}
+                    </span>
+                    
+                    <a href="{{ url_for(request.endpoint, page=current_page+1, query=request.args.get('query'), categories=request.args.get('categories'), sizes=request.args.get('sizes'), statuses=request.args.get('statuses')) }}" 
+                       class="pagination-btn {% if current_page == total_pages %}disabled{% endif %}"
+                       {% if current_page == total_pages %}onclick="return false;"{% endif %}>
+                        Next
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+<div id="uploadModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeUploadDialog()">&times;</span>
+        <h2>Upload Booth Details File</h2>
+        <form action="{{ url_for('booth.upload_booth_file') }}" method="POST" enctype="multipart/form-data"
+            class="upload-form">
+            <label for="file-upload" class="file-upload-label">
+                <input type="file" id="file-upload" name="file" required onchange="displayFileName()" />
+                <span>Select a File</span>
+            </label>
+            <span id="file-name" class="file-name"></span> <!-- New span for file name display -->
+            <hr class="separator">
+            <div class="button-group">
+                <button type="submit" class="upload-btn" id="upload-btn" disabled>Upload</button>
+                <a href="{{ url_for('booth.download_booth_template') }}" class="download-link" download>
+                    Download Booth Template
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<script>
+    // Select/Deselect all checkboxes
+    document.getElementById('select-all').addEventListener('change', function() {
+        let checkboxes = document.querySelectorAll('.exhibitor-checkbox');
+        for (let checkbox of checkboxes) {
+            checkbox.checked = this.checked;
+        }
+    });
+
+        document.querySelector('.delete-btn').addEventListener('click', function() {
+        let selectedExhibitors = [];
+        document.querySelectorAll('.exhibitor-checkbox:checked').forEach(checkbox => {
+            selectedExhibitors.push(checkbox.value);
+        });
+
+        if (selectedExhibitors.length === 0) {
+            alert('No exhibitors selected for deletion.');
+            return;
+        }
+
+        if (confirm('Are you sure you want to delete the selected exhibitor(s)?')) {
+            fetch('/delete_exhibitor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ exhibitor_ids: selectedExhibitors }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload(); // Reload page to update the list
+                } else {
+                    alert('Failed to delete: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to delete exhibitor(s).');
+            });
+        }
+    });
+
+
+    // Open email communication page and pass selected exhibitors' emails
+// Open email communication page and pass selected exhibitors' emails
+function openEmailCommunication() {
+    let selectedExhibitors = [];
+    document.querySelectorAll('.exhibitor-checkbox:checked').forEach(checkbox => {
+        selectedExhibitors.push(checkbox.getAttribute('data-email'));
+    });
+
+    if (selectedExhibitors.length === 0) {
+        alert('Please select at least one exhibitor email to communicate');
+        return;
+    }
+
+    // Pass selected emails as a single 'emails' query parameter
+    let emailUrl = '/email_communication?emails=' + encodeURIComponent(selectedExhibitors.join(','));
+    window.location.href = emailUrl;
+}
+window.localStorage.setItem('previousPage', document.referrer);
+
+
+function openUploadDialog() {
+        document.getElementById("uploadModal").style.display = "flex";
+    }
+
+    function closeUploadDialog() {
+        document.getElementById("uploadModal").style.display = "none";
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function (event) {
+        const modal = document.getElementById("uploadModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
+
+    function displayFileName() {
+    const fileInput = document.getElementById("file-upload");
+    const fileNameDisplay = document.getElementById("file-name");
+    const uploadBtn = document.getElementById("upload-btn");
+
+    // Display the selected file name
+    if (fileInput.files.length > 0) {
+        fileNameDisplay.textContent = fileInput.files[0].name;
+        
+        // Enable the upload button and change its color
+        uploadBtn.disabled = false;
+        uploadBtn.style.backgroundColor = '#4CAF50';  // Green when file is selected
+        uploadBtn.style.Color = '#ffffff';
+    } else {
+        fileNameDisplay.textContent = ""; // Clear if no file is selected
+
+        // Disable the upload button and reset its color
+        uploadBtn.disabled = true;
+        uploadBtn.style.backgroundColor = '#D3D3D3';  // Default gray when no file is selected
+        uploadBtn.style.Color = '#000000';
+    }
+}
+
+function refreshTable() {
+    window.location.href = "{{ url_for('booth.view_booths') }}";
+}
+
+let currentSort = {
+    column: null,
+    direction: 'asc'
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const sortType = th.dataset.sort;
+            
+            // Remove all sorting classes first
+            document.querySelectorAll('th.sortable').forEach(header => {
+                header.classList.remove('asc', 'desc');
+            });
+            
+            // Toggle sort direction if clicking the same column
+            if (currentSort.column === sortType) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = sortType;
+                currentSort.direction = 'asc';
+            }
+
+            // Add appropriate class for current sort
+            th.classList.add(currentSort.direction);
+            
+            sortTable(sortType, currentSort.direction);
+        });
+    });
+});
+
+function sortTable(sortType, direction) {
+    const tbody = document.querySelector('table tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    const sortedRows = rows.sort((a, b) => {
+        let aVal, bVal;
+
+        switch(sortType) {
+            case 'index':
+                aVal = parseInt(a.cells[1].textContent);
+                bVal = parseInt(b.cells[1].textContent);
+                break;
+            case 'exhibitorId':
+                aVal = a.cells[2].textContent;
+                bVal = b.cells[2].textContent;
+                break;
+            case 'name':
+                aVal = a.cells[3].textContent.toLowerCase();
+                bVal = b.cells[3].textContent.toLowerCase();
+                break;
+            case 'email':
+                aVal = a.cells[4].textContent.toLowerCase();
+                bVal = b.cells[4].textContent.toLowerCase();
+                break;
+            case 'contact':
+                aVal = a.cells[5].textContent.replace(/[^\d]/g, '');
+                bVal = b.cells[5].textContent.replace(/[^\d]/g, '');
+                break;
+            case 'company':
+                aVal = a.cells[6].textContent.toLowerCase();
+                bVal = b.cells[6].textContent.toLowerCase();
+                break;
+            case 'category':
+                aVal = a.cells[7].textContent.toLowerCase();
+                bVal = b.cells[7].textContent.toLowerCase();
+                break;
+            case 'size':
+                aVal = parseFloat(a.cells[8].textContent) || 0;
+                bVal = parseFloat(b.cells[8].textContent) || 0;
+                break;
+            case 'fees':
+                aVal = parseFloat(a.cells[9].textContent.replace(/[^\d.-]/g, '')) || 0;
+                bVal = parseFloat(b.cells[9].textContent.replace(/[^\d.-]/g, '')) || 0;
+                break;
+            case 'status':
+                // Custom order for status: Active > Pending > Inactive
+                const statusOrder = { 'Active': 0, 'Pending': 1, 'Inactive': 2 };
+                aVal = statusOrder[a.cells[10].textContent.trim()] ?? 999;
+                bVal = statusOrder[b.cells[10].textContent.trim()] ?? 999;
+                break;
+            default:
+                return 0;
+        }
+
+        if (direction === 'asc') {
+            return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+        } else {
+            return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+        }
+    });
+
+    // Clear and re-append sorted rows
+    while (tbody.firstChild) {
+        tbody.removeChild(tbody.firstChild);
+    }
+    sortedRows.forEach(row => tbody.appendChild(row));
+}
+
+// Filter Modal Functions
+function openFilterModal() {
+    document.getElementById('filterModal').style.display = 'flex';
+}
+
+function closeFilterModal() {
+    document.getElementById('filterModal').style.display = 'none';
+}
+
+// Handle "All" checkbox logic for each filter section
+document.addEventListener('DOMContentLoaded', function() {
+    // Category filters
+    const categoryAll = document.querySelector('.category-filter-checkbox-all');
+    const categoryCheckboxes = document.querySelectorAll('.category-filter-checkbox');
+    
+    // Size filters
+    const sizeAll = document.querySelector('.size-filter-checkbox-all');
+    const sizeCheckboxes = document.querySelectorAll('.size-filter-checkbox');
+    
+    // Status filters
+    const statusAll = document.querySelector('.status-filter-checkbox-all');
+    const statusCheckboxes = document.querySelectorAll('.status-filter-checkbox');
+
+    // Setup handlers for each filter type
+    setupFilterHandlers(categoryAll, categoryCheckboxes);
+    setupFilterHandlers(sizeAll, sizeCheckboxes);
+    setupFilterHandlers(statusAll, statusCheckboxes);
+});
+
+function setupFilterHandlers(allCheckbox, individualCheckboxes) {
+    if (allCheckbox && individualCheckboxes) {
+        allCheckbox.addEventListener('change', function() {
+            individualCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.disabled = this.checked;
+            });
+        });
+
+        individualCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const anyIndividualChecked = Array.from(individualCheckboxes).some(cb => cb.checked);
+                allCheckbox.checked = !anyIndividualChecked;
+            });
+        });
+    }
+}
+
+function applyFilters() {
+    const selectedCategories = [];
+    const selectedSizes = [];
+    const selectedStatuses = [];
+
+    if (!document.querySelector('.category-filter-checkbox-all').checked) {
+        document.querySelectorAll('.category-filter-checkbox:checked').forEach(checkbox => {
+            selectedCategories.push(checkbox.value);
+        });
+    }
+    
+    if (!document.querySelector('.size-filter-checkbox-all').checked) {
+        document.querySelectorAll('.size-filter-checkbox:checked').forEach(checkbox => {
+            selectedSizes.push(checkbox.value);
+        });
+    }
+    
+    if (!document.querySelector('.status-filter-checkbox-all').checked) {
+        document.querySelectorAll('.status-filter-checkbox:checked').forEach(checkbox => {
+            selectedStatuses.push(checkbox.value);
+        });
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete('categories');
+    url.searchParams.delete('sizes');
+    url.searchParams.delete('statuses');
+    
+    if (selectedCategories.length > 0) {
+        url.searchParams.append('categories', selectedCategories.join(','));
+    }
+    
+    if (selectedSizes.length > 0) {
+        url.searchParams.append('sizes', selectedSizes.join(','));
+    }
+    
+    if (selectedStatuses.length > 0) {
+        url.searchParams.append('statuses', selectedStatuses.join(','));
+    }
+    
+    window.location.href = url.toString();
+}
+</script>
+
+<!-- Filter Modal -->
+<div id="filterModal" class="modal">
+    <div class="modal-content filter-modal">
+        <h2>Filter Booths</h2>
+        
+        <div class="filter-sections-container">
+            <!-- Booth Category Filter -->
+            <div class="filter-section">
+                <h3>Booth Category</h3>
+                <div class="filter-options">
+                    <div class="filter-option">
+                        <input type="checkbox" id="category_all" class="category-filter-checkbox-all" checked>
+                        <label for="category_all">All Categories</label>
+                    </div>
+                    <div class="filter-divider"></div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="category_standard" value="Standard" class="category-filter-checkbox">
+                        <label for="category_standard">Standard</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="category_highclass" value="High Class" class="category-filter-checkbox">
+                        <label for="category_highclass">High Class</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="category_supreme" value="Supreme" class="category-filter-checkbox">
+                        <label for="category_supreme">Supreme</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booth Size Filter -->
+            <div class="filter-section">
+                <h3>Booth Size</h3>
+                <div class="filter-options">
+                    <div class="filter-option">
+                        <input type="checkbox" id="size_all" class="size-filter-checkbox-all" checked>
+                        <label for="size_all">All Sizes</label>
+                    </div>
+                    <div class="filter-divider"></div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="size_3x3" value="3x3" class="size-filter-checkbox">
+                        <label for="size_3x3">3x3 meters</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="size_5x5" value="5x5" class="size-filter-checkbox">
+                        <label for="size_5x5">5x5 meters</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="size_8x8" value="8x8" class="size-filter-checkbox">
+                        <label for="size_8x8">8x8 meters</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="filter-section">
+                <h3>Status</h3>
+                <div class="filter-options">
+                    <div class="filter-option">
+                        <input type="checkbox" id="status_all" class="status-filter-checkbox-all" checked>
+                        <label for="status_all">All Statuses</label>
+                    </div>
+                    <div class="filter-divider"></div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="status_active" value="Active" class="status-filter-checkbox">
+                        <label for="status_active">Active</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="status_inactive" value="Inactive" class="status-filter-checkbox">
+                        <label for="status_inactive">Inactive</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="button" class="cancel-btn" onclick="closeFilterModal()">Cancel</button>
+            <button type="button" class="apply-btn" onclick="applyFilters()">Apply</button>
+        </div>
+    </div>
+</div>
+</html>

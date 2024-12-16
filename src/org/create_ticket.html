@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Create Ticket</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ticket_manage.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo">
+                <span>TicketPro</span>
+            </div>
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="{{ url_for('event_management') }}"><i class="fas fa-calendar-alt"></i> Events</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('order_management') }}"><i class="fas fa-chart-line"></i> Orders & Sales</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('participant_management') }}"><i class="fas fa-users"></i> Participants</a>
+                </li>
+                <li class="active">
+                    <a href="{{ url_for('ticket_management') }}"><i class="fas fa-ticket-alt"></i> Tickets</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('smart_contract_management') }}"><i class="fas fa-file-contract"></i> Smart Contracts</a>
+                </li>
+            </ul>
+            <button class="new-event-btn">+ New Event</button>
+        </nav>
+
+        <div id="content">
+            <header>
+                <div class="header-left">
+                    <a href="{{ url_for('ticket_management') }}" class="back-button"><i class="fas fa-arrow-left"></i> Back</a>
+                    <h2>Create Ticket</h2>
+                </div>
+                <div class="user-info">
+                    <div class="dropdown">
+                        <button class="dropbtn">
+                            <span>{{ session['organiser_name'] }}</span>
+                            <img src="{{ url_for('static', filename='image/user-avatar.png') }}" alt="User Avatar" class="user-avatar">
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#"><i class="fas fa-user"></i> Profile</a>
+                            <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <div class="admin-container">
+                    <div class="admin-header">
+                        <h2>New Ticket</h2>
+                    </div>
+                    <form class="ticket-form" action="{{ url_for('create_ticket') }}" method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="event-id">Event</label>
+                            <select id="event-id" name="event-id" required>
+                                {% for event in events %}
+                                <option value="{{ event.EventID }}">{{ event.EventTitle }} - {{ event.EventStartDate }} - {{ event.EventVenue }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticket-type">Ticket Type</label>
+                            <input type="text" id="ticket-type" name="ticket-type" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticket-price">Ticket Price (ETH)</label>
+                            <input type="number" id="ticket-price" name="ticket-price" min="0" step="0.001" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticket-quantity">Quantity Available</label>
+                            <input type="number" id="ticket-quantity" name="ticket-quantity" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ticket-description">Description</label>
+                            <textarea id="ticket-description" name="ticket-description" rows="4"></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="create-ticket-btn" onclick="this.disabled=true; this.form.submit();">Create Ticket</button>
+                            <button type="button" class="cancel-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script>
+    document.querySelector('.ticket-form').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const ticketData = {
+            eventId: document.getElementById('event-id').value,
+            ticketType: document.getElementById('ticket-type').value,
+            ticketPrice: document.getElementById('ticket-price').value,
+            ticketQuantity: document.getElementById('ticket-quantity').value,
+            description: document.getElementById('ticket-description').value
+        };
+
+        // Generate a unique identifier for each ticket
+        const ticketId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+        ticketData.ticketId = ticketId;
+
+        // Generate QR code
+        const qrCodeData = JSON.stringify({
+            ticketId: ticketId,
+            eventId: ticketData.eventId,
+            ticketType: ticketData.ticketType,
+            ticketPrice: ticketData.ticketPrice
+        });
+
+        // Create a temporary div to hold the QR code
+        const qrCodeDiv = document.createElement('div');
+        new QRCode(qrCodeDiv, {
+            text: qrCodeData,
+            width: 128,
+            height: 128
+        });
+
+        // Convert QR code to base64 image and store it
+        setTimeout(() => {
+            const qrCodeImage = qrCodeDiv.querySelector('img');
+            ticketData.qrCodeBase64 = qrCodeImage.src;
+            localStorage.setItem('pendingTicket', JSON.stringify(ticketData));
+            // Allow the form to submit normally
+            this.submit();
+        }, 100); // Small delay to ensure QR code is generated
+    });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ViewParticipant.css') }}"> <!-- Same CSS as for Event -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Event Planning Dashboard - Participants</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  
+                        <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                        Event
+                    
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Participant</h2>
+            </div>
+            
+            <div class="tableList">
+                
+
+                <div class="search-bar">
+                    <button type="button" class="refresh-btn" onclick="refreshTable()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <form id="search-form" action="{{ url_for('participant.search_participants') }}" method="GET">
+                        <input type="text" name="query" placeholder="Search by participant name">
+                        <button type="submit">Search</button>
+                    </form>
+                    <button type="button" class="filter-btn" onclick="openFilterModal()">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+                <div class="search-delete-bar">
+                    <div class="action-bar">
+                        <button class="delete-btn" onclick="deleteSelectedParticipants()">Delete</button>
+                        <button class="file-upload-btn" onclick="openUploadDialog()">File Upload</button>
+                        <button class="communicate-btn" onclick="openEmailCommunication()">Contact</button>
+                    </div>
+                    
+                    <a class="add-event-btn" href="{{ url_for('participant.add_participant') }}">Add Participant ➕</a>
+                </div>
+                
+
+
+                {% if error %}
+                <div class="alert alert-danger">{{ error|safe }}</div>
+                {% endif %}
+                {% if success %}
+                <div class="alert alert-success">{{ success }}</div>
+                {% endif %}
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all-participants" onclick="toggleAllParticipants()"></th>
+                            <th class="sortable" data-sort="index">No. <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="participantId">Participant ID <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="userId">User ID <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="name">Name <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="email">Email <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="contact">Contact No <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="date">Registration Date <span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="event">Event Participated <span class="sort-icon"></span></th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for participant in participants %}
+                        <tr>
+                            <td><input type="checkbox" class="participant-checkbox" value="{{ participant.ParticipantID }}" data-email="{{ participant.ParticipantEmail }}"></td>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ participant.ParticipantID }}</td>
+                            <td>{{ participant.UserID }}</td>
+                            <td>{{ participant.ParticipantName }}</td>
+                            <td>{{ participant.ParticipantEmail }}</td>
+                            <td>{{ participant.ParticipantContactInfo }}</td>
+                            <td>{{ participant.RegistrationDate.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>{{ participant.EventTitle }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="action-btn modify-btn">
+                                        <a href="{{ url_for('participant.edit_participant', participant_id=participant.ParticipantID) }}" class="btn">
+                                            <i class="fas fa-edit"></i> Modify
+                                        </a>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <!-- Add pagination controls -->
+                <div class="pagination">
+                    <a href="{{ url_for(request.endpoint, page=current_page-1, query=request.args.get('query'), events=request.args.get('events')) }}" 
+                       class="pagination-btn {% if current_page == 1 %}disabled{% endif %}">Previous</a>
+                    
+                    <span class="pagination-info">
+                        Page <span class="current-page">{{ current_page }}</span> of {{ total_pages }}
+                    </span>
+                    
+                    <a href="{{ url_for(request.endpoint, page=current_page+1, query=request.args.get('query'), events=request.args.get('events')) }}" 
+                       class="pagination-btn {% if current_page == total_pages %}disabled{% endif %}">Next</a>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Add Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUploadDialog()">&times;</span>
+            <h2>Upload Participant Details File</h2>
+            <form action="{{ url_for('participant.upload_participant_file') }}" method="POST" enctype="multipart/form-data" class="upload-form">
+                <label for="file-upload" class="file-upload-label">
+                    <input type="file" id="file-upload" name="file" required onchange="displayFileName()" />
+                    <span>Select a File</span>
+                </label>
+                <span id="file-name" class="file-name"></span>
+                
+                <hr class="separator">
+                <div class="button-group">
+                    <button type="submit" class="upload-btn" id="upload-btn" disabled>Upload</button>
+                    <a href="{{ url_for('participant.download_participant_template') }}" class="download-link" download>
+                        Download Participant Template
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="filterModal" class="modal">
+        <div class="modal-content filter-modal">
+            <h2>Filter Participants</h2>
+            <div class="filter-section">
+                
+                <div class="filter-options">
+                    <h3>Event</h3>
+                    <div class="filter-option">
+                        <input type="checkbox" id="event_all" class="event-filter-checkbox-all" 
+                               {% if not selected_events %}checked{% endif %}>
+                        <label for="event_all">All Events</label>
+                    </div>
+                    <div class="filter-divider"></div>
+                    {% for event in events %}
+                    <div class="filter-option">
+                        <input type="checkbox" id="event_{{ event.EventID }}" value="{{ event.EventID }}" 
+                               class="event-filter-checkbox" {% if event.EventID in selected_events %}checked{% endif %}>
+                        <label for="event_{{ event.EventID }}">{{ event.EventTitle }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button type="button" class="cancel-btn" onclick="closeFilterModal()">Cancel</button>
+                <button type="button" class="apply-btn" onclick="applyFilters()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Select/Deselect all participant checkboxes
+        document.getElementById('select-all-participants').addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.participant-checkbox');
+            for (let checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
+
+        // Open email communication page and pass selected participants' emails
+        function openEmailCommunication() {
+            let selectedParticipants = [];
+            document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
+                selectedParticipants.push(checkbox.getAttribute('data-email'));
+            });
+
+            if (selectedParticipants.length === 0) {
+                alert('Please select at least one participant email to communicate');
+                return;
+            }
+
+            // Pass selected emails as a single 'emails' query parameter
+            let emailUrl = '/email_communication?emails=' + encodeURIComponent(selectedParticipants.join(','));
+            window.location.href = emailUrl;
+        }
+
+        window.localStorage.setItem('previousPage', document.referrer);
+
+        // Add these new functions for the upload modal
+        function openUploadDialog() {
+            document.getElementById("uploadModal").style.display = "flex";
+        }
+
+        function closeUploadDialog() {
+            document.getElementById("uploadModal").style.display = "none";
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById("uploadModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        function displayFileName() {
+            const fileInput = document.getElementById("file-upload");
+            const fileNameDisplay = document.getElementById("file-name");
+            const uploadBtn = document.getElementById("upload-btn");
+
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = fileInput.files[0].name;
+                uploadBtn.disabled = false;
+                uploadBtn.style.backgroundColor = '#4CAF50';
+                uploadBtn.style.color = '#ffffff';
+            } else {
+                fileNameDisplay.textContent = "";
+                uploadBtn.disabled = true;
+                uploadBtn.style.backgroundColor = '#D3D3D3';
+                uploadBtn.style.color = '#000000';
+            }
+        }
+
+        // Add new delete function
+        function deleteSelectedParticipants() {
+            const selectedParticipants = [];
+            document.querySelectorAll('.participant-checkbox:checked').forEach(checkbox => {
+                selectedParticipants.push(checkbox.value);
+            });
+
+            if (selectedParticipants.length === 0) {
+                alert('Please select at least one participant to delete');
+                return;
+            }
+
+            if (confirm('Are you sure you want to delete the selected participant(s)?')) {
+                fetch('/delete_participants', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        participant_ids: selectedParticipants
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Error deleting participants');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting participants');
+                });
+            }
+        }
+
+        function toggleAllParticipants() {
+            const selectAllCheckbox = document.getElementById('select-all-participants');
+            const participantCheckboxes = document.querySelectorAll('.participant-checkbox');
+            
+            participantCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        function refreshTable() {
+            window.location.href = "{{ url_for('participant.view_participants') }}";
+        }
+
+        let currentSort = {
+            column: null,
+            direction: 'asc'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const sortType = th.dataset.sort;
+                    
+                    // Remove all sorting classes first
+                    document.querySelectorAll('th.sortable').forEach(header => {
+                        header.classList.remove('asc', 'desc');
+                    });
+                    
+                    // Toggle sort direction if clicking the same column
+                    if (currentSort.column === sortType) {
+                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSort.column = sortType;
+                        currentSort.direction = 'asc';
+                    }
+
+                    // Add appropriate class for current sort
+                    th.classList.add(currentSort.direction);
+                    
+                    sortTable(sortType, currentSort.direction);
+                });
+            });
+        });
+
+        function sortTable(sortType, direction) {
+            const tbody = document.querySelector('table tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            const sortedRows = rows.sort((a, b) => {
+                let aVal, bVal;
+
+                switch(sortType) {
+                    case 'index':
+                        aVal = parseInt(a.cells[1].textContent);
+                        bVal = parseInt(b.cells[1].textContent);
+                        break;
+                    case 'participantId':
+                        aVal = a.cells[2].textContent;
+                        bVal = b.cells[2].textContent;
+                        break;
+                    case 'userId':
+                        aVal = a.cells[3].textContent;
+                        bVal = b.cells[3].textContent;
+                        break;
+                    case 'name':
+                        aVal = a.cells[4].textContent.toLowerCase();
+                        bVal = b.cells[4].textContent.toLowerCase();
+                        break;
+                    case 'email':
+                        aVal = a.cells[5].textContent.toLowerCase();
+                        bVal = b.cells[5].textContent.toLowerCase();
+                        break;
+                    case 'contact':
+                        aVal = a.cells[6].textContent.replace(/[^\d]/g, '');
+                        bVal = b.cells[6].textContent.replace(/[^\d]/g, '');
+                        break;
+                    case 'date':
+                        aVal = new Date(a.cells[7].textContent);
+                        bVal = new Date(b.cells[7].textContent);
+                        break;
+                    case 'event':
+                        aVal = a.cells[8].textContent.toLowerCase();
+                        bVal = b.cells[8].textContent.toLowerCase();
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (direction === 'asc') {
+                    return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                } else {
+                    return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+                }
+            });
+
+            // Clear and re-append sorted rows
+            while (tbody.firstChild) {
+                tbody.removeChild(tbody.firstChild);
+            }
+            sortedRows.forEach(row => tbody.appendChild(row));
+        }
+
+        function openFilterModal() {
+            document.getElementById("filterModal").style.display = "flex";
+        }
+
+        function closeFilterModal() {
+            document.getElementById("filterModal").style.display = "none";
+        }
+
+        function applyFilters() {
+            const allCheckbox = document.querySelector('.event-filter-checkbox-all');
+            const selectedEvents = [];
+            
+            if (!allCheckbox.checked) {
+                // Only collect selected events if "All" is not checked
+                document.querySelectorAll('.event-filter-checkbox:checked').forEach(checkbox => {
+                    selectedEvents.push(checkbox.value);
+                });
+            }
+            
+            // Create URL with selected event IDs
+            const url = new URL(window.location.href);
+            url.searchParams.delete('events');
+            if (selectedEvents.length > 0) {
+                url.searchParams.append('events', selectedEvents.join(','));
+            }
+            
+            window.location.href = url.toString();
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const filterModal = document.getElementById("filterModal");
+            const uploadModal = document.getElementById("uploadModal");
+            if (event.target == filterModal) {
+                filterModal.style.display = "none";
+            }
+            if (event.target == uploadModal) {
+                uploadModal.style.display = "none";
+            }
+        }
+
+        // Add these functions to your existing script section
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle "All" checkbox
+            const allCheckbox = document.querySelector('.event-filter-checkbox-all');
+            const eventCheckboxes = document.querySelectorAll('.event-filter-checkbox');
+            
+            if (allCheckbox) {
+                allCheckbox.addEventListener('change', function() {
+                    eventCheckboxes.forEach(checkbox => {
+                        checkbox.checked = false;
+                        checkbox.disabled = this.checked;
+                    });
+                });
+            }
+
+            // Handle individual event checkboxes
+            eventCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        allCheckbox.checked = false;
+                    }
+                    // Check if any individual event is checked
+                    const anyChecked = Array.from(eventCheckboxes).some(cb => cb.checked);
+                    if (!anyChecked) {
+                        allCheckbox.checked = true;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

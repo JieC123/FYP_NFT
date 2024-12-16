@@ -1,0 +1,697 @@
+/* Base Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #0a0e1a;
+    color: white;
+    overflow-y: overlay;
+}
+
+/* Header Styles */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #0a0e1a;
+    border-bottom: 1px solid #1e2130;
+}
+
+.logo img {
+    height: 40px;
+}
+
+.nav-group {
+    display: flex;
+    align-items: center;
+}
+
+nav ul {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    margin-right: 1.5rem;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: white;
+    font-weight: 550;
+    transition: color 0.3s ease;
+    position: relative;
+    padding-bottom: 5px;
+}
+
+nav ul li a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00c3ff, #b700ff, #ff008c);
+    transition: width 0.3s ease;
+}
+
+nav ul li a:hover::after, nav ul li a.active::after {
+    width: 100%;
+}
+
+main {
+    display: flex;
+    padding: 2rem;
+    gap: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Filter Styles - Matched with eventlist */
+.filters {
+    width: 300px;
+    background: linear-gradient(145deg, rgba(26, 31, 53, 0.9), rgba(10, 14, 26, 0.9));
+    padding: 1.5rem;
+    border-radius: 15px;
+    height: fit-content;
+    position: sticky;
+    top: 6rem;
+    border: 1px solid rgba(0, 168, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.filters h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #00c3ff, #b700ff, #ff008c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(0, 195, 255, 0.5);
+}
+
+.filter-section {
+    margin-bottom: 1.5rem;
+}
+
+.filter-section h3 {
+    color: #00a8ff;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 10px rgba(0, 168, 255, 0.3);
+}
+
+.price-inputs,
+.date-inputs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-section input {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(13, 25, 42, 0.5);
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.filter-section input:focus {
+    outline: none;
+    border-color: #00a8ff;
+    box-shadow: 0 0 15px rgba(0, 168, 255, 0.3);
+}
+
+.filter-section input::placeholder {
+    color: #6c7293;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.apply-btn,
+.reset-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.apply-btn, .buy-btn {
+    background: linear-gradient(135deg, #00c3ff, #b700ff);
+    color: white;
+    border: none;
+    box-shadow: 0 0 20px rgba(0, 195, 255, 0.3);
+}
+
+.apply-btn:hover, .buy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(0, 195, 255, 0.5);
+}
+
+.reset-btn {
+    background-color: transparent;
+    border: 1px solid #3a3f55;
+    color: #a0a0a0;
+}
+
+.reset-btn:hover {
+    background-color: #2a2f45;
+    color: #ffffff;
+}
+
+
+/* Search Bar Container */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+/* Search Bar Styles */
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(145deg, rgba(26, 31, 53, 0.9), rgba(10, 14, 26, 0.9));
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-radius: 15px;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.search-bar input {
+    flex-grow: 1;
+    padding: 1rem;
+    background: transparent;
+    border: none;
+    color: white;
+    font-family: 'Courier New', monospace;
+}
+
+.search-bar input:focus {
+    outline: none;
+}
+
+.search-bar button {
+    background: linear-gradient(135deg, #00c3ff, #b700ff);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.search-bar button:hover {
+    background: linear-gradient(135deg, #b700ff, #00c3ff);
+    box-shadow: 0 0 20px rgba(0, 195, 255, 0.4);
+}
+/* Info Button Styles */
+.info-button {
+    background: rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.info-button i {
+    color: #00a8ff;
+    font-size: 20px;
+}
+
+.info-button:hover {
+    background: rgba(0, 168, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* Marketplace content area */
+.marketplace-listings {
+    flex-grow: 1;
+    max-width: 1400px;
+    position: relative;
+    width: 100%;
+}
+
+/* Rest of your marketplace-specific styles... */
+
+/* Listings Grid */
+.listings-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
+    margin-top: 1rem;
+}
+
+.listing-card {
+    background-color: #1e2130;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.listing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 168, 255, 0.2);
+}
+
+.listing-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+
+.listing-details {
+    padding: 1rem;
+}
+
+.listing-details h3 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+    color: #ffffff;
+}
+
+.price-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.resale-price {
+    color: #00a8ff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.original-price {
+    color: #6c7293;
+    text-decoration: line-through;
+    font-size: 0.75rem;
+    margin: 0;
+}
+
+.event-date,
+.event-venue {
+    color: #a0a0a0;
+    font-size: 0.8rem;
+    margin: 0.25rem 0;
+}
+
+.event-date i,
+.event-venue i {
+    margin-right: 0.5rem;
+    color: #00a8ff;
+}
+
+.seller-info {
+    display: flex;
+    align-items: center;
+    margin: 0.5rem 0;
+    padding: 0.4rem 0;
+    border-top: 1px solid #2a2f45;
+    border-bottom: 1px solid #2a2f45;
+    font-size: 0.85rem;
+}
+
+.seller-info i {
+    color: #00a8ff;
+    margin-right: 0.5rem;
+}
+
+.seller-rating {
+    margin-left: auto;
+    color: #ffd700;
+}
+
+.buy-btn {
+    width: 100%;
+    padding: 0.6rem;
+    background-color: #00a8ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.buy-btn:hover {
+    background-color: #0090e0;
+}
+
+/* Empty State */
+.no-listings {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    background-color: #1e2130;
+    border-radius: 10px;
+}
+
+.no-listings i {
+    font-size: 3rem;
+    color: #00a8ff;
+    margin-bottom: 1rem;
+}
+
+.no-listings p {
+    color: #a0a0a0;
+    margin-bottom: 1.5rem;
+}
+
+.browse-events-btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    background-color: transparent;
+    color: #00a8ff;
+    border: 2px solid #00a8ff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.browse-events-btn:hover {
+    background-color: rgba(0, 168, 255, 0.1);
+    border-color: #0090e0;
+    color: #0090e0;
+}
+
+/* Notice Section Styles */
+.marketplace-notice {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: calc(100% + 10px); /* Position below the info button */
+    right: 0;
+    background: linear-gradient(145deg, rgba(13, 17, 28, 0.98), rgba(19, 23, 34, 0.98));
+    border: 1px solid rgba(0, 168, 255, 0.15);
+    border-radius: 16px;
+    padding: 25px;
+    width: 450px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.marketplace-notice.show {
+    display: block;
+}
+
+/* Arrow pointer for the popup */
+.marketplace-notice::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 16px; /* Align with info button */
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(145deg, rgba(13, 17, 28, 0.98), rgba(19, 23, 34, 0.98));
+    transform: rotate(45deg);
+    border-left: 1px solid rgba(0, 168, 255, 0.15);
+    border-top: 1px solid rgba(0, 168, 255, 0.15);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notice-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 168, 255, 0.1);
+}
+
+.notice-header i {
+    color: #00a8ff;
+    font-size: 24px;
+}
+
+.notice-header h2 {
+    color: #fff;
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.notice-content {
+    color: #8b95a5;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.notice-description {
+    margin-bottom: 20px;
+    color: #a0a0a0;
+}
+
+.notice-points {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.notice-points li {
+    padding-left: 20px;
+    position: relative;
+    color: #8b95a5;
+    line-height: 1.5;
+}
+
+.notice-points li::before {
+    content: "•";
+    color: #00a8ff;
+    position: absolute;
+    left: 0;
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.resell-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 168, 255, 0.1);
+}
+
+.resell-section p {
+    color: #a0a0a0;
+    margin-bottom: 12px;
+}
+
+.resell-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #00a8ff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.resell-cta:hover {
+    color: #0090e0;
+    transform: translateX(5px);
+}
+
+.resell-cta i {
+    font-size: 0.9em;
+}
+
+/* @keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+} */
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: transparent;
+    color: white;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.dropbtn span {
+    margin-right: 12px;
+    font-weight: 550;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.fa-caret-down {
+    margin-left: 5px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #2a2f45;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 5px;
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 12px 20px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    font-weight: 550;
+}
+
+.dropdown-content a i {
+    margin-right: 10px;
+}
+
+.dropdown-content a:hover {
+    background-color: #3a3f55;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover a:hover {
+        color: #00a8ff;
+}
+
+.user-info span {
+    margin-right: 10px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(26, 31, 53, 0.9);
+    border-radius: 5px;
+    margin: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #00c3ff, #b700ff);
+    border-radius: 5px;
+    border: 2px solid rgba(26, 31, 53, 0.9);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #b700ff, #00c3ff);
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #00c3ff rgba(26, 31, 53, 0.9);
+}
+
+/* Main content scrolling */
+body {
+    overflow-y: overlay;
+    background-clip: padding-box;
+}
+
+/* Remove any potential border artifacts */
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+.user-title {
+    position: relative;
+    display: inline-block; /* Important for gradient text */
+    background-image: linear-gradient(135deg, #00c3ff, #b700ff, #ff008c);
+    -webkit-background-clip: text;
+    -moz-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    /* Remove text-shadow as it can interfere with the gradient */
+    /* Add a filter for glow effect instead */
+    filter: drop-shadow(0 0 10px rgba(0, 195, 255, 0.3));
+}
+
+/* Optional: Add animation to make gradient move */
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.user-title {
+    /* Add these properties to the existing class */
+    background-size: 200% auto;
+    animation: gradient 3s linear infinite;
+}

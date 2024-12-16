@@ -1,0 +1,496 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    background-color:#e8dddc;
+}
+.container {
+    display: flex;
+    height: 100%;
+}
+.sidebar {
+    width: 200px;
+    background-color: #2c3e50;
+    color: white;
+    padding: 6.5px 0;
+    position: fixed;
+    top: 73.5px;
+    bottom: 0;
+    z-index: 1000;
+}
+.sidebar-item {
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-bottom: 1px solid white;
+}
+.sidebar-item img {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+}
+.sidebar-item.active {
+    background-color: #16a085;
+}
+.sidebar-item:hover {
+    background-color: #16a085;
+}
+.sidebar-item a {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.sidebar-item a img {
+    margin-right: 10px;
+}
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    padding-left: 220px;
+    margin-top: 60px;
+    height: calc(100vh - 60px);
+    position: relative;
+}
+.header {
+    width: 98%;
+    background-color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+.header .logo {
+    height: 40px;
+    margin-right: 10px;
+}
+.header h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+    margin-left: 10px;
+    flex-grow: 1;
+}
+.user-actions {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #333;
+}
+.user-actions .icon {
+    margin-left: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #bdc3c7;
+}
+.pageTitle {
+    margin-top: 20px;
+    padding: 20px 0;
+}
+.pageTitle h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #333;
+    font-weight: bold;
+}
+.nav-btn {
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    border: 1px solid black;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+    margin: 0;
+    text-decoration: none;
+    color: black;
+}
+.nav-btn.active {
+    background-color: #D3D3D3;
+}
+.nav-btn:not(:last-child)::after {
+    content: none;
+}
+.nav-btn:hover {
+    background-color: #D3D3D3;
+}
+.header {
+    margin-bottom: 20px;
+}
+#map-container {
+    position: relative;
+    background-color: #ffffff;
+    height: auto;
+    margin: 20px;
+    padding: 20px;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.tableList {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px;
+    overflow: hidden;
+    margin-top: 30px;
+}
+#map {
+    height: 550px;
+    width: 100%;
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    max-height: calc(100vh - 25px);
+}
+.btn-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 999;
+}
+.btn-container button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin: 5px;
+}
+.btn-container button:hover {
+    background-color: #0056b3;
+}
+.select-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+}
+.event-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.event-label {
+    font-weight: bold;
+    white-space: nowrap;
+}
+#eventSelect {
+    width: 200px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+.color-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.color-label {
+    font-weight: bold;
+    white-space: nowrap;
+}
+.upload-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.select-btn, .save-map-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+.select-btn:hover, .save-map-btn:hover {
+    background-color: #2980b9;
+}
+#imageUpload {
+    padding: 8px;
+    font-size: 16px;
+    margin-left: 15px;
+}
+.save-map-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+.save-map-btn:hover {
+    background-color: #d35400;
+}
+.file-upload-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+}
+.file-upload-label {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+.file-upload-label:hover {
+    background-color: #45a049;
+}
+.file-upload-input {
+    display: none;
+}
+.booth-marker {
+    position: relative;
+    text-align: center;
+}
+.marker-label {
+    background-color: #3498db;
+    border-radius: 1px;
+    padding: 2px 5px;
+    font-size: 14px;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    margin-top: -8px;
+}
+
+/* Order Management specific styles */
+.search-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+}
+
+.orders-table th,
+.orders-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.orders-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 0.9em;
+}
+
+.status.completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.fa-eye {
+    color: #3498db;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.fa-eye:hover {
+    color: #2980b9;
+}
+
+/* Ticket Management specific styles */
+.create-ticket-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.create-ticket-btn:hover {
+    background-color: #2980b9;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 2px;
+}
+
+.action-btn.edit {
+    background-color: #3498db;
+}
+
+.action-btn.delete {
+    background-color: #e74c3c;
+}
+
+.action-btn:hover {
+    opacity: 0.8;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+/* Status styles */
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 0.9em;
+}
+
+.status.yes {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status.no {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Smart Contract Management specific styles */
+.contract-info {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.contract-info h3 {
+    margin: 0;
+    color: #333;
+}
+
+.minting-section {
+    margin-top: 20px;
+}
+
+.minting-section h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.mint-nft-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.mint-nft-btn:hover {
+    background-color: #2980b9;
+}
+
+.mint-nft-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.transfer-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.transferable-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.transfer-toggle label {
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+}
+
+#mintingResult {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+#mintingResult.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+#mintingResult.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+#qrCodesContainer {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.qr-code-item {
+    background: white;
+    margin: 15px 0;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    text-align: center;
+}
+

@@ -1,0 +1,144 @@
+body {
+    background-color: #0a0e1a;
+    color: #ffffff;
+}
+
+.admin-container {
+    display: flex;
+    gap: 2rem;
+}
+
+.ticket-form {
+    flex: 2;
+    background-color: #1e2130;
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-header h3 {
+    color: #00a8ff;
+    font-size: 1.2rem;
+}
+
+.collapse-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #3a3f55;
+    border-radius: 5px;
+    background-color: #2a2f45;
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #ffffff;
+}
+
+.checkbox-label input {
+    margin-right: 0.5rem;
+}
+
+.help-text {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+    margin-top: 0.5rem;
+}
+
+.ticket-preview {
+    flex: 1;
+    background-color: #1e2130;
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+.preview-image {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.preview-image img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.change-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.preview-details h4 {
+    font-size: 1rem;
+    color: #a0a0a0;
+    margin-bottom: 0.5rem;
+}
+
+.preview-details h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+.preview-info {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #a0a0a0;
+}
+
+.preview-info i {
+    margin-right: 0.5rem;
+}
+
+.create-btn {
+    background-color: #00a8ff;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}

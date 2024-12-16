@@ -1,0 +1,117 @@
+.event-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.event-table th, .event-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #3a3f55;
+}
+
+.event-table th {
+    background-color: #2a2f45;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+}
+
+.event-table tbody tr {
+    background-color: #2a2f45;
+    transition: background-color 0.3s ease;
+}
+
+.event-table tbody tr:hover {
+    background-color: #3a3f55;
+}
+
+.event-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Style for the create event button */
+.create-event-btn {
+    background-color: #00a8ff;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.create-event-btn:hover {
+    background-color: #0090e0;
+}
+
+/* Style for the status indicator */
+.status {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status.upcoming {
+    background-color: #4CAF50;
+    color: #ffffff;
+}
+
+.status.ongoing {
+    background-color: #FFC107;
+    color: #000000;
+}
+
+.status.completed {
+    background-color: #9E9E9E;
+    color: #ffffff;
+}
+
+.status.cancelled {
+    background-color: #F44336;
+    color: #ffffff;
+}
+
+/* Style for action buttons */
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.action-btn.edit {
+    color: #FFC107;
+}
+
+.action-btn.delete {
+    color: #F44336;
+}
+
+.action-btn:hover {
+    opacity: 0.8;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .event-table {
+        font-size: 0.9rem;
+    }
+
+    .event-table th, .event-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .create-event-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}

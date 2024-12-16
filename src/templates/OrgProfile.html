@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/OrgProfile.css') }}">
+    <title>Event Planning Dashboard - Profile</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                        <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                        <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Profile</h2>
+            </div>
+
+            <div class="profile-section">
+                <div class="personal-info">
+                    <h3>Personal Information</h3>
+                    <div class="info-item">
+                        <label for="uid">UID:</label>
+                        <input type="text" id="uid" value="{{ organiser.id }}" disabled>
+                    </div>
+                    <div class="info-item">
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" value="{{ organiser.name }}" disabled> <!-- Update to 'name' -->
+                    </div>
+                    <div class="info-item">
+                        <label for="email">Email Address:</label>
+                        <input type="email" id="email" value="{{ organiser.email }}" disabled> <!-- Update to 'email' -->
+                    </div>
+                    <div class="info-item">
+                        <label for="ic">IC No:</label>
+                        <input type="text" id="ic" value="{{ organiser.ic }}" disabled> <!-- Update to 'ic' -->
+                    </div>
+                    <div class="info-item">
+                        <label for="contact">Contact No:</label>
+                        <input type="text" id="contact" value="{{ organiser.contact_no }}" disabled> <!-- Update to 'contact_no' -->
+                    </div>
+                    <div class="organising-info">
+                        <h3>Organising Information</h3>
+                        <p>Created Events: <span>{{ organiser.event_history_count }}</span></p> <!-- Update to 'event_history_count' -->
+                    </div>
+                </div>
+
+                <div class="profile-image">
+                    <h3>Profile Image:</h3>
+                    <img src="{{ url_for('profile.profile_images', filename=organiser.profile_image.split('\\')[-1]) }}" alt="Profile Image">
+
+
+                    <p>Account Status: <span class="status-active">{{ organiser.account_status }}</span></p> <!-- Update to 'account_status' -->
+                    <a href="{{ url_for('profile.edit_profile') }}">
+                        <button class="modify-btn">Modify Profile</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

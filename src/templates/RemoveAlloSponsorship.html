@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/OrgAlloSponsorship.css') }}"> <!-- Same CSS as for Event -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Event Planning Dashboard - Remove Sponsorship Allocation</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events"> <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event   
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewSponsorship">
+                        <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Allocation Removal</h2>
+            </div>
+
+            <a href="/OrgViewSponsorship" class="nav-btn">Sponsorship</a>
+            <a href="{{ url_for('sponsorshipAllo.sponsorship_page') }}" class="nav-btn">Event Allocation</a>
+            <a href="{{ url_for('sponsorshipAllo.remove_allo_page') }}" class="nav-btn active">Remove Event Allocation</a>
+            
+            <div class="tableList">
+                <div class="select-section">
+                    <form method="post" action="{{ url_for('sponsorshipAllo.remove_allo_page') }}">
+                        <label for="eventSelect" class="event-label">Select an Event:</label>
+                        <select id="eventSelect" name="eventSelect" class="form-control" required>
+                            {% if events %}
+                                {% for event in events %}
+                                    <option value="{{ event['EventID'] }}" 
+                                            {% if selected_event_id == event['EventID'] %} selected {% endif %}>
+                                        {{ event['EventTitle'] }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option disabled>No events available</option>
+                            {% endif %}
+                        </select>
+                        <button type="submit" class="select-btn">Select</button>
+                    </form>
+                </div>
+
+                <div class="table-section">
+                    {% if event_details %}
+                    <h4>Event Duration:
+                    {{ event_details['EventStartDate'] }} - {{ event_details['EventEndDate'] }}</h4>
+                    
+                    {% endif %}
+                    <h3>Assigned Sponsorship:</h3>
+                    <form method="POST" action="{{ url_for('sponsorshipAllo.remove_allo_page') }}" id="removeSponsorshipForm">
+                        <table id="assignedTable" class="sponsorship-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" onclick="toggleAll(this)" /></th>
+                                    <th class="sortable" data-sort="number">No.<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="sponsorshipId">Sponsorship ID<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="name">Name<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="company">Company<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="packageDetails">Package Details<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="paymentSchedule">Payment Schedule<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="amount">Amount Contributed (RM)<span class="sort-icon"></span></th>
+                                    <th class="sortable" data-sort="assignedDate">Assigned Date<span class="sort-icon"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if assigned_sponsorships %}
+                                    {% for sponsorship in assigned_sponsorships %}
+                                    <tr>
+                                        <td><input type="checkbox" name="selected_sponsorships" value="{{ sponsorship['SponsorshipID'] }}" class="row-checkbox"></td>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ sponsorship['SponsorshipID'] }}</td>
+                                        <td>{{ sponsorship['SponsorshipName'] }}</td>
+                                        <td>{{ sponsorship['Company'] }}</td>
+                                        <td>{{ sponsorship['SponsorDetail'] }}</td>
+                                        <td>{{ sponsorship['PaymentSchedule'] }}</td>
+                                        <td>{{ '%0.2f' | format(sponsorship['AmountContributed']) }}</td>
+                                        <td>{{ sponsorship['DateAssigned'] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="9" style="text-align: center;">No assigned sponsorships found</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="confirm-btn" onclick="confirmRemove()">Remove</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    function toggleAll(source) {
+        const checkboxes = document.querySelectorAll(".row-checkbox");
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = source.checked;
+        });
+    }
+
+    function confirmRemove() {
+    const selectedSponsorships = document.querySelectorAll('input[name="selected_sponsorships"]:checked');
+    if (selectedSponsorships.length > 0) {
+        const confirmAction = confirm('Are you sure you want to remove the selected assigned sponsorship(s)?');
+        if (confirmAction) {
+            const sponsorshipIds = [];
+            selectedSponsorships.forEach(sponsorship => {
+                sponsorshipIds.push(sponsorship.value);
+            });
+
+            // Send an AJAX request to delete the selected sponsorships
+            const selectedEventId = document.getElementById('eventSelect').value;
+            const data = {
+                sponsorshipIds: sponsorshipIds,
+                eventId: selectedEventId
+            };
+
+            // Perform the AJAX request to delete the sponsorships
+            fetch('/remove_sponsorships', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Sponsorship(s) removed successfully.');
+
+                    // Remove the rows from the table
+                    selectedSponsorships.forEach(sponsorship => {
+                        const row = sponsorship.closest('tr');
+                        if (row) {
+                            row.remove();
+                        }
+                    });
+
+                    // Check if there are any rows left in the table
+                    const tableBody = document.querySelector('#assignedTable tbody');
+                    if (tableBody && tableBody.rows.length === 0) {
+                        // If no rows, show "No assigned sponsorships found" message
+                        const noSponsorshipRow = document.createElement('tr');
+                        const noSponsorshipMessage = document.createElement('td');
+                        noSponsorshipMessage.colSpan = 8;
+                        noSponsorshipMessage.style.textAlign = 'center';
+                        noSponsorshipMessage.innerText = 'No assigned sponsorships found';
+                        noSponsorshipRow.appendChild(noSponsorshipMessage);
+                        tableBody.appendChild(noSponsorshipRow);
+                    }
+                } else {
+                    alert('Failed to remove sponsorship(s).');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while trying to remove sponsorship(s).');
+            });
+        }
+    } else {
+        alert('Please select at least one sponsorship to remove.');
+    }
+}
+
+    // Add sorting functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const getCellValue = (tr, idx) => {
+            const cell = tr.children[idx];
+            let value = cell.textContent || cell.innerText;
+            
+            // For amount column (index 7)
+            if (idx === 7) {
+                return parseFloat(value.replace('RM', '').trim()) || 0;
+            }
+            
+            // For assigned date column (index 8)
+            if (idx === 8) {
+                // Parse date in YYYY-MM-DD format
+                const dateValue = value.trim();
+                if (dateValue) {
+                    return new Date(dateValue);
+                }
+                return new Date(0);
+            }
+            
+            return value;
+        };
+
+        const comparer = (idx, asc) => (a, b) => {
+            const v1 = getCellValue(asc ? a : b, idx);
+            const v2 = getCellValue(asc ? b : a, idx);
+            
+            // Handle different types of sorting
+            if (idx === 1) { // No. column
+                return parseInt(v1) - parseInt(v2);
+            } else if (idx === 7) { // Amount column
+                return v1 - v2;
+            } else if (idx === 8) { // Date column
+                // Handle date comparison
+                if (v1 instanceof Date && v2 instanceof Date) {
+                    return v1.getTime() - v2.getTime();
+                }
+                return 0;
+            } else { // Text columns
+                return v1.toString().localeCompare(v2);
+            }
+        };
+
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const table = th.closest('table');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const headerRow = th.parentElement;
+                const columnIndex = Array.from(headerRow.children).indexOf(th);
+                
+                // Remove asc/desc classes from all headers
+                headerRow.querySelectorAll('th').forEach(header => {
+                    if (header !== th) {
+                        header.classList.remove('asc', 'desc');
+                    }
+                });
+                
+                // Toggle sort direction
+                const isAsc = !th.classList.contains('asc');
+                th.classList.toggle('asc', isAsc);
+                th.classList.toggle('desc', !isAsc);
+                
+                // Sort rows
+                rows.sort(comparer(columnIndex, isAsc));
+                
+                // Reorder rows in the table
+                tbody.append(...rows);
+                
+                // Update the index numbers if not sorting
+            });
+        });
+    });
+
+</script>
+
+</html>

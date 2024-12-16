@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Order Detail</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ticket_manage.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo">
+                <span>TicketPro</span>
+            </div>
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="{{ url_for('event_management') }}"><i class="fas fa-calendar-alt"></i> Events</a>
+                </li>
+                <li class="active">
+                    <a href="{{ url_for('order_management') }}"><i class="fas fa-chart-line"></i> Orders & Sales</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('participant_management') }}"><i class="fas fa-users"></i> Participants</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('ticket_management') }}"><i class="fas fa-ticket-alt"></i> Tickets</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('smart_contract_management') }}"><i class="fas fa-file-contract"></i> Smart Contracts</a>
+                </li>
+            </ul>
+            <button class="new-event-btn">+ New Event</button>
+        </nav>
+
+        <div id="content">
+            <header>
+                <div class="header-left">
+                    <a href="{{ url_for('order_management') }}" class="back-button"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+                    <h2>Order Detail</h2>
+                </div>
+                <div class="user-info">
+                    <div class="dropdown">
+                        <button class="dropbtn">
+                            <span>{{ session['organiser_name'] }}</span>
+                            <img src="{{ url_for('static', filename='image/user-avatar.png') }}" alt="User Avatar" class="user-avatar">
+                            <i class="fas fa-caret-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <a href="#"><i class="fas fa-user"></i> Profile</a>
+                            <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <div class="admin-container order-detail">
+                    <div class="admin-header">
+                        <h2>Order #{{ transaction.TransactionID }}</h2>
+                        <div class="status {{ transaction.TransactionStatus | lower }}" style="color:#00a8ff;">{{ transaction.TransactionStatus }}</div>
+                    </div>
+                    <div class="order-details">
+                        <div class="detail-section">
+                            <h3>Customer Information</h3>
+                            <p><strong>Name:</strong> {{ transaction.UserName }}</p>
+                            <p><strong>Email:</strong> {{ transaction.UserEmail }}</p>
+                            <p><strong>Contact:</strong> {{ transaction.UserContactInfo }}</p>
+                        </div>
+                        <div class="detail-section">
+                            <h3>Order Information</h3>
+                            <p><strong>Order Date:</strong> {{ transaction.OrderDate.strftime('%d/%m/%Y %H:%M:%S') }}</p>
+                            <p><strong>Payment Method:</strong> {{ transaction.PaymentMethod }}</p>
+                            <p><strong>Total Amount:</strong> {{ transaction.TotalAmount }} ETH</p>
+                        </div>
+                    </div>
+                    <div class="detail-section full-width">
+                        <h3>Ticket Details</h3>
+                        <div class="table-responsive">
+                            <table class="ticket-detail-table">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Ticket Type</th>
+                                        <th>Token ID</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in transaction.Items %}
+                                    <tr>
+                                        <td>{{ item['EventTitle'] }}</td>
+                                        <td>{{ item['TicketType'] }}</td>
+                                        <td>{{ item['TokenID'] }}</td>
+                                        <td>{{ item['Quantity'] }}</td>
+                                        <td>{{ item['Price'] }} ETH</td>
+                                        <td>{{ item['Subtotal'] }} ETH</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="admin-actions">
+                        <button id="printOrderBtn" class="action-btn"><i class="fas fa-print"></i> Print Order</button>
+                        <button id="sendEmailBtn" class="action-btn"><i class="fas fa-envelope"></i> Send Email</button>
+                        <button id="cancelOrderBtn" class="action-btn"><i class="fas fa-ban"></i> Cancel Order</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/order_detail.js') }}"></script>
+</body>
+
+</html>

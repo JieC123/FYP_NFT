@@ -1,0 +1,319 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    background-color:#e8dddc;
+}
+.container {
+    display: flex;
+    height: 100%;
+}
+.sidebar {
+    width: 200px;
+    background-color: #2c3e50;
+    color: white;
+    padding: 20px 0;
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+}
+.sidebar-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-bottom: 1px solid white; /* Add white dividers */
+}
+.sidebar-item img {
+width: 16px;  /* Set this value to match the font size */
+height: 16px; /* Same as width to maintain aspect ratio */
+margin-right: 10px; /* Add space between the image and text */
+display: inline-block;
+vertical-align: middle; /* Align with the text */
+}
+
+.sidebar-item.active {
+    background-color: #16a085;
+}
+.sidebar-item:hover {
+    background-color: #16a085;
+}
+
+.sidebar-item a {
+text-decoration: none;
+color: inherit; /* Ensures the text remains white */
+display: flex;
+align-items: center; /* Aligns the icon and text horizontally */
+}
+
+.sidebar-item a img {
+margin-right: 10px; /* Space between icon and text */
+}
+
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+    padding-left: 220px;
+    /* background-color: #ecf0f1; */
+    height: calc(100% - 60px);
+    overflow: auto;
+}
+
+/* Header Styling */
+.header {
+    width: 98%; /* Set width to 100% */
+    background-color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.header .logo {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.header h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+    margin-left: 10px;
+    flex-grow: 1;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #333;
+}
+
+.user-actions .icon {
+    margin-left: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #bdc3c7;
+}
+
+.pageTitle {
+    margin-top: 80px;
+    padding: 20px 0;
+}
+
+.pageTitle h2 {
+    margin: 0;
+    font-size: 28px;
+    color: #333;
+    font-weight: bold;
+}
+
+
+
+.nav-btn {
+    padding: 10px 15px; /* Adjust padding for better alignment */
+    background-color: #f8f9fa;
+    border: 1px solid black; /* Add black border */
+    cursor: pointer; /* Pointer cursor */
+    transition: background-color 0.3s; /* Transition for hover effect */
+    display: inline-block; /* Allow button to only take up needed width */
+    margin: 0; /* Remove margin between buttons */
+    text-decoration: none;
+    color: black;
+}
+
+.nav-btn.active {
+    background-color: #D3D3D3;
+}
+
+/* Remove the separator line between buttons */
+.nav-btn:not(:last-child)::after {
+    content: none; /* Remove the separator line */
+}
+
+/* Hover effect */
+.nav-btn:hover {
+    background-color: #D3D3D3; /* Change to specified color on hover */
+}
+
+/* Ensure space between h1 and nav bar */
+.header {
+    margin-bottom: 20px; /* Add margin to create space */
+}
+
+.tableList {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    position: relative; 
+}
+
+.table-section {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.event-label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+#eventSelect {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+/* Table Styling */
+.booth-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.booth-table th, .booth-table td {
+    border: 1px solid #bdc3c7;
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.booth-table th {
+    background-color: #f2f2f2;
+    color: black;
+}
+
+.booth-table tbody tr:hover {
+    background-color: #f2f2f2;
+}
+
+.booth-table th:first-child, .booth-table td:first-child {
+    text-align: center;
+    width: 50px;
+}
+
+.booth-table input[type="checkbox"] {
+    transform: scale(1.2);
+    margin: 0 auto;
+    display: block;
+}
+
+
+.confirm-btn {
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.confirm-btn:hover {
+    background-color: #13856b;
+}
+
+.select-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.select-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+.select-btn:hover {
+    background-color: #0056b3;
+}
+
+
+.toggle-buttons {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.toggle-btn {
+    background-color:#3498db;
+    width: 200px;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.toggle-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Add these sorting styles */
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 25px;
+    background-color: #f2f2f2;
+    transition: background-color 0.3s;
+}
+
+th.sortable:hover {
+    background-color: #e8e8e8;
+}
+
+.sort-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+th.sortable.asc .sort-icon::after {
+    font-family: "Font Awesome 5 Free";
+    content: '\f0de'; /* fa-sort-up */
+    font-weight: 900;
+    color: #3498db;
+}
+
+th.sortable.desc .sort-icon::after {
+    font-family: "Font Awesome 5 Free";
+    content: '\f0dd'; /* fa-sort-down */
+    font-weight: 900;
+    color: #3498db;
+}
+
+th.sortable:not(.asc):not(.desc) .sort-icon::after {
+    font-family: "Font Awesome 5 Free";
+    content: '\f0dc'; /* fa-sort */
+    font-weight: 900;
+}

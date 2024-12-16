@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - TicketPro</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.3.6/dist/web3.min.js"></script>
+    <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro"></a>
+        </div>
+        <div class="nav-group">
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('eventlist') }}">Events</a></li>
+                    <li><a href="{{ url_for('marketplace') }}">Marketplace</a></li>
+                    <li><a href="{{ url_for('myticket') }}">MyTicket</a></li>
+                    <li><a href="{{ url_for('orders') }}">Orders</a></li>
+                </ul>
+            </nav>
+            {% if session['user_id'] %}
+            <div class="user-info">
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <span class="user-title" style="text-transform: capitalize; font-weight: 550;">{{ session['username'] }}</span>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <button class="login-btn">Login</button>
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        <!-- Progress Bar -->
+        <div class="cyber-progress-container">
+            <div class="progress-line"></div>
+            <div class="progress-steps">
+                <div class="step active">
+                    <div class="step-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <span>Connect Wallet</span>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <span>Verify Details</span>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <span>Confirm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer (updated display time) -->
+        <div class="cyber-timer">
+            <div class="timer-content">
+                <i class="fas fa-clock"></i>
+                <span>Reserved for:</span>
+                <div class="timer-display" id="timer"></div>
+            </div>
+        </div>
+
+        <div class="checkout-grid">
+            <!-- Left Panel -->
+            <div class="cyber-panel payment-panel">
+                <div class="panel-header">
+                    <i class="fas fa-shield-alt"></i>
+                    <h2>Secure Payment</h2>
+                </div>
+
+                <!-- Wallet Connection (keeping your existing functionality) -->
+                <div class="wallet-connector">
+                    <div class="metamask-status">
+
+                        <div id="walletSection">
+                            <div id="walletInfo" class="wallet-info" style="display: none;">
+                                <p data-label="Connected Address:">
+                                    <span id="userAddress"></span>
+                                </p>
+                                <p data-label="Balance:">
+                                    <span id="userBalance"></span>
+                                    <span class="eth-unit">ETH</span>
+                                </p>
+                            </div>
+                            <button id="connectWallet" class="cyber-button connect-wallet">
+                                <span class="button-content">
+                                    <i class="fab fa-ethereum"></i>
+                                    Connect Wallet <i class="fas fa-arrow-right"></i>
+                                </span>
+                                <div class="button-glitch"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Input -->
+                <div class="cyber-input-group">
+                    <div class="panel-header">
+                        <i class="fas fa-user-shield"></i>
+                        <h2>Contact Information</h2>
+                    </div>
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-at"></i>
+                        <input type="email" id="email" placeholder="Enter your email">
+                        <div class="input-glow"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="cyber-panel summary-panel">
+                <div class="panel-header">
+                    <i class="fas fa-ticket-alt"></i>
+                    <h2>Order Summary</h2>
+                </div>
+
+                <!-- Ticket List (keeping your dynamic content) -->
+                <div id="ticketsList" class="ticket-summary cyber-box" style="text-transform: capitalize;">
+                    <!-- Your dynamic tickets will be populated here -->
+                </div>
+
+                <!-- Price Breakdown (keeping your dynamic content) -->
+                <div class="price-breakdown cyber-box">
+                    <div id="ticketPrices" style="text-transform: capitalize;">
+                        <!-- Your dynamic ticket prices will be populated here -->
+                    </div>
+                    <div class="price-row total">
+                        <span style="color: white;">Total Amount</span>
+                        <span id="totalPrice" class="eth-amount"></span>
+                    </div>
+                </div>
+
+                <!-- Payment Button (keeping your existing functionality) -->
+                <button id="payButton" class="cyber-button confirm-purchase">
+                    <span class="button-content">
+                        Confirm Purchase
+                        <i class="fas fa-arrow-right"></i>
+                    </span>
+                    <div class="button-glitch"></div>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    {% include 'chatbot.html' %}
+
+    <!-- Add this script before your existing script -->
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Retrieve values from sessionStorage
+        const selectedTickets = JSON.parse(sessionStorage.getItem('selectedTickets') || '[]');
+        const eventTitle = sessionStorage.getItem('eventTitle') || 'Event';
+        const ticketType = sessionStorage.getItem('ticketType') || 'Ticket Type';
+         // Fixed platform fee in ETH
+        
+        // Calculate totals and display tickets
+        let subtotal = 0;
+        const ticketsList = document.getElementById('ticketsList');
+        const ticketPrices = document.getElementById('ticketPrices');
+        
+        // Display event title
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = eventTitle;
+        ticketsList.appendChild(titleElement);
+        
+        // Display each ticket type and calculate subtotal
+        selectedTickets.forEach(ticket => {
+            // Add ticket type and quantity to ticket info
+            const ticketInfo = document.createElement('div');
+            ticketInfo.className = 'ticket-item';
+            ticketInfo.innerHTML = `
+                <p>${ticket.ticketType}</p>
+                <span class="quantity">x${ticket.quantity}</span>
+            `;
+            ticketsList.appendChild(ticketInfo);
+            
+            // Add price breakdown
+            const ticketTotal = parseFloat(ticket.price) * parseInt(ticket.quantity);
+            subtotal += ticketTotal;
+            
+            const priceItem = document.createElement('div');
+            priceItem.className = 'price-item';
+            priceItem.innerHTML = `
+                <span>${ticket.ticketType}</span>
+                <span>${ticket.price} ETH × ${ticket.quantity}</span>
+            `;
+            ticketPrices.appendChild(priceItem);
+        });
+        
+        // Calculate and display total
+        const total = (subtotal).toFixed(4);
+        document.getElementById('totalPrice').textContent = total + ' ETH';
+        
+        // Store the final total for the payment function
+        sessionStorage.setItem('finalTotal', total);
+        
+        let currentReservationId = null;
+        let reservationCheckInterval = null;
+
+        async function reserveTickets(tickets) {
+            try {
+                const response = await fetch('/reserve_tickets', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tickets })
+                });
+                
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to reserve tickets');
+                }
+                
+                currentReservationId = data.reservationId;
+                startReservationCheck(data.reservationId);
+                return true;
+                
+            } catch (error) {
+                showAlert(error.message);
+                return false;
+            }
+        }
+
+        function startReservationCheck(reservationId) {
+            if (reservationCheckInterval) {
+                clearInterval(reservationCheckInterval);
+            }
+            
+            reservationCheckInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/check_reservation/${reservationId}`);
+                    const data = await response.json();
+                    
+                    if (data.status === 'EXPIRED') {
+                        clearInterval(reservationCheckInterval);
+                        showAlert('Your reservation has expired. Please try again.');
+                        window.location.href = '/eventlist';
+                    }
+                } catch (error) {
+                    console.error('Error checking reservation:', error);
+                }
+            }, 10000);
+        }
+
+        async function releaseReservation() {
+            if (currentReservationId) {
+                try {
+                    await fetch(`/release_reservation/${currentReservationId}`, {
+                        method: 'POST'
+                    });
+                } catch (error) {
+                    console.error('Error releasing reservation:', error);
+                }
+            }
+        }
+
+        async function makePayment() {
+            try {
+                const selectedTickets = JSON.parse(sessionStorage.getItem('selectedTickets') || '[]');
+                
+                for (const ticket of selectedTickets) {
+                    const ticketResponse = await fetch('/get_ticket_id', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            eventTitle: sessionStorage.getItem('eventTitle'),
+                            ticketType: ticket.ticketType
+                        })
+                    });
+                    const ticketData = await ticketResponse.json();
+                    
+                 
+                }
+                
+
+                const email = document.getElementById('email').value;
+                if (!email) {
+                    showAlert('Please fill in all required fields');
+                    return;
+                }
+
+                payButton.disabled = true;
+                payButton.innerHTML = 'Processing Payment...';
+
+                const response = await fetch('/get_contract_data');
+                const contractData = await response.json();
+                if (!contractData || !contractData.abi || !contractData.address) {
+                    throw new Error('Invalid contract data');
+                }
+
+                const { abi, address } = contractData;
+                const contract = new web3.eth.Contract(abi, address);
+
+                const orderId = 'ORD' + Date.now();
+                let totalOrderAmount = 0;
+                let transactionHash = '';
+                const orderItems = new Map();
+
+                for (const ticket of selectedTickets) {
+                    const ticketResponse = await fetch('/get_ticket_id', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            eventTitle: sessionStorage.getItem('eventTitle'),
+                            ticketType: ticket.ticketType
+                        })
+                    });
+                    const ticketData = await ticketResponse.json();
+                    if (ticketData.error) {
+                        throw new Error(`Failed to get ticket ID: ${ticketData.error}`);
+                    }
+
+                    const nftResponse = await fetch(`/check_and_get_nft/${ticketData.ticketId}`);
+                    const nftData = await nftResponse.json();
+                    
+                    if (nftData.error) {
+                        throw new Error(`Failed to get NFT for ticket type ${ticket.ticketType}: ${nftData.error}`);
+                    }
+
+                    const ticketDetails = await contract.methods.getTicketDetails(ticketData.ticketId).call();
+                    
+                    if (ticketDetails.isSold) {
+                        throw new Error(`Ticket type ${ticket.ticketType} is sold out`);
+                    }
+
+                    const amountInWei = web3.utils.toWei((ticket.price * ticket.quantity).toString(), 'ether');
+                    const gasEstimate = await contract.methods.buyTicket(ticketData.ticketId, ticket.quantity).estimateGas({
+                        from: userAccount,
+                        value: amountInWei
+                    });
+
+                    const gasLimit = Math.floor(gasEstimate * 1.1);
+
+                    const transaction = await contract.methods.buyTicket(ticketData.ticketId, ticket.quantity).send({
+                        from: userAccount,
+                        value: amountInWei,
+                        gas: gasLimit
+                    });
+
+                    transactionHash = transaction.transactionHash;
+
+                    const purchaseEvents = transaction.events.TicketPurchased;
+                    let tokenIds = [];
+
+                    if (Array.isArray(purchaseEvents)) {
+                        tokenIds = purchaseEvents.map(event => event.returnValues.tokenId);
+                    } else if (purchaseEvents) {
+                        tokenIds = [purchaseEvents.returnValues.tokenId];
+                    }
+
+                    if (orderItems.has(ticketData.ticketId)) {
+                        const existingItem = orderItems.get(ticketData.ticketId);
+                        existingItem.quantity += ticket.quantity;
+                        existingItem.tokenIds.push(...tokenIds);
+                    } else {
+                        orderItems.set(ticketData.ticketId, {
+                            orderId: orderId,
+                            ticketId: ticketData.ticketId,
+                            quantity: ticket.quantity,
+                            price: ticket.price,
+                            tokenIds: tokenIds
+                        });
+                    }
+
+                    totalOrderAmount += (ticket.price * ticket.quantity);
+                }
+
+                await recordOrder(orderId, totalOrderAmount, transactionHash);
+
+                for (const item of orderItems.values()) {
+                    await recordOrderItem(
+                        item.orderId,
+                        item.tokenIds.join(','),
+                        item.ticketId,
+                        item.price,
+                        parseInt(item.quantity)
+                    );
+
+                    await updateOwner(
+                        item.tokenIds,
+                        userAccount,
+                        parseInt(item.quantity),
+                        transactionHash
+                    );
+                }
+
+                if (currentReservationId) {
+                    await fetch(`/complete_reservation/${currentReservationId}`, {
+                        method: 'POST'
+                    });
+                }
+
+                showAlert('All tickets purchased successfully!', 'success');
+                sessionStorage.clear();
+                window.location.href = '/myticket';
+
+            } catch (error) {
+                console.error('Original error:', error);
+                const userMessage = parseBlockchainError(error);
+                showAlert(userMessage);
+                
+                payButton.disabled = false;
+                payButton.innerHTML = 'Confirm Purchase';
+            }
+        }
+
+        window.makePayment = makePayment;
+
+        // Add a flag to track payment processing
+        let isPaymentProcessing = false;
+
+        // Update the payment confirmation handler
+        payButton.addEventListener('click', () => {
+            if (!userAccount) {
+                showAlert('Please connect your wallet first to proceed with the purchase');
+                walletSection.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+            
+            const total = sessionStorage.getItem('finalTotal');
+            if (confirm(`Confirm payment of ${total} ETH?`)) {
+                isPaymentProcessing = true; // Set flag when payment starts
+                makePayment().finally(() => {
+                    isPaymentProcessing = false; // Reset flag when payment completes
+                });
+            }
+        });
+
+        window.addEventListener('beforeunload', async (event) => {
+            if (currentReservationId && !isPaymentProcessing) {
+                await releaseReservation();
+            }
+        });
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 60) {
+                timerContainer.classList.add('warning');
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                handleExpiration();
+            }
+            timeLeft--;
+        }
+
+        // Add this new code for immediate reservation
+        async function initializeReservation() {
+            try {
+                console.log('Initializing reservation...');
+                const selectedTickets = JSON.parse(sessionStorage.getItem('selectedTickets') || '[]');
+                
+                if (selectedTickets.length === 0) {
+                    console.log('No tickets selected');
+                    window.location.href = '/eventlist';
+                    return;
+                }
+
+                // Prepare array of ticket reservations
+                const ticketReservations = [];
+                
+                // Process all selected tickets
+                for (const ticket of selectedTickets) {
+                    console.log('Processing ticket:', ticket);
+                    const ticketResponse = await fetch('/get_ticket_id', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            eventTitle: sessionStorage.getItem('eventTitle'),
+                            ticketType: ticket.ticketType
+                        })
+                    });
+                    
+                    if (!ticketResponse.ok) {
+                        throw new Error('Failed to get ticket ID');
+                    }
+                    
+                    const ticketData = await ticketResponse.json();
+                    console.log('Ticket data:', ticketData);
+                    
+                    ticketReservations.push({
+                        ticketId: ticketData.ticketId,
+                        quantity: ticket.quantity
+                    });
+                }
+
+                // Create reservations for all tickets at once
+                const reserved = await reserveTickets(ticketReservations);
+                if (!reserved) {
+                    console.log('Reservation failed');
+                    window.location.href = '/eventlist';
+                    return;
+                }
+                console.log('Reservation successful');
+                
+            } catch (error) {
+                console.error('Reservation error:', error);
+                showAlert('Failed to reserve tickets: ' + error.message);
+                window.location.href = '/eventlist';
+            }
+        }
+
+        // Call the initialization function only once
+        if (selectedTickets.length > 0) {
+            console.log('Starting reservation process...');
+            await initializeReservation();
+        } else {
+            console.log('No tickets selected');
+            window.location.href = '/eventlist';
+        }
+    });
+    </script>
+
+    <!-- Add this script at the bottom of the body -->
+    <script>
+        let web3;
+        let userAccount;
+        const payButton = document.getElementById('payButton');
+        const connectButton = document.getElementById('connectWallet');
+        const walletSection = document.getElementById('walletSection');
+        const walletInfo = document.getElementById('walletInfo');
+
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userAccount = accounts[0];
+                    web3 = new Web3(window.ethereum);
+                    
+                    // Update UI
+                    document.getElementById('userAddress').textContent = 
+                        userAccount.slice(0, 6) + '...' + userAccount.slice(-4);
+                    walletInfo.style.display = 'block';
+                    
+                    // Get and display balance
+                    const balance = await web3.eth.getBalance(userAccount);
+                    const ethBalance = web3.utils.fromWei(balance, 'ether');
+                    document.getElementById('userBalance').textContent = 
+                        parseFloat(ethBalance).toFixed(4);
+                    
+                    // Update button states
+                    connectButton.innerHTML = 'Connected';
+                    connectButton.disabled = true;
+                    payButton.innerHTML = 'Proceed with Payment';
+                    
+                    // Listen for account changes
+                    window.ethereum.on('accountsChanged', function (accounts) {
+                        window.location.reload();
+                    });
+                    
+                } catch (error) {
+                    console.error('Failed to connect wallet:', error);
+                    alert('Failed to connect to MetaMask: ' + error.message);
+                }
+            } else {
+                alert('Please install MetaMask to use this payment method');
+            }
+        }
+
+        connectButton.addEventListener('click', connectWallet);
+
+        // Handle chain changes
+        if (window.ethereum) {
+            window.ethereum.on('chainChanged', function(networkId){
+                window.location.reload();
+            });
+        }
+    </script>
+
+    <!-- Add this script before your existing scripts -->
+    <script>
+    // Add this script to make the timer dynamic
+    document.addEventListener('DOMContentLoaded', function() {
+        let timeLeft = 5 * 60; // 5 minutes in seconds
+        const timerDisplay = document.getElementById('timer');
+        const timerContainer = document.querySelector('.cyber-timer');
+        let countdown; // Define countdown in accessible scope
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 60) {
+                timerContainer.classList.add('warning');
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                handleExpiration();
+            }
+            timeLeft--;
+        }
+
+        // New function to handle expiration
+        async function handleExpiration() {
+            try {
+                if (currentReservationId && !isPaymentProcessing) { // Only release if not processing payment
+                    const response = await fetch(`/release_reservation/${currentReservationId}`, {
+                        method: 'POST'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to release reservation');
+                    }
+                    
+                    // Show alert and redirect only if not in payment process
+                    if (!isPaymentProcessing) {
+                        alert('Your reservation has expired! Redirecting to event list...');
+                        window.location.href = '/eventlist';
+                    }
+                }
+            } catch (error) {
+                console.error('Error handling expiration:', error);
+                if (!isPaymentProcessing) {
+                    alert('Session expired! Redirecting to event list...');
+                    window.location.href = '/eventlist';
+                }
+            }
+        }
+
+        // Initial display
+        updateTimer();
+        
+        // Start countdown
+        countdown = setInterval(updateTimer, 1000);
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (countdown) {
+                clearInterval(countdown);
+            }
+        });
+    });
+    </script>
+
+    <!-- Helper function to record order items -->
+    <script>
+    async function recordOrderItem(orderId, tokenId, ticketId, price, quantity) {
+        const response = await fetch('/insert_order_item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                orderId: orderId,
+                tokenId: tokenId,
+                ticketId: ticketId,
+                quantity: quantity,
+                price: price
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Failed to record order item: ${errorData.error}`);
+        }
+    }
+
+    // Helper function to record order and transaction
+    async function recordOrder(orderId, totalAmount, transactionHash) {
+        const response = await fetch('/insert_order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                orderId: orderId,
+                userId: sessionStorage.getItem('user_id'),
+                totalAmount: totalAmount,
+                transactionHash: transactionHash,
+                status: 'Completed',
+                eventId: sessionStorage.getItem('eventId')
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Failed to record order: ${errorData.error}`);
+        }
+    }
+
+    // Update the updateOwner function to handle multiple tokens
+    async function updateOwner(tokenIds, newOwner, quantity, transactionHash) {
+        try {
+            // Split tokenIds if it's a string
+            const tokens = Array.isArray(tokenIds) ? tokenIds : tokenIds.split(',');
+            
+            // Update each token individually
+            for (const tokenId of tokens) {
+                const response = await fetch('/update_owner', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        tokenId: tokenId.trim(), // Remove any whitespace
+                        newOwner: newOwner,
+                        quantity: 1, // Each token represents one ticket
+                        transactionHash: transactionHash
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Failed to update owner for token ${tokenId}: ${errorData.error}`);
+                }
+            }
+            return { success: true };
+        } catch (error) {
+            console.error('Error updating owners:', error);
+            throw error;
+        }
+    }
+    </script>
+
+    <!-- Add this helper function to handle contract error messages -->
+    <script>
+    function parseBlockchainError(error) {
+        // Check if it's a MetaMask error
+        if (error.code === 4001) {
+            return 'Transaction was cancelled';
+        }
+
+        // Extract message from various error formats
+        let message = '';
+        if (error.data && error.data.message) {
+            message = error.data.message;
+        } else if (error.message) {
+            message = error.message;
+        } else {
+            return 'An unknown error occurred';
+        }
+
+        // Convert message to lowercase for consistent matching
+        message = message.toLowerCase();
+
+        // Common contract error mappings
+        const errorMappings = {
+            'owner cannot buy': 'You cannot buy your own ticket',
+            'not listed for resale': 'This ticket is not available for purchase',
+            'insufficient payment': 'You have insufficient funds for this purchase',
+            'ticket already used': 'This ticket has already been used',
+            'not enough tickets available': 'This ticket is no longer available',
+            'invalid price': 'Invalid ticket price',
+            'sold out': 'This ticket is sold out',
+            'not token owner': 'You do not own this ticket',
+            'price exceeds original': 'Resale price cannot exceed original price',
+            'already listed': 'This ticket is already listed for sale'
+        };
+
+        // Check for known error messages
+        for (const [key, value] of Object.entries(errorMappings)) {
+            if (message.includes(key)) {
+                return value;
+            }
+        }
+
+        // Handle network/gas errors
+        if (message.includes('network') || message.includes('connection')) {
+            return 'Network error. Please check your connection and try again';
+        }
+        if (message.includes('gas')) {
+            return 'Transaction failed due to gas estimation. Please try again';
+        }
+
+        // Return original message if no mapping found
+        return message;
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - User Profile</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+        
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro"></a>
+        </div>
+        <div class="nav-group">
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('eventlist') }}">Events</a></li>
+                    <li><a href="{{ url_for('marketplace') }}">Marketplace</a></li>
+                    <li><a href="{{ url_for('myticket') }}">MyTicket</a></li>
+                    <li><a href="{{ url_for('orders') }}">Orders</a></li>
+                </ul>
+            </nav>
+            {% if session['user_id'] %}
+            <div class="user-info">
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <span class="user-title" style="text-transform: capitalize; font-weight: 550;">{{ session['username'] }}</span>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('profile') }}" class="active"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <button class="login-btn">Login</button>
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        <div class="profile-container">
+            <h1>User Profile</h1>
+            <form id="profileForm" method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+                <div class="profile-image">
+                    <img src="{{ url_for('static', filename=user.ProfileImage) }}" alt="Profile Picture" id="profileImage">
+                    <label for="imageUpload" class="image-upload-btn">
+                        <i class="fas fa-camera"></i> Change Photo
+                    </label>
+                    <input type="file" id="imageUpload" name="image" accept="image/*" style="display: none;">
+                </div>
+                <input type="hidden" name="current_image" value="{{ user.ProfileImage }}">
+                <div class="form-group">
+                    <label for="userid">User ID</label>
+                    <input type="text" id="userid" value="{{ user.UserID }}" readonly disabled title="User ID cannot be modified">
+                </div>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" value="{{ user.UserName }}" 
+                           pattern="[A-Za-z\s]+" 
+                           title="Please enter alphabetic characters only" 
+                           placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" value="{{ user.UserContactInfo }}" 
+                           pattern="^0\d{9,10}$"
+                           title="Please enter a valid Malaysian phone number starting with 0 (10-11 digits)" 
+                           placeholder="Enter your phone number" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" value="{{ user.UserEmail }}" readonly disabled title="Email address cannot be modified">
+                </div>
+                <button type="submit" class="save-btn">Save Changes</button>
+            </form>
+        </div>
+    </main>
+
+    {% include 'chatbot.html' %}
+
+    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+    <script>
+        const web3 = new Web3(window.ethereum);
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+        
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Add validation before submission
+            const nameInput = document.getElementById('name');
+            const phoneInput = document.getElementById('phone');
+            
+            // Validate name (only alphabetic characters and spaces)
+            const nameRegex = /^[A-Za-z\s]+$/;
+            if (!nameRegex.test(nameInput.value)) {
+                showAlert('Name should only contain alphabetic characters');
+                return;
+            }
+            
+            // Validate Malaysian phone number
+            const phoneRegex = /^0\d{9,10}$/;
+            if (!phoneRegex.test(phoneInput.value)) {
+                showAlert('Please enter a valid Malaysian phone number starting with 0 (10-11 digits)');
+                return;
+            }
+
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this)
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update username in dropdown immediately
+                    const usernameSpan = document.querySelector('.dropbtn span');
+                    if (usernameSpan) {
+                        usernameSpan.textContent = data.username;
+                    }
+                    
+                    showAlert(data.message);
+                    
+                    // Redirect after a short delay to show the success message
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 350);
+                } else {
+                    showAlert(data.message);
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.');
+            }
+        });
+
+        // Image preview functionality
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith('image/')) {
+                    showAlert('Please select an image file.');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileImage').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

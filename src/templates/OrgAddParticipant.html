@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AddParticipant.css') }}">
+    <title>Event Planning Dashboard - Add Participant</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Participant Registration Form</h2>
+                
+                <button class="back-btn" onclick="location.href='/OrgViewParticipant'">⬅️ Back</button>
+            </div>
+
+            <div class="event-form">
+                <form id="participantForm" onsubmit="return validateAndSubmit(event)">
+                    <div class="form-container">
+                        <div class="form-column">
+                            <div class="form-row">
+                                <label for="userID">User ID: *</label>
+                                <div class="input-with-button">
+                                    <input type="text" id="userID" name="userID" placeholder="Enter User ID" required>
+                                    <button type="button" class="confirm-btn" onclick="confirmUser()">Confirm</button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <label for="fullName">Full Name:</label>
+                                <input type="text" id="fullName" readonly placeholder="Name">
+                            </div>
+                            
+                            <div class="form-row hidden" id="eventRow">
+                                <label for="eventParticipated">Event Participated: *</label>
+                                <select id="eventParticipated" name="eventParticipated" required>
+                                    {% for event in events %}
+                                        <option value="{{ event.EventID }}">{{ event.EventTitle }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+            
+                        <div class="form-column">
+                            <div class="form-row">
+                                <label for="contactNo">Contact No:</label>
+                                <input type="tel" id="contactNo" readonly placeholder="Contact No">
+                            </div>
+                            <div class="form-row">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" readonly placeholder="Email">
+                            </div>
+                            <div class="form-row hidden" id="registrationDateRow">
+                                <label for="registrationDate">Registration Date: *</label>
+                                <input type="datetime-local" id="registrationDate" name="registrationDate" required>
+                            </div>
+                            
+                           
+                        </div>
+                    </div>
+            
+                    <div class="form-actions hidden" id="registerAction">
+                        <button type="button" class="cancel-btn" onclick="resetForm()">Cancel</button>
+                        <button type="submit" class="register-btn">Register</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isUserConfirmed = false;
+
+        async function confirmUser() {
+            const userID = document.getElementById('userID').value;
+            try {
+                const response = await fetch(`/check_user/${userID}`);
+                const data = await response.json();
+                
+                if (data.exists) {
+                    isUserConfirmed = true;
+                    // Fill in user details
+                    document.getElementById('fullName').value = data.user.UserName;
+                    document.getElementById('email').value = data.user.UserEmail;
+                    document.getElementById('contactNo').value = data.user.UserContactInfo;
+                    
+                    // Show registration fields
+                    document.getElementById('registrationDateRow').classList.remove('hidden');
+                    document.getElementById('eventRow').classList.remove('hidden');
+                    document.getElementById('registerAction').classList.remove('hidden');
+                    
+                    // Set current date and time as default
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                    
+                    document.getElementById('registrationDate').value = formattedDateTime;
+                } else {
+                    isUserConfirmed = false;
+                    alert('User not found. Please check the User ID.');
+                    resetForm();
+                }
+            } catch (error) {
+                isUserConfirmed = false;
+                console.error('Error:', error);
+                alert('Error checking user. Please try again.');
+            }
+        }
+
+        function resetForm() {
+            isUserConfirmed = false;
+            document.getElementById('participantForm').reset();
+            document.getElementById('registrationDateRow').classList.add('hidden');
+            document.getElementById('eventRow').classList.add('hidden');
+            document.getElementById('registerAction').classList.add('hidden');
+        }
+
+        function validateAndSubmit(event) {
+            event.preventDefault();
+            
+            if (!isUserConfirmed) {
+                alert('Please confirm the User ID first before submitting.');
+                return false;
+            }
+
+            const userID = document.getElementById('userID').value.trim();
+            const eventID = document.getElementById('eventParticipated').value.trim();
+            const registrationDate = document.getElementById('registrationDate').value.trim();
+
+            if (!userID || !eventID || !registrationDate) {
+                alert('Please fill in all required fields');
+                return false;
+            }
+
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Confirm Registration',
+                text: 'Are you sure you want to register this participant?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                },
+                buttonsStyling: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitRegistration();
+                }
+            });
+
+            return false;
+        }
+
+        async function submitRegistration() {
+            const userID = document.getElementById('userID').value;
+            const eventID = document.getElementById('eventParticipated').value;
+            const registrationDate = document.getElementById('registrationDate').value;
+            const formattedDate = new Date(registrationDate).toISOString().slice(0, 19).replace('T', ' ');
+
+            try {
+                const response = await fetch('/register_participant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userID: userID,
+                        eventID: eventID,
+                        registrationDate: formattedDate
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Participant registered successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = '/OrgViewParticipant';
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Registration failed: ' + result.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Error registering participant. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    </script>
+</body>
+</html>

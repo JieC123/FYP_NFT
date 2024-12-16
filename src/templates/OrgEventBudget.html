@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/EventBudget.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Event Planning Dashboard - Event Budget Management</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                        <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgEventBudget">
+                        <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Budget</h2>
+            </div>
+
+            <a href="{{ url_for('budget.budget_page') }}" class="nav-btn active">Budget Management</a>
+            <a href="{{ url_for('budget_simulate.budget_simulation') }}" class="nav-btn ">Budget Simulation</a>
+                      
+            <div class="tableList">
+                <div class="select-section">
+                    <form method="post" action="{{ url_for('budget.budget_page') }}">
+                        <label for="eventSelect" class="event-label">Select an Event:</label>
+                        <select id="eventSelect" name="eventSelect" class="form-control" required>
+                            <option value="">Select an Event</option>
+                            {% if events %}
+                                {% for event in events %}
+                                    <option value="{{ event.EventID }}" 
+                                            {% if selected_event_id and selected_event_id == event.EventID %}selected{% endif %}>
+                                        {{ event.EventTitle }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="" disabled>No events available</option>
+                            {% endif %}
+                        </select>
+                        <button type="submit" class="select-btn">Select</button>
+                    </form>
+                </div>
+                
+                
+                <!-- Display the selected event name -->
+                {% if selected_event_title %}
+                <div class="event-name">
+                    <h3>Event: {{ selected_event_title }}</h3>
+                </div>
+                {% endif %}
+                
+               <div class="search-delete-bar">
+                    <div class="action-bar">
+                        <button class="delete-btn">Delete</button>
+                    </div>
+                    {% if selected_event_id %}
+                        <a class="add-budget-btn" href="{{ url_for('budget.add_budget', event_id=selected_event_id) }}">Add Budget ➕</a>
+                    {% endif %}
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 3%"><input type="checkbox" id="select-all"></th>
+                            <th class="sortable" data-sort="number" style="width: 4%">No.<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="budgetId" style="width: 5%">Budget ID<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="category" style="width: 12%">Category<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="budgetAmount" style="width: 10%">Budget Amount (RM)<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="expensesAmount" style="width: 10%">Expenses Amount (RM)<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="remainingBudget" style="width: 10%">Remaining Budget (RM)<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="vendor" style="width: 15%">Vendor<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="paymentStatus" style="width: 8%">Payment Status<span class="sort-icon"></span></th>
+                            <th class="sortable" data-sort="comments" style="width: 15%">Comments<span class="sort-icon"></span></th>
+                            <th style="width: 9%">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set ns = namespace(total_budget=0.0, total_expenses=0.0, total_remaining=0.0) %}
+                        
+                        {% if budgets %}
+                            {% for budget in budgets %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="budget-checkbox" value="{{ budget.BudgetID }}" data-budget-id="{{ budget.BudgetID }}">
+                                </td>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ budget.BudgetID }}</td>
+                                <td>{{ budget.CategoryName }}</td>
+                                <td class="amount-cell">{{ "%.2f"|format(budget.BudgetAmount) }}</td>
+                                <td class="amount-cell">{{ "%.2f"|format(budget.ExpensesAmount) }}</td>
+                                <td class="amount-cell">{{ "%.2f"|format(budget.RemainingBudgetAmount) }}</td>
+                                <td>{{ budget.Vendor }}</td>
+                                <td class="status-cell">
+                                    <span class="status-badge {% if budget.PaymentStatus == 'Paid' %}paid{% else %}pending{% endif %}">
+                                        {{ budget.PaymentStatus }}
+                                    </span>
+                                </td>
+                                <td>{{ budget.Comments }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn modify-btn">
+                                        <a href="{{ url_for('budget.edit_budget', budget_id=budget.BudgetID) }}" class="btn">
+                                            <i class="fas fa-edit"></i> Modify
+                                        </a>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% set ns.total_budget = ns.total_budget + budget.BudgetAmount %}
+                            {% set ns.total_expenses = ns.total_expenses + budget.ExpensesAmount %}
+                            {% set ns.total_remaining = ns.total_remaining + budget.RemainingBudgetAmount %}
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="11" class="no-data">No budget data available for this event</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-header-row">
+                            <td rowspan="2" colspan="4" style="vertical-align: middle; text-align: center;">
+                                <div class="budget-status-container" style="justify-content: center; margin: 0;">
+                                    <div class="budget-indicator" style="margin-right: 10px;">
+                                        {% set budget_percentage = (ns.total_expenses / ns.total_budget * 100) if ns.total_budget > 0 else 0 %}
+                                        <div class="status-text">
+                                            <span class="percentage">{{ "%.1f"|format(budget_percentage) }}%</span>
+                                            <span class="
+                                             {% if budget_percentage > 100 %}over-budget{% else %}under-budget{% endif %}">
+                                                {% if budget_percentage > 100 %}
+                                                    Over Budget
+                                                {% else %}
+                                                    Under Budget
+                                                {% endif %}
+                                            </span>
+                                            <i class="fas fa-info-circle info-icon" onclick="showBudgetInfoPopup()"></i>
+                                        </div>
+                                    </div>
+                                    <div class="dollar-icon-container">
+                                        <div class="dollar-wrapper">
+                                            <i class="fas fa-dollar-sign" id="dollar-sign"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="total-label" colspan="1" style="text-align: center;"><strong style="color: #000000;">Total Budget Amount (RM)</strong></td>
+                            <td class="total-label" colspan="1" style="text-align: center;"><strong style="color: #cc0000;">Total Expenses Amount (RM)</strong></td>
+                            <td class="total-label" colspan="1" style="text-align: center;"><strong style="color: #008000;">Total Remaining Budget (RM)</strong></td>
+                            <td colspan="5" rowspan="2"></td>
+                            </tr>
+                        <tr class="total-amount-row">
+                            <td class="total-amount" colspan="1" style="text-align: center;"><strong style="color: #000000;">{{ "%.2f"|format(ns.total_budget) }}</strong></td>
+                            <td class="total-amount" colspan="1" style="text-align: center;"><strong style="color: #cc0000;">{{ "%.2f"|format(ns.total_expenses) }}</strong></td>
+                            <td class="total-amount" colspan="1" style="text-align: center;"><strong style="color: #008000;">{{ "%.2f"|format(ns.total_remaining) }}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add the budget info popup -->
+    <div id="budget-info-popup" class="popup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeBudgetInfoPopup()">&times;</span>
+            <h3 class="popup-title">Budget Status Information</h3>
+            <div class="popup-description">
+                <p>Budget status is determined by comparing total expenses to the total budget:</p>
+                <ul>
+                    <li><span class="over-budget">Over Budget (>100%)</span>: Expenses have exceeded the allocated budget</li>
+                    <li><span class="under-budget">Under Budget (≤100%)</span>: Expenses are within or below the allocated budget</li>
+                </ul>
+                <p>This indicator helps you quickly assess your budget utilization and make informed financial decisions for your event.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showBudgetInfoPopup() {
+            document.getElementById('budget-info-popup').style.display = 'block';
+        }
+
+        function closeBudgetInfoPopup() {
+            document.getElementById('budget-info-popup').style.display = 'none';
+        }
+
+        // Close popup when clicking outside
+        window.onclick = function(event) {
+            var popup = document.getElementById('budget-info-popup');
+            if (event.target == popup) {
+                popup.style.display = 'none';
+            }
+        }
+
+        // Update the dollar sign color based on budget status
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusLabel = document.querySelector('.budget-indicator .status-text span:nth-child(2)');
+            const dollarSign = document.querySelector('.fa-dollar-sign');
+            
+            if (statusLabel && dollarSign) {  // Check if elements exist
+                if (statusLabel.classList.contains('over-budget')) {
+                    dollarSign.style.color = '#cc0000'; // Red color for over budget
+                } else {
+                    dollarSign.style.color = '#008000'; // Green color for under budget
+                }
+            }
+        });
+
+        // Select/Deselect all checkboxes
+        document.getElementById('select-all').addEventListener('change', function() {
+            let checkboxes = document.querySelectorAll('.budget-checkbox');
+            for (let checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
+
+        // Delete button functionality
+        document.querySelector('.delete-btn').addEventListener('click', function() {
+            let selectedBudgets = [];
+            document.querySelectorAll('.budget-checkbox:checked').forEach(checkbox => {
+                selectedBudgets.push(checkbox.value);
+            });
+
+            if (selectedBudgets.length === 0) {
+                alert('No budget selected for deletion.');
+                return;
+            }
+
+            if (confirm('Are you sure you want to delete the selected budget(s)?')) {
+                fetch('/delete_budget', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ budget_ids: selectedBudgets }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert('Failed to delete: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to delete budget(s).');
+                });
+            }
+        });
+
+        // Sorting functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const getCellValue = (tr, idx) => {
+                const cell = tr.children[idx];
+                // For amount columns, remove 'RM' and convert to number
+                if (idx >= 4 && idx <= 6) {
+                    return parseFloat(cell.textContent.replace('RM', '').trim()) || 0;
+                }
+                return cell.textContent || cell.innerText;
+            };
+
+            const comparer = (idx, asc) => (a, b) => {
+                const v1 = getCellValue(asc ? a : b, idx);
+                const v2 = getCellValue(asc ? b : a, idx);
+                
+                // Handle different types of sorting
+                if (idx === 1) { // No. column
+                    return parseInt(v1) - parseInt(v2);
+                } else if (idx >= 4 && idx <= 6) { // Amount columns
+                    return parseFloat(v1) - parseFloat(v2);
+                } else { // Text columns
+                    return v1.toString().localeCompare(v2);
+                }
+            };
+
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.addEventListener('click', () => {
+                    const table = th.closest('table');
+                    const tbody = table.querySelector('tbody');
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    const headerRow = th.parentElement;
+                    const columnIndex = Array.from(headerRow.children).indexOf(th);
+                    
+                    // Remove asc/desc classes from all headers
+                    headerRow.querySelectorAll('th').forEach(header => {
+                        if (header !== th) {
+                            header.classList.remove('asc', 'desc');
+                        }
+                    });
+                    
+                    // Toggle sort direction
+                    const isAsc = !th.classList.contains('asc');
+                    th.classList.toggle('asc', isAsc);
+                    th.classList.toggle('desc', !isAsc);
+                    
+                    // Sort rows
+                    rows.sort(comparer(columnIndex, isAsc));
+                    
+                    // Reorder rows in the table
+                    tbody.append(...rows);
+                    
+                    // Update the index numbers
+                    if (columnIndex !== 1) { // Only update numbers if not sorting by No. column
+                        rows.forEach((row, index) => {
+                            row.querySelector('td:nth-child(2)').textContent = index + 1;
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

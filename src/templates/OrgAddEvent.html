@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AddEvent.css') }}"> <!-- Using the same CSS -->
+    <title>Event Planning Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item  active">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>    
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                        <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                        <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                        <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Creation</h2>
+                <!-- Back button aligned to the right -->
+                <button class="back-btn" onclick="location.href='/events'">⬅️ Back</button>
+            </div>
+
+
+            <div id="errorMessages" style="color: red;">
+                {% if error_message %}
+                    <p>{{ error_message }}</p>
+                {% endif %}
+            </div>
+
+
+
+          <div class="event-form">
+            <form id="eventForm" method="POST" action="{{ url_for('event.add_event') }}" enctype="multipart/form-data" onsubmit="return validateAndSubmit(event)">
+                <div class="form-container">
+                    <!-- Left Column Fields -->
+                    <div class="form-column">
+                        <div class="form-row">
+                            <label for="eventTitle">Event Title:</label>
+                            <input type="text" id="eventTitle" name="eventTitle" placeholder="Event title" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="eventVenue">Event Venue:</label>
+                            <input type="text" id="eventVenue" name="eventVenue" placeholder="Event venue" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="eventStatus">Event Status:</label>
+                            <select id="eventStatus" name="eventStatus">
+                                <option value="Upcoming">Upcoming</option>
+                                <option value="Ongoing">Ongoing</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="eventType">Event Type:</label>
+                            <select id="eventType" name="eventType">
+                                <option value="Concert">Concert</option>
+                                <option value="Conference">Conference</option>
+                                <option value="Seminar">Seminar</option>
+                                <option value="Workshop">Workshop</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="eventPoster">Event Poster:</label>
+                            <input type="file" id="eventPoster" name="eventPoster" accept="image/*" required>
+                            <small>Max size: 8 MB. Only image files allowed.</small>
+                            <!-- Image Preview -->
+                            <div id="imagePreview" style="display: none; margin-top: 10px;">
+                                
+                                <img id="previewImage" src="" alt="Image Preview" style="max-width: 150px; max-height: 150px; object-fit: cover;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column Fields -->
+                    <div class="form-column">
+                        <div class="form-row">
+                            <label for="startDate">Event Start Date:</label>
+                            <input type="datetime-local" id="startDate" name="startDate" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="endDate">Event End Date:</label>
+                            <input type="datetime-local" id="endDate" name="endDate" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="capacity">Event Capacity:</label>
+                            <input type="number" id="capacity" name="capacity" value="1" min="1" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="description">Event Description:</label>
+                            <textarea id="description" name="description" rows="3" placeholder="Event description" required></textarea>
+                        </div>
+                       
+                    </div>
+                </div>
+            
+                <div class="form-actions">
+                    <button type="reset" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="save-btn">Save</button>
+                </div>
+            </form>
+            
+        </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    function validateAndSubmit(event) {
+        event.preventDefault();
+        let errorMessages = [];
+        
+        // Validate required fields
+        const fields = ['eventTitle', 'eventVenue', 'eventStatus', 'eventType', 'startDate', 'endDate', 'capacity', 'description', 'eventPoster'];
+        fields.forEach(function(field) {
+            const element = document.getElementById(field);
+            if (element && !element.value.trim()) {
+                errorMessages.push(`${field.replace(/([A-Z])/g, ' $1')} is required.`);
+            }
+        });
+
+        // Validate event dates
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        if (new Date(startDate) >= new Date(endDate)) {
+            errorMessages.push("Event End Date must be later than Event Start Date.");
+        }
+
+        // Validate event capacity
+        const capacity = document.getElementById('capacity').value;
+        if (!Number.isInteger(parseFloat(capacity)) || capacity <= 0) {
+            errorMessages.push("Event Capacity must be a valid positive integer.");
+        }
+
+        // Validate event poster
+        const file = document.getElementById('eventPoster').files[0];
+        if (file && !file.type.startsWith('image/')) {
+            errorMessages.push('Event Poster must be an image file.');
+        }
+        if (file && file.size > 8 * 1024 * 1024) {
+            errorMessages.push('Event Poster file size exceeds 8 MB.');
+        }
+
+        if (errorMessages.length > 0) {
+            let errorContainer = document.getElementById('errorMessages');
+            errorContainer.innerHTML = errorMessages.map(msg => `<li>${msg}</li>`).join('');
+            return false;
+        }
+
+        // Show confirmation dialog
+        Swal.fire({
+            title: 'Confirm Event Creation',
+            text: 'Are you sure you want to create this event?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'swal2-confirm',
+                cancelButton: 'swal2-cancel'
+            },
+            buttonsStyling: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('eventForm').submit();
+            }
+        });
+
+        return false;
+    }
+
+    // Preview Image on file input change
+    document.getElementById('eventPoster').addEventListener('change', function(event) {
+        var file = event.target.files[0];
+        
+        if (file) {
+            var reader = new FileReader();
+
+            reader.onload = function(e) {
+                // Display the preview
+                var preview = document.getElementById('imagePreview');
+                var previewImage = document.getElementById('previewImage');
+                previewImage.src = e.target.result;
+                preview.style.display = 'block';
+            };
+
+            reader.readAsDataURL(file);
+        }
+    });
+</script>

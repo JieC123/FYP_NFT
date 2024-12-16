@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/OrgAlloStaff.css') }}"> <!-- Same CSS as for Event -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Event Planning Dashboard - Staff Allocation</title>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                        <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Event Staff and Authority</h2>
+            </div>
+
+            <a href="/OrgViewStaff" class="nav-btn">Event Staff</a>
+            <a href="{{ url_for('staffAllo.staffAllocation_page') }}" class="nav-btn">Event Allocation</a>
+            <a href="{{ url_for('staffAllo.staffAllocationRemoval_page') }}" class="nav-btn active">Event Allocation Removal</a>
+            
+            <!-- <button class="nav-btn">Event Allocation Removal</button>             -->
+            <div class="tableList">
+                <div class="select-section">
+                
+                   
+                        <form method="post" action="{{ url_for('staffAllo.staffAllocationRemoval_page') }}">
+                            <label for="eventSelect" class="event-label">Select an Event:</label>
+                            <select id="eventSelect" name="eventSelect" class="form-control" required>
+                                {% if events %}
+                                    {% for event in events %}
+                                        <option value="{{ event['EventID'] }}" 
+                                                {% if selected_event_id == event['EventID'] %} selected {% endif %}>
+                                            {{ event['EventTitle'] }}
+                                        </option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option disabled>No events available</option>
+                                {% endif %}
+                            </select>
+                            <button type="submit" class="select-btn">Select</button>
+                        </form>
+                    
+                
+               
+                
+                <!-- Toggle Buttons Moved to the Right Side -->
+               
+            </div>
+            <div id="assignedSection" class="table-section">
+                {% if event_details %}
+                    <h4>Event Duration: {{ event_details['EventStartDate'] }} - {{ event_details['EventEndDate'] }}</h4>
+                {% endif %}
+                
+                <h3>Assigned Staff:</h3>
+              
+                <table id="assignedTable" class="staff-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all" onclick="toggleAll(this)"></th>
+                            <th>No.</th>
+                            <th>Staff ID</th>
+                            <th>Staff Name</th>
+                            <th>Role</th>
+                            <th>Contract Start Date</th>
+                            <th>Contract End Date</th>
+                            <th>Salary (RM)</th>
+                            <th>One Time Fees (RM)</th>
+                            <th>Hours Worked</th>
+                            <th>Date Assigned</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if assigned_staff and assigned_staff|length > 0 %}
+                            {% for staff in assigned_staff %}
+                                <tr>
+                                    <td><input type="checkbox" class="row-checkbox" name="selected_staff" value="{{ staff['StaffID'] }}"></td>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ staff['StaffID'] }}</td>
+                                    <td>{{ staff['StaffName'] }}</td>
+                                    <td>{{ staff['Role'] }}</td>
+                                    <td>{{ staff['JobStartPeriod'] }}</td>
+                                    <td>{{ staff['JobEndPeriod'] }}</td>
+                                    <td>{{ '%0.2f' | format(staff['Salary']) }}</td>
+                                    <td>{{ '%0.2f' | format(staff['OneTimeFees']) }}</td>
+                                    <td>{{ staff['HoursWorked'] }}</td>
+                                    <td>{{ staff['DateAssigned'] }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="11" style="text-align: center;">No assigned staff found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                
+            </div>
+            
+            
+            
+            
+            
+        
+            <!-- Confirm Button -->
+            <button type="button" class="confirm-btn" onclick="confirmRemove()">Remove</button>
+        </div>
+    </div>
+</div>
+</body>
+
+
+
+
+<script>
+    // Add sorting functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const getCellValue = (tr, idx) => {
+            const cell = tr.children[idx];
+            let value = cell.textContent || cell.innerText;
+            
+            // For salary and fees columns (index 7 and 8)
+            if (idx === 7 || idx === 8) {
+                return parseFloat(value.replace('RM', '').trim()) || 0;
+            }
+            
+            // For all date columns (contract dates and assigned date)
+            if (idx === 5 || idx === 6 || idx === 10) {
+                // Try parsing YYYY-MM-DD format
+                if (value.includes('-')) {
+                    return new Date(value);
+                }
+                // Try parsing DD/MM/YYYY format
+                const parts = value.split('/');
+                if (parts.length === 3) {
+                    return new Date(parts[2], parts[1] - 1, parts[0]);
+                }
+                return new Date(0);
+            }
+
+            // For hours worked (index 9)
+            if (idx === 9) {
+                return parseInt(value) || 0;
+            }
+            
+            return value;
+        };
+
+        const comparer = (idx, asc) => (a, b) => {
+            const v1 = getCellValue(asc ? a : b, idx);
+            const v2 = getCellValue(asc ? b : a, idx);
+            
+            // Handle different types of sorting
+            if (v1 instanceof Date && v2 instanceof Date) {
+                return v1 - v2;
+            } else if (idx === 1) { // No. column
+                return parseInt(v1) - parseInt(v2);
+            } else if (idx === 7 || idx === 8) { // Salary and Fees columns
+                return v1 - v2;
+            } else if (idx === 9) { // Hours Worked column
+                return v1 - v2;
+            } else { // Text columns
+                return v1.toString().localeCompare(v2);
+            }
+        };
+
+        // First, update the table headers to include sortable class and sort icons
+        const headers = document.querySelectorAll('#assignedTable th:not(:first-child)');
+        headers.forEach(header => {
+            header.classList.add('sortable');
+            header.innerHTML += '<span class="sort-icon"></span>';
+        });
+
+        // Add click event listeners to sortable headers
+        document.querySelectorAll('#assignedTable th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const table = th.closest('table');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const headerRow = th.parentElement;
+                const columnIndex = Array.from(headerRow.children).indexOf(th);
+                
+                // Remove asc/desc classes from all headers
+                headerRow.querySelectorAll('th').forEach(header => {
+                    if (header !== th) {
+                        header.classList.remove('asc', 'desc');
+                    }
+                });
+                
+                // Toggle sort direction
+                const isAsc = !th.classList.contains('asc');
+                th.classList.toggle('asc', isAsc);
+                th.classList.toggle('desc', !isAsc);
+                
+                // Sort rows
+                rows.sort(comparer(columnIndex, isAsc));
+                
+                // Reorder rows in the table
+                tbody.append(...rows);
+                
+                // Update the index numbers if not sorting by No. column
+                if (columnIndex !== 1) {
+                    rows.forEach((row, index) => {
+                        row.querySelector('td:nth-child(2)').textContent = index + 1;
+                    });
+                }
+
+                // Preserve checkbox states
+                rows.forEach(row => {
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    if (checkbox) {
+                        checkbox.checked = checkbox.getAttribute('data-checked') === 'true';
+                    }
+                });
+            });
+        });
+
+        // Store checkbox states before sorting
+        document.querySelectorAll('#assignedTable input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                this.setAttribute('data-checked', this.checked);
+            });
+        });
+    });
+
+    // Function to toggle all checkboxes
+    function toggleAll(source) {
+        const checkboxes = document.querySelectorAll(".row-checkbox");
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = source.checked;
+        });
+    }
+
+
+
+    function confirmRemove() {
+        const selectedStaff = document.querySelectorAll('input.row-checkbox:checked');  // Updated selector for staff checkboxes
+        if (selectedStaff.length > 0) {
+            const confirmAction = confirm('Are you sure you want to remove the selected assigned staff?');
+            if (confirmAction) {
+                const staffIds = [];
+                selectedStaff.forEach(staff => {
+                    staffIds.push(staff.value);
+                });
+
+                // Send an AJAX request to delete the selected staff
+                const selectedEventId = document.getElementById('eventSelect').value;
+                const data = {
+                    staffIds: staffIds,
+                    eventId: selectedEventId
+                };
+
+                // Perform the AJAX request to delete the staff assignments
+                fetch('/remove_staff_assignments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Staff assignment(s) removed successfully.');
+
+                        // Remove the rows from the table
+                        selectedStaff.forEach(staff => {
+                            const row = staff.closest('tr');
+                            if (row) {
+                                row.remove();
+                            }
+                        });
+
+                        // Check if there are any rows left in the table
+                        const tableBody = document.querySelector('#assignedStaffTable tbody');
+                        if (tableBody && tableBody.rows.length === 0) {
+                            // If no rows, show "No assigned staff found" message
+                            const noStaffRow = document.createElement('tr');
+                            const noStaffMessage = document.createElement('td');
+                            noStaffMessage.colSpan = 11;
+                            noStaffMessage.style.textAlign = 'center';
+                            noStaffMessage.innerText = 'No assigned staff found';
+                            noStaffRow.appendChild(noStaffMessage);
+                            tableBody.appendChild(noStaffRow);
+                        }
+                    } else {
+                        alert('Failed to remove staff assignments.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while trying to remove staff assignments.');
+                });
+            }
+        } else {
+            alert('Please select at least one staff to remove.');
+        }
+    }
+</script>
+</html>

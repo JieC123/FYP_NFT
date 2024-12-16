@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - My Tickets</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/myticket.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+    
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo"></a>
+        </div>
+        <div class="nav-group">
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('eventlist') }}">Events</a></li>
+                    <li><a href="{{ url_for('marketplace') }}">Marketplace</a></li>
+                    <li><a href="{{ url_for('myticket') }}" class="active">MyTicket</a></li>
+                    <li><a href="{{ url_for('orders') }}">Orders</a></li>
+                </ul>
+            </nav>
+            {% if session['user_id'] %}
+            <div class="user-info">
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <span class="user-title" style="text-transform: capitalize; font-weight: 550;">{{ session['username'] }}</span>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <button class="login-btn">Login</button>
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        <h1 class="myticket-title">My NFT Tickets</h1>
+        
+        <div class="ticket-filters">
+            <button class="filter-btn active" data-filter="upcoming">Upcoming</button>
+            <button class="filter-btn" data-filter="past">Past</button>
+            <button class="filter-btn" data-filter="all">All</button>
+            
+            <div class="sort-container">
+                <select id="sortSelect" class="sort-select">
+                    <option value="eventDate">Event Date (Nearest)</option>
+                    <option value="eventDateDesc">Event Date (Furthest)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="ticket-table-container">
+            <table class="ticket-table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Venue</th>
+                        <th>Ticket ID</th>
+                        <th>Token ID</th>
+                        <th>Transferability</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                        {% set event_start_datetime = ticket.EventStartDateTime %}
+                        {% set event_status = 'upcoming' if event_start_datetime >= now else 'past' %}
+                        <tr class="ticket-row {{ event_status }}" 
+                            data-purchase-date="{{ ticket.PurchaseDate if ticket.PurchaseDate else '1970-01-01' }}"
+                            data-event-date="{{ ticket.EventStartDate }}">
+                            <td class="row-number"></td>
+                            <td>
+                                <div class="event-info">
+                                    <img src="{{ url_for('static', filename=ticket.EventImage) }}" alt="{{ ticket.EventTitle }}">
+                                    <span>{{ ticket.EventTitle }} ({{ ticket.TicketType }})</span>
+                                </div>
+                            </td>
+                            <td>{{ ticket.EventStartDate }} - {{ ticket.EventEndDate }}</td>
+                            <td>{{ ticket.EventStartTime }} - {{ ticket.EventEndTime }}</td>
+                            <td>{{ ticket.EventVenue }}</td>
+                            <td>{{ ticket.TicketID }}</td>
+                            <td>{{ ticket.TokenID }}</td>
+                            <td>
+                                {% if ticket.IsTransferrable == "1" %}
+                                    <span class="transferable-badge">Transferable</span>
+                                {% else %}
+                                    <span class="non-transferable-badge">Non-transferable</span>
+                                {% endif %}
+                            </td>
+                            <td class="action-buttons">
+                                <a href="{{ url_for('ticket_detail', ticket_id=ticket.TicketID, token_id=ticket.TokenID) }}" 
+                                   class="view-ticket-btn"
+                                   data-is-transferrable="{{ ticket.IsTransferrable }}">View</a>
+                                {% if ticket.IsTransferrable == '1' %}
+                                    {% if ticket.IsReselling %}
+                                        <span class="reselling-badge">Reselling</span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="no-tickets-message" style="display: none;">
+                No Ticket Found. <a href="{{ url_for('eventlist') }}" class="buy-now-link">Buy Now <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const ticketRows = document.querySelectorAll('.ticket-row');
+        const noTicketsMessage = document.querySelector('.no-tickets-message');
+        const sortSelect = document.getElementById('sortSelect');
+        const ticketTable = document.querySelector('.ticket-table tbody');
+
+        // Function to update row numbers for visible rows only
+        function updateRowNumbers() {
+            let counter = 1;
+            const rows = ticketTable.getElementsByTagName('tr');
+            Array.from(rows).forEach(row => {
+                if (row.style.display !== 'none') {
+                    // Directly set the text content of the first cell
+                    row.cells[0].textContent = counter++;
+                }
+            });
+        }
+
+        // Function to sort rows
+        function sortRows(sortBy) {
+            const rows = Array.from(ticketTable.getElementsByTagName('tr'));
+            
+            rows.sort((a, b) => {
+                let aValue = new Date(a.cells[2].textContent.split(' - ')[0]);
+                let bValue = new Date(b.cells[2].textContent.split(' - ')[0]);
+                
+                return sortBy === 'eventDate' ? aValue - bValue : bValue - aValue;
+            });
+
+            // Clear and reinsert sorted rows
+            while (ticketTable.firstChild) {
+                ticketTable.removeChild(ticketTable.firstChild);
+            }
+            rows.forEach(row => ticketTable.appendChild(row));
+            
+            // Update row numbers after sorting
+            updateRowNumbers();
+        }
+
+        // Filter button click handlers
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const filter = this.getAttribute('data-filter');
+                
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                noTicketsMessage.style.display = 'none';
+                let visibleCount = 0;
+
+                // First, update display property for all rows
+                Array.from(ticketTable.getElementsByTagName('tr')).forEach(row => {
+                    if (filter === 'all') {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        if (row.classList.contains(filter)) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    }
+                });
+
+                if (visibleCount === 0) {
+                    noTicketsMessage.style.display = 'block';
+                }
+
+                // Then update row numbers
+                updateRowNumbers();
+            });
+        });
+
+        // Sort when dropdown selection changes
+        sortSelect.addEventListener('change', function() {
+            sortRows(this.value);
+        });
+
+        // Initial sort and numbering
+        sortRows('eventDate');
+    });
+    </script>
+
+    <style>
+        .no-tickets-message {
+            text-align: center;
+            padding: 20px;
+            color: #fff;
+            background-color: rgba(30, 33, 48, 0.8);
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 1.1rem;
+        }
+
+        .buy-now-link {
+            color: #00a8ff;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 8px;
+            padding: 6px 12px;
+            border: 2px solid #00a8ff;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .buy-now-link:hover {
+            background-color: #00a8ff;
+            color: #fff;
+        }
+
+        .buy-now-link i {
+            margin-left: 5px;
+            font-size: 0.9rem;
+        }
+
+        .pending-sell {
+            background-color: #2A2D3E;
+            color: #ffd700;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            cursor: not-allowed;
+        }
+
+        .view-ticket-btn {
+            background-color: #00a8ff;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .view-ticket-btn:hover {
+            background-color: #0089d1;
+        }
+
+        .transferable-badge, .non-transferable-badge, .reselling-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            display: inline-block;
+        }
+
+        .transferable-badge {
+            background-color: rgba(0, 168, 255, 0.1);
+            color: #00a8ff;
+            border: 1px solid rgba(0, 168, 255, 0.3);
+        }
+
+        .non-transferable-badge {
+            background-color: rgba(255, 68, 68, 0.1);
+            color: #ff4444;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+
+        .reselling-badge {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .sort-container {
+            display: inline-block;
+            margin-left: 20px;
+            vertical-align: middle;
+            position: relative;
+        }
+
+        .sort-select {
+            padding: 8px 35px 8px 15px;
+            border-radius: 6px;
+            background-color: rgba(0, 168, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            position: relative;
+            min-width: 200px;
+        }
+
+        .sort-container::after {
+            content: '\f078';
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #00a8ff;
+            pointer-events: none;
+            font-size: 0.8em;
+        }
+
+        .sort-select:hover {
+            background-color: rgba(0, 168, 255, 0.2);
+            border-color: rgba(0, 168, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.2);
+        }
+
+        .sort-select:focus {
+            outline: none;
+            background-color: rgba(0, 168, 255, 0.15);
+            border-color: #00a8ff;
+            box-shadow: 0 0 0 2px rgba(0, 168, 255, 0.2);
+        }
+
+        .sort-select option {
+            background-color: #1E2130;
+            color: #fff;
+            padding: 10px;
+        }
+
+        .ticket-filters {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .row-number {
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+            width: 50px;
+        }
+    </style>
+
+    <div id="resellModal" class="modal">
+        <div class="modal-content">
+            <h2>List Ticket for Resale</h2>
+            <p>Event: <span id="modalEventTitle"></span></p>
+            <p>Original Price: <span id="modalOriginalPrice"></span></p>
+            
+            <div class="price-options">
+                <div class="price-option">
+                    <input type="radio" id="originalPrice" name="priceOption" value="original" onchange="updatePriceDetails()">
+                    <label for="originalPrice">Sell at Original Price</label>
+                </div>
+                <div class="price-option">
+                    <input type="radio" id="lowerPrice" name="priceOption" value="lower" onchange="updatePriceDetails()">
+                    <label for="lowerPrice">Sell at Lower Price</label>
+                </div>
+                <div class="discount-selector" style="display: none;">
+                    <label for="discountPercentage">Select discount percentage:</label>
+                    <select id="discountPercentage" onchange="updatePriceDetails()">
+                        <option value="10">10% off</option>
+                        <option value="20">20% off</option>
+                        <option value="30">30% off</option>
+                        <option value="40">40% off</option>
+                        <option value="50">50% off</option>
+                        <option value="60">60% off</option>
+                        <option value="70">70% off</option>
+                        <option value="80">80% off</option>
+                        <option value="90">90% off</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="price-details" style="display: none;">
+                <div class="price-breakdown">
+                    <p>Original Price: <span id="breakdownOriginal"></span></p>
+                    <p>Deduction (30%): <span id="breakdownDeduction"></span></p>
+                    <p class="final-price">Final Resale Price: <span id="breakdownFinal"></span></p>
+                </div>
+            </div>
+
+            <div class="marketplace-note">
+                <i class="fas fa-store"></i>
+                <p>Your ticket will be listed on the <span class="highlight">TicketPro Marketplace</span></p>
+                <p>Potential buyers can purchase your ticket directly through our platform</p>
+            </div>
+
+            <div class="terms-section">
+                <div class="terms-header" onclick="toggleTerms()">
+                    <h3>Terms and Conditions</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="terms-content">
+                    <ul class="terms-list">
+                        <li>Once listed, the ticket will be locked and cannot be used until either sold or delisted</li>
+                        <li>A 2.5% platform fee will be deducted from the final sale price</li>
+                        <li>Payment will be processed automatically through smart contract</li>
+                        <li>Funds will be transferred to your wallet after successful purchase</li>
+                        <li>Listing can be cancelled at any time before purchase</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="checkbox-container">
+                <input type="checkbox" id="termsAccepted" required>
+                <label for="termsAccepted">
+                    I understand and agree to the terms and conditions for reselling my ticket on the TicketPro Marketplace
+                </label>
+            </div>
+
+            <div class="modal-buttons">
+                <button onclick="confirmResell()" id="confirmButton" disabled>Confirm</button>
+                <button onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- {% include 'chatbot.html' %} -->
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script>
+    let currentTicketData = null;
+    let selectedPrice = 0;
+    let web3;
+
+    // Initialize Web3 when the page loads
+    document.addEventListener('DOMContentLoaded', async function() {
+        if (typeof window.ethereum !== 'undefined') {
+            web3 = new Web3(window.ethereum);
+        } else {
+            console.error('MetaMask is not installed');
+        }
+    });
+
+    function toggleModal(show) {
+        const modal = document.getElementById('resellModal');
+        const body = document.body;
+        
+        if (show) {
+            modal.style.display = 'block';
+            body.style.overflow = 'hidden'; // Prevent background scrolling
+        } else {
+            modal.style.display = 'none';
+            body.style.overflow = ''; // Restore scrolling
+        }
+    }
+
+    async function initiateResell(button) {
+        if (typeof window.ethereum === 'undefined') {
+            alert('Please install MetaMask to use this feature');
+            return;
+        }
+
+        try {
+            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+            const userAccount = accounts[0];
+
+            // Initialize Web3 if not already initialized
+            if (!web3) {
+                web3 = new Web3(window.ethereum);
+            }
+
+            // Get contract instance
+            const response = await fetch('/get_contract_data');
+            if (!response.ok) {
+                throw new Error('Failed to fetch contract data');
+            }
+            const contractData = await response.json();
+            const contract = new web3.eth.Contract(contractData.abi, contractData.address);
+
+            // Get token ID and validate ownership
+            const tokenId = button.dataset.tokenId;
+            console.log('Checking ownership for token:', tokenId); // Debug log
+
+            try {
+                const currentOwner = await contract.methods.getTokenCurrentOwner(tokenId).call();
+                console.log('Current owner:', currentOwner); // Debug log
+                console.log('User account:', userAccount); // Debug log
+
+                
+            } catch (contractError) {
+                console.error('Contract error:', contractError); // Debug log
+                alert('Failed to verify ticket ownership. Please try again.');
+                return;
+            }
+
+            // If validation passes, proceed with resell modal
+            currentTicketData = {
+                ticketId: button.dataset.ticketId,
+                tokenId: parseInt(tokenId),
+                eventTitle: button.dataset.eventTitle,
+                originalPrice: parseFloat(button.dataset.originalPrice)
+            };
+
+            // Update modal content
+            document.getElementById('modalEventTitle').textContent = currentTicketData.eventTitle;
+            document.getElementById('modalOriginalPrice').textContent = 
+                currentTicketData.originalPrice + ' ETH';
+            
+            // Reset radio buttons and price details
+            document.querySelectorAll('input[name="priceOption"]').forEach(radio => {
+                radio.checked = false;
+            });
+            document.querySelector('.price-details').style.display = 'none';
+            
+            // Show modal
+            toggleModal(true);
+
+        } catch (error) {
+            console.error('Resell initiation error:', error);
+            alert(error.message || 'An error occurred while initiating resale');
+        }
+    }
+
+    function updatePriceDetails() {
+        const priceOption = document.querySelector('input[name="priceOption"]:checked');
+        const discountSelector = document.querySelector('.discount-selector');
+        if (!priceOption) return;
+
+        const priceDetails = document.querySelector('.price-details');
+        const originalPrice = parseFloat(currentTicketData.originalPrice);
+        
+        if (priceOption.value === 'original') {
+            selectedPrice = originalPrice;
+            priceDetails.style.display = 'none';
+            discountSelector.style.display = 'none';
+        } else {
+            discountSelector.style.display = 'block';
+            const discountPercentage = parseInt(document.getElementById('discountPercentage').value) / 100;
+            const deduction = parseFloat((originalPrice * discountPercentage).toFixed(3));
+            selectedPrice = parseFloat((originalPrice - deduction).toFixed(3));
+            
+            // Update price breakdown with 7 decimal places
+            document.getElementById('breakdownOriginal').textContent = originalPrice.toFixed(3) + ' ETH';
+            document.getElementById('breakdownDeduction').textContent = deduction.toFixed(3) + ' ETH';
+            document.getElementById('breakdownFinal').textContent = selectedPrice.toFixed(3) + ' ETH';
+            
+            priceDetails.style.display = 'block';
+        }
+        
+        console.log('Selected Price:', selectedPrice); // Debug log
+    }
+
+    function closeModal() {
+        toggleModal(false);
+    }
+
+    async function confirmResell() {
+        if (!currentTicketData) {
+            alert('No ticket selected');
+            return;
+        }
+
+        const priceOption = document.querySelector('input[name="priceOption"]:checked');
+        if (!priceOption) {
+            alert('Please select a price option');
+            return;
+        }
+
+        try {
+            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+            
+            // Get contract instance
+            const response = await fetch('/get_contract_data');
+            const contractData = await response.json();
+            const contract = new web3.eth.Contract(contractData.abi, contractData.address);
+
+            console.log('Listing ticket:', {
+                tokenId: currentTicketData.tokenId,
+                price: selectedPrice
+            }); // Debug log
+
+            // Convert price to Wei
+            const priceInWei = web3.utils.toWei(selectedPrice.toString(), 'ether');
+
+            // List ticket for resale
+            const listingTx = await contract.methods.listTicketForResale(
+                currentTicketData.tokenId,
+                priceInWei
+            ).send({ 
+                from: accounts[0],
+                gas: 300000
+            });
+
+            console.log('Blockchain transaction:', listingTx); // Debug log
+
+            // Store listing in database
+            const response2 = await fetch('/list_ticket', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ticketId: currentTicketData.ticketId,
+                    tokenId: currentTicketData.tokenId,
+                    price: selectedPrice
+                })
+            });
+
+            if (!response2.ok) throw new Error('Failed to store listing in database');
+
+            alert('Ticket listed for resale successfully!');
+            closeModal();
+            location.reload();
+
+        } catch (error) {
+            console.error('Error listing ticket:', error);
+            alert('Failed to list ticket: ' + error.message);
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('resellModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+    </script>
+
+    <style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        overflow-y: auto; /* Enable scrolling */
+        padding: 20px; /* Add padding for mobile */
+    }
+
+    .modal-content {
+        background-color: #1E2130;
+        margin: 5vh auto; /* Reduced from 15% to 5vh */
+        padding: 25px;
+        border: 1px solid #00a8ff;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        color: #fff;
+        position: relative;
+        max-height: 90vh; /* Maximum height */
+        overflow-y: auto; /* Enable scrolling within modal */
+    }
+
+    .price-options {
+        margin: 15px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .price-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    .price-option input[type="radio"] {
+        accent-color: #00a8ff;
+    }
+
+    .price-option label {
+        cursor: pointer;
+    }
+
+    .price-details {
+        background-color: rgba(0, 168, 255, 0.1);
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+    }
+
+    .price-breakdown p {
+        margin: 8px 0;
+    }
+
+    .final-price {
+        font-weight: bold;
+        color: #00a8ff;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 8px;
+        margin-top: 8px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 15px;
+    }
+
+    .modal-buttons button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .marketplace-note {
+        background-color: rgba(0, 168, 255, 0.1);
+        padding: 12px;
+        border-radius: 6px;
+        margin: 15px 0;
+        text-align: center;
+    }
+
+    .marketplace-note i {
+        color: #00a8ff;
+        margin-bottom: 8px;
+    }
+
+    .terms-section {
+        margin: 15px 0;
+        padding: 12px;
+        background-color: rgba(0, 168, 255, 0.05);
+        border-radius: 6px;
+    }
+
+    .terms-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 8px;
+    }
+
+    .terms-header h3 {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #00a8ff;
+    }
+
+    .terms-header i {
+        color: #00a8ff;
+        transition: transform 0.3s ease;
+    }
+
+    .terms-content {
+        display: none;
+        padding-top: 10px;
+        border-top: 1px solid rgba(0, 168, 255, 0.1);
+        margin-top: 10px;
+    }
+
+    .terms-content.show {
+        display: block;
+    }
+
+    .terms-header.active i {
+        transform: rotate(180deg);
+    }
+
+    .terms-list {
+        margin: 0;
+        padding: 0;
+    }
+
+    .terms-list li {
+        margin-bottom: 6px;
+        padding-left: 15px;
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .checkbox-container {
+        margin: 15px 0;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .checkbox-container label {
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    /* Mobile optimization */
+    @media (max-width: 480px) {
+        .modal-content {
+            margin: 2vh auto;
+            padding: 20px;
+            width: 95%;
+        }
+
+        .modal {
+            padding: 10px;
+        }
+
+        .modal-buttons {
+            flex-direction: column;
+        }
+
+        .modal-buttons button {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+    }
+
+    .discount-selector {
+        margin-top: 10px;
+        margin-left: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .discount-selector select {
+        padding: 5px;
+        border-radius: 4px;
+        background-color: #2A2D3E;
+        color: #fff;
+        border: 1px solid #00a8ff;
+        width: 150px;
+    }
+
+    .discount-selector label {
+        font-size: 0.9em;
+        color: #ccc;
+    }
+    </style>
+
+    <script>
+    function toggleTerms() {
+        const termsHeader = document.querySelector('.terms-header');
+        const termsContent = document.querySelector('.terms-content');
+        
+        termsHeader.classList.toggle('active');
+        termsContent.classList.toggle('show');
+    }
+
+    // Update the checkbox validation
+    document.getElementById('termsAccepted').addEventListener('change', function() {
+        if (this.checked && !document.querySelector('.terms-content').classList.contains('show')) {
+            // If user checks box without reading terms, show terms
+            toggleTerms();
+        }
+        document.getElementById('confirmButton').disabled = !this.checked;
+    });
+    </script>
+
+    <button id="scrollToTopBtn" class="scroll-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+    // Scroll to top functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) { // Show button after 300px of scrolling
+                scrollToTopBtn.classList.add('show');
+            } else {
+                scrollToTopBtn.classList.remove('show');
+            }
+        });
+        
+        // Smooth scroll to top when button is clicked
+        scrollToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    });
+    </script>
+
+    <style>
+    .scroll-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 40px;
+        height: 40px;
+        background-color: #00a8ff;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .scroll-to-top:hover {
+        background-color: #0089d1;
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .scroll-to-top.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .scroll-to-top i {
+        font-size: 1.2rem;
+    }
+
+    /* Adjust position for mobile devices */
+    @media (max-width: 768px) {
+        .scroll-to-top {
+            bottom: 20px;
+            right: 20px;
+            width: 35px;
+            height: 35px;
+        }
+    }
+
+    /* Ensure button doesn't overlap with chat widget if present */
+    @media (max-width: 480px) {
+        .scroll-to-top {
+            bottom: 80px; /* Adjust this value based on your chat widget height */
+        }
+    }
+    </style>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/EditParticipant.css') }}">
+    <title>Event Planning Dashboard - Edit Participant</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <a href="/events">
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item active">
+                <a href="/OrgViewParticipant">
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                    <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                        <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                    <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                        <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Edit Participant Details</h2>
+                <button class="back-btn" onclick="location.href='/OrgViewParticipant'">⬅️ Back</button>
+            </div>
+
+            <div class="event-form">
+                <form id="participantForm" onsubmit="return validateAndSubmit(event)">
+                    <div class="form-container">
+                        <div class="form-column">
+                            <div class="form-row">
+                                <label for="userID">User ID:</label>
+                                <input type="text" id="userID" name="userID" value="{{ participant.UserID }}" readonly>
+                                <input type="hidden" id="participantID" name="participantID" value="{{ participant.ParticipantID }}">
+                            </div>
+                            <div class="form-row">
+                                <label for="fullName">Full Name:</label>
+                                <input type="text" id="fullName" name="fullName" value="{{ participant.UserName }}" readonly>
+                            </div>
+                            <div class="form-row">
+                                <label for="eventParticipated">Event Participated: *</label>
+                                <select id="eventParticipated" name="eventParticipated" required>
+                                    {% for event in events %}
+                                        <option value="{{ event.EventID }}" 
+                                            {% if event.EventID == participant.EventID %}selected{% endif %}>
+                                            {{ event.EventTitle }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+            
+                        <div class="form-column">
+                            <div class="form-row">
+                                <label for="contactNo">Contact No:</label>
+                                <input type="tel" id="contactNo" name="contactNo" value="{{ participant.UserContactInfo }}" readonly>
+                            </div>
+                            <div class="form-row">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" value="{{ participant.UserEmail }}" readonly>
+                            </div>
+                            <div class="form-row">
+                                <label for="registrationDate">Registration Date: *</label>
+                                <input type="datetime-local" id="registrationDate" name="registrationDate" 
+                                    value="{{ participant.RegistrationDate.strftime('%Y-%m-%dT%H:%M') }}" required>
+                            </div>
+                        </div>
+                    </div>
+            
+                    <div class="form-actions">
+                        
+                        <button type="submit" class="save-btn">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function validateAndSubmit(event) {
+            event.preventDefault();
+            
+            const eventID = document.getElementById('eventParticipated').value.trim();
+            const registrationDate = document.getElementById('registrationDate').value.trim();
+
+            if (!eventID || !registrationDate) {
+                alert('Please fill in all required fields (Event Participated and Registration Date)');
+                return false;
+            }
+
+            Swal.fire({
+                title: 'Confirm Update',
+                text: 'Are you sure you want to update this participant information?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                },
+                buttonsStyling: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitEdit(event);
+                }
+            });
+
+            return false;
+        }
+
+        async function submitEdit(event) {
+            const formData = {
+                participantID: document.getElementById('participantID').value,
+                userID: document.getElementById('userID').value,
+                eventID: document.getElementById('eventParticipated').value,
+                registrationDate: document.getElementById('registrationDate').value
+            };
+
+            try {
+                const response = await fetch('/update_participant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = '/OrgViewParticipant';
+                } else {
+                    alert('Update failed: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating participant details. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

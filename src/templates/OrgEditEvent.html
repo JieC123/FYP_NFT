@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/EditEvent.css') }}"> <!-- Updated CSS file -->
+    <title>Event Edit Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-item  active">
+                <a href="/events">  <!-- Update this link to point to /events -->
+                    <img src="{{ url_for('static', filename='Image/eventIcon.png') }}" alt="Event Icon">
+                    Event
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewParticipant"> <!-- Ensure these links are also updated correctly -->
+                    <img src="{{ url_for('static', filename='Image/participantIcon.png') }}" alt="Participant Icon">
+                    Participant
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewSponsorship">
+                        <img src="{{ url_for('static', filename='Image/sponsorshipIcon.png') }}" alt="Sponsorship Icon">
+                    Sponsorship
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewBooth">
+                    <img src="{{ url_for('static', filename='Image/boothIcon.png') }}" alt="Exhibitor Icon">
+                    Exhibitor & Booth
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgViewStaff">
+                        <img src="{{ url_for('static', filename='Image/staffIcon.png') }}" alt="Staff Icon">
+                    Event Staff & Authority
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/OrgEventBudget">
+                    <img src="{{ url_for('static', filename='Image/eventBudgetIcon.png') }}" alt="Budget Icon">
+                    Event Budget
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('ticket_management') }}">
+                    <img src="{{ url_for('static', filename='Image/ticketIcon.png') }}" alt="Ticket Icon">
+                    Ticket
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('order_management') }}">
+                    <img src="{{ url_for('static', filename='Image/nftIcon.png') }}" alt="NFT Icon">
+                    Order & Sales
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="{{ url_for('smart_contract_management') }}">
+                    <img src="{{ url_for('static', filename='Image/smartContractIcon.png') }}" alt="Smart Contract Icon">
+                    Mint NFT
+                </a>
+            </div>
+            <div class="sidebar-item">
+                <a href="/EventSummaryReport">
+                    <img src="{{ url_for('static', filename='Image/reportIcon.png') }}" alt="Reporting Icon">
+                    Reporting
+                </a>
+            </div>
+        </div>
+        <div class="main-content">
+            {% include 'TopHeader.html' %}
+            <div class="pageTitle">
+                <h2>Edit Event</h2> <!-- Updated heading to Edit Event -->
+                <!-- Back button aligned to the right -->
+                <button class="back-btn" onclick="location.href='OrgViewEvent.html'">⬅️ Back</button>
+            </div>
+
+            <div id="errorMessages" style="color: red;">
+                {% if error_message %}
+                    <p>{{ error_message }}</p>
+                {% endif %}
+            </div>
+
+            <div class="event-form">
+                <form id="eventForm" method="POST" action="{{ url_for('event.update_event') }}" enctype="multipart/form-data" onsubmit="return confirmUpdate(event)">
+                    <input type="hidden" name="eventID" value="{{ event['EventID'] }}">
+                    <div class="form-container">
+                        <div class="form-column">
+                            <!-- Left Column Fields -->
+                            <div class="form-row">
+                                <label for="eventTitle">Event Title:</label>
+                                <input type="text" id="eventTitle" name="eventTitle" value="{{ event['EventTitle'] }}" placeholder="Event title">
+                            </div>
+                            <div class="form-row">
+                                <label for="eventVenue">Event Venue:</label>
+                                <input type="text" id="eventVenue" name="eventVenue" value="{{ event['EventVenue'] }}" placeholder="Event venue">
+                            </div>
+                            <div class="form-row">
+                                <label for="eventStatus">Event Status:</label>
+                                <select id="eventStatus" name="eventStatus">
+                                    <option value="Upcoming" {% if event['EventStatus'] == 'Upcoming' %}selected{% endif %}>Upcoming</option>
+                                    <option value="Ongoing" {% if event['EventStatus'] == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                                    <option value="Completed" {% if event['EventStatus'] == 'Completed' %}selected{% endif %}>Completed</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="eventType">Event Type:</label>
+                                <select id="eventType" name="eventType">
+                                    <option value="Concert" {% if event['EventType'] == 'Concert' %}selected{% endif %}>Concert</option>
+                                    <option value="Conference" {% if event['EventType'] == 'Conference' %}selected{% endif %}>Conference</option>
+                                    <option value="Seminar" {% if event['EventType'] == 'Seminar' %}selected{% endif %}>Seminar</option>
+                                    <option value="Workshop" {% if event['EventType'] == 'Workshop' %}selected{% endif %}>Workshop</option>
+                                </select>
+                            </div>
+                            <!-- Event Poster Upload -->
+                           <div class="form-row">
+                            <label for="eventPoster">Event Poster (Optional):</label>
+                            <input type="file" id="eventPoster" name="eventPoster" accept="image/*">
+                            <small>Max size: 8 MB. Only image files allowed.</small>
+
+                            <!-- Image Preview -->
+                            <div id="imagePreview" style="display: none; margin-top: 10px;">
+                                
+                                <img id="previewImage" src="" alt="Image Preview" style="max-width: 150px; max-height: 150px; object-fit: cover;">
+                            </div>
+                        </div>
+                        </div>
+
+                        <div class="form-column">
+                            <!-- Right Column Fields -->
+                            <div class="form-row">
+                                <label for="startDate">Event Start Date:</label>
+                                <input type="datetime-local" id="startDate" name="startDate" value="{{ event['EventStartDate'] | to_datetime_local }}">
+                            </div>
+                            <div class="form-row">
+                                <label for="endDate">Event End Date:</label>
+                                <input type="datetime-local" id="endDate" name="endDate" value="{{ event['EventEndDate'] | to_datetime_local }}">
+                            </div>
+                            <div class="form-row">
+                                <label for="capacity">Event Capacity:</label>
+                                <input type="number" id="capacity" name="capacity" value="{{ event['EventCapacity'] }}" min="1">
+                            </div>
+                            <div class="form-row">
+                                <label for="description">Event Description:</label>
+                                <textarea id="description" name="description" rows="3">{{ event['EventDescription'] }}</textarea>
+                            </div>
+                            
+                            
+                        </div> 
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="save-btn">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Event listener to handle file input and preview the image
+        document.getElementById('eventPoster').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+            
+            if (file) {
+                // Validate file size (max 8 MB)
+                if (file.size > 8 * 1024 * 1024) {
+                    alert('File size exceeds 8 MB.');
+                    return;
+                }
+
+                // Validate file type (image files only)
+                const fileType = file.type.split('/')[0];
+                if (fileType !== 'image') {
+                    alert('Only image files are allowed.');
+                    return;
+                }
+
+                // Create image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    preview.style.display = 'block'; // Show the image preview
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none'; // Hide preview if no file selected
+            }
+        });
+
+        // Form validation before submission
+    document.getElementById('eventForm').addEventListener('submit', function(event) {
+        let errorMessages = [];
+        
+        // Validate all fields
+        const eventTitle = document.getElementById('eventTitle').value;
+        const eventVenue = document.getElementById('eventVenue').value;
+        const eventStatus = document.getElementById('eventStatus').value;
+        const eventType = document.getElementById('eventType').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const capacity = document.getElementById('capacity').value;
+        const description = document.getElementById('description').value;
+
+        if (!eventTitle || !eventVenue || !eventStatus || !eventType || !startDate || !endDate || !capacity || !description) {
+            errorMessages.push('All fields are required except new event poster upload.');
+        }
+
+        // Validate event start and end date
+        if (new Date(startDate) >= new Date(endDate)) {
+            errorMessages.push('Event End Date must be later than Event Start Date.');
+        }
+
+        // Validate capacity (must be a positive integer, no decimals)
+        if (isNaN(capacity) || capacity <= 0 || !Number.isInteger(Number(capacity))) {
+            errorMessages.push('Event Capacity must be a valid positive integer.');
+        }
+
+        if (errorMessages.length > 0) {
+            event.preventDefault();  // Prevent form submission
+            document.getElementById('errorMessages').innerHTML = `<p>${errorMessages.join('</p><p>')}</p>`;
+        }
+    });
+
+    function confirmUpdate(event) {
+        event.preventDefault(); // Prevent form from submitting immediately
+        
+        // Check form validation first
+        let errorMessages = [];
+        
+        // Validate all fields
+        const eventTitle = document.getElementById('eventTitle').value;
+        const eventVenue = document.getElementById('eventVenue').value;
+        const eventStatus = document.getElementById('eventStatus').value;
+        const eventType = document.getElementById('eventType').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const capacity = document.getElementById('capacity').value;
+        const description = document.getElementById('description').value;
+
+        if (!eventTitle || !eventVenue || !eventStatus || !eventType || !startDate || !endDate || !capacity || !description) {
+            errorMessages.push('All fields are required except new event poster upload.');
+        }
+
+        // Validate event start and end date
+        if (new Date(startDate) >= new Date(endDate)) {
+            errorMessages.push('Event End Date must be later than Event Start Date.');
+        }
+
+        // Validate capacity (must be a positive integer, no decimals)
+        if (isNaN(capacity) || capacity <= 0 || !Number.isInteger(Number(capacity))) {
+            errorMessages.push('Event Capacity must be a valid positive integer.');
+        }
+
+        if (errorMessages.length > 0) {
+            document.getElementById('errorMessages').innerHTML = `<p>${errorMessages.join('</p><p>')}</p>`;
+            return false;
+        }
+
+        // If validation passes, show confirmation dialog
+        Swal.fire({
+            title: 'Confirm Update',
+            text: 'Are you sure you want to update this event information?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // If user confirms, submit the form
+                document.getElementById('eventForm').submit();
+            }
+        });
+
+        return false; // Prevent form from submitting normally
+    }
+
+    </script>
+</body>
+</html>

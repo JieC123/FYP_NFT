@@ -1,0 +1,209 @@
+/* Global Settings */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #e8dddc;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 800px;
+    margin: 100px auto 20px auto; /* Adjust top margin to account for fixed header */
+    background-color: white;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Header/Navbar */
+.header {
+    width: 100%;
+    background-color: #fff;
+    padding: 0px 20px;
+    display: flex; /* Enables Flexbox */
+    align-items: center; /* Align items vertically */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.header .logo {
+    height: 40px; /* Adjust the logo height */
+    margin-right: 10px;
+    margin-bottom: 10px; /* Space between image and text */
+}
+
+.header h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+    margin-left: 10px; /* Add some space between logo and heading */
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    margin-top: 20px;
+}
+
+.form-group {
+    flex-basis: 48%;
+    position: relative;
+    margin-bottom: 20px; /* Add space between form groups */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px; /* Increased border radius */
+    box-sizing: border-box;
+}
+
+.password-requirements {
+    font-size: 12px;
+    color: #ff0000;
+    margin-top: 5px;
+}
+
+.profile-image {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    font-size: 20px;
+    color: #333;
+}
+
+.profile-image-preview {
+    max-width: 150px; /* Reduced max width */
+    max-height: 150px; /* Reduced max height */
+    border-radius: 8px;
+    display: none;
+    border: 2px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    object-fit: cover;
+    background-color: transparent;
+    margin-left: 0; /* Remove any left margin */
+}
+
+.register-btn {
+    background-color: #ff5722;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 40%; /* Reduced width to match login page */
+    margin: 30px auto; /* Reduced top margin */
+    display: block;
+    transition: background-color 0.3s;
+}
+
+.register-btn:hover {
+    background-color: #e0481f; /* Darker shade on hover */
+}
+
+.header-container {
+    display: flex; /* Enable flexbox */
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+    margin-bottom: 20px; /* Space below the header */
+}
+
+.back-arrow {
+    font-size: 24px; /* Size of the back arrow */
+    text-decoration: none;
+    color: #333;
+    margin-right: 10px; /* Space between back arrow and heading */
+    display: flex; /* Add this to keep the arrow's alignment consistent */
+    align-items: center; /* Center the arrow vertically */
+}
+
+h2 {
+    font-size: 24px; /* Font size for the heading */
+    margin: 0; /* Remove default margin */
+    color: #333; /* Text color */
+    text-align: center; /* Center the text */
+    display: flex; /* Flex display for better alignment */
+    align-items: center; /* Center heading vertically */
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.toggle-icon {
+    position: absolute;
+    right: 10px;
+    top: 30px; /* Adjust to align with input field */
+    cursor: pointer;
+    z-index: 2; /* Ensure it stays above other elements */
+}
+
+.toggle-icon:hover {
+    color: #000; /* Darker shade on hover */
+}
+
+
+input[type="password"] {
+    padding-right: 40px; /* Make room for the eye icon */
+}
+
+/* Add/Update these styles for the image preview */
+.image-preview-container {
+    margin-top: 10px;
+    text-align: left; /* Change to left alignment */
+    height: 150px; /* Reduced height */
+    display: flex;
+    justify-content: flex-start; /* Align to the left */
+    align-items: center;
+    background-color: transparent;
+}
+
+/* Update form group for profile image to ensure proper alignment */
+.form-group input[type="file"] {
+    margin-bottom: 10px; /* Add some space between input and preview */
+}
+
+/* Add this to your existing CSS */
+.g-recaptcha {
+    margin: 20px 0;
+}
+
+/* Ensure reCAPTCHA is centered on mobile */
+@media (max-width: 300px) {
+    .g-recaptcha {
+        transform: scale(0.77);
+        transform-origin: 0 0;
+    }
+}

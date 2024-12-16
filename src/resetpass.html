@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/forgetpass.css') }}">
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo" class="logo">
+    </header>
+    <div class="container">
+        <h1>Reset Password</h1>
+        <form method="POST" action="{{ url_for('reset_password', token=token) }}" id="resetForm">
+            <input type="password" name="password" id="password" placeholder="New Password" required>
+            <div class="password-requirements">
+                Password must contain:
+                <ul>
+                    <li id="length">At least 8 characters</li>
+                    <li id="uppercase">One uppercase letter</li>
+                    <li id="lowercase">One lowercase letter</li>
+                    <li id="special">One special character</li>
+                </ul>
+            </div>
+            <input type="password" name="confirm_password" id="confirmPassword" placeholder="Confirm New Password" required>
+            <button type="submit">Reset Password</button>
+        </form>
+    </div>
+
+    <script>
+        function validatePassword(password) {
+            const minLength = 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            
+            return {
+                length: password.length >= minLength,
+                uppercase: hasUpperCase,
+                lowercase: hasLowerCase,
+                special: hasSpecialChar,
+                isValid: password.length >= minLength && hasUpperCase && hasLowerCase && hasSpecialChar
+            };
+        }
+
+        function updatePasswordRequirements(password) {
+            const requirements = validatePassword(password);
+            
+            Object.keys(requirements).forEach(req => {
+                if (req !== 'isValid') {
+                    const element = document.getElementById(req);
+                    if (element) {
+                        if (requirements[req]) {
+                            element.classList.add('requirement-met');
+                        } else {
+                            element.classList.remove('requirement-met');
+                        }
+                    }
+                }
+            });
+            
+            return requirements.isValid;
+        }
+
+        const passwordInput = document.getElementById('password');
+        const requirementsDiv = document.querySelector('.password-requirements');
+
+        passwordInput.addEventListener('input', function(e) {
+            updatePasswordRequirements(e.target.value);
+        });
+
+        passwordInput.addEventListener('focus', function() {
+            requirementsDiv.classList.add('show');
+        });
+
+        passwordInput.addEventListener('blur', function() {
+            if (this.value.length === 0) {
+                requirementsDiv.classList.remove('show');
+            }
+        });
+
+        document.getElementById('resetForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+
+            try {
+                const formData = new FormData(this);
+                const password = formData.get('password');
+                const confirmPassword = formData.get('confirm_password');
+
+                // Client-side validation
+                if (!updatePasswordRequirements(password)) {
+                    showAlert('Please meet all password requirements', 'error');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    showAlert('Passwords do not match', 'error');
+                    return;
+                }
+
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: new URLSearchParams(formData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                } else {
+                    showAlert(data.message || 'An error occurred', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('An error occurred. Please try again.', 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Reset Password';
+            }
+        });
+    </script>
+
+    <style>
+        .password-requirements {
+            font-size: 13px;
+            color: #6c757d;
+            margin: -5px 0 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #1a1f2e;
+            display: none;
+        }
+
+        .password-requirements.show {
+            display: block;
+        }
+
+        .password-requirements ul {
+            list-style: none;
+            margin: 5px 0;
+            padding: 0;
+        }
+
+        .password-requirements li {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+        }
+
+        .password-requirements li::before {
+            content: "•";
+            margin-right: 8px;
+            color: #6c757d;
+        }
+
+        .password-requirements li.requirement-met {
+            color: #00ff9d;
+            opacity: 1;
+        }
+
+        .password-requirements li.requirement-met::before {
+            content: "✓";
+            color: #00ff9d;
+        }
+    </style>
+</body>
+</html>

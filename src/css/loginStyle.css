@@ -1,0 +1,144 @@
+/* Global Settings */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #e8dddc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+}
+
+/* Header/Navbar */
+.header {
+    width: 100%;
+    background-color: #fff;
+    padding: 0px 20px;
+    display: flex; /* Enables Flexbox */
+    align-items: center; /* Align items vertically */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.header .logo {
+    height: 40px; /* Adjust the logo height */
+    margin-right: 10px;
+    margin-bottom: 10px; /* Space between image and text */
+}
+
+.header h1 {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+    margin-left: 10px; /* Add some space between logo and heading */
+}
+
+/* Centering Container */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding-top: 80px; /* Ensures it's below the nav */
+}
+
+.login-box {
+    background-color: white; /* Background color for the login box */
+    padding: 40px; /* Increased padding for more space */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    text-align: center; /* Center text in the login box */
+    width: 400px; 
+}
+
+/* Logo and heading container */
+.logo-container {
+    display: flex; /* Enables Flexbox for horizontal alignment */
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+    margin-bottom: 20px; /* Space below the logo and heading */
+}
+
+.login-logo {
+    height: 50px; /* Adjust the logo size as needed */
+    margin-right: 10px; /* Space between logo and heading */
+}
+
+h2 {
+    font-size: 24px; /* Adjust font size as needed */
+    margin: 0; /* Remove default margin */
+    color: #333; /* Text color */
+}
+
+/* Input Group */
+.input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.input-group input {
+    width: 100%; /* Full width */
+    padding: 15px; /* Increased padding for more space */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px; /* Slightly larger font size */
+}
+
+/* Toggle password visibility icon */
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+}
+
+/* Buttons */
+.btn-login,
+.btn-register {
+    width: 100%;
+    padding: 15px; /* Increased padding for comfort */
+    border: none; /* Remove default border */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Transition for hover effect */
+    border-radius: 25px; /* More rounded corners */
+}
+
+.btn-login {
+    background-color: #333; /* Dark background */
+    color: white; /* White text */
+    border-radius: 25px;
+}
+
+.btn-login:hover {
+    background-color: #555; /* Darker shade on hover */
+}
+
+.btn-register {
+    background-color: #f1592a; /* Orange background */
+    color: white; /* White text */
+    margin-top: 10px; /* Space above the register button */
+}
+
+.btn-register:hover {
+    background-color: #e0481f; /* Darker orange on hover */
+}
+
+/* Trouble Login Link */
+p {
+    font-size: 14px;
+}
+
+p a {
+    color: #999;
+    text-decoration: none;
+}
+
+p a:hover {
+    text-decoration: underline;
+}

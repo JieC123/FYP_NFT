@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketPro - Track Sales</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ticket_manage.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/track_sales.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='image/logo.png') }}" alt="TicketPro Logo">
+                <span>TicketPro</span>
+            </div>
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="{{ url_for('event_management') }}"><i class="fas fa-calendar-alt"></i> Events</a>
+                </li>
+                <li class="active">
+                    <a href="{{ url_for('order_management') }}"><i class="fas fa-chart-line"></i> Orders & Sales</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('participant_management') }}"><i class="fas fa-users"></i> Participants</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('ticket_management') }}"><i class="fas fa-ticket-alt"></i> Tickets</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('smart_contract_management') }}"><i class="fas fa-file-contract"></i> Smart Contracts</a>
+                </li>
+            </ul>
+            <button class="new-event-btn">+ New Event</button>
+        </nav>
+
+        <div id="content">
+            <header>
+                <h2>Track Sales</h2>
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <span>{{ session['organiser_name'] }}</span>
+                        <img src="{{ url_for('static', filename='image/user-avatar.png') }}" alt="User Avatar" class="user-avatar">
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="#"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <div class="admin-container">
+                    <div class="admin-header">
+                        <h2>Sales Report</h2>
+                        <div class="report-controls">
+                            <button class="btn" data-period="daily">Daily</button>
+                            <button class="btn active" data-period="weekly">Weekly</button>
+                            <button class="btn" data-period="monthly">Monthly</button>
+                            <button class="btn print-btn" id="printReport">
+                                <i class="fas fa-print"></i> Print Report
+                            </button>
+                        </div>
+                    </div>
+                    <div class="report-summary">
+                        <div class="summary-card">
+                            <h3>Total Sales This Week</h3>
+                            <p class="large-number">
+                                RM {{ "%.2f"|format(summary.TotalSales * 14000) }}
+                                <span class="eth-value">({{ "%.4f"|format(summary.TotalSales) }} ETH)</span>
+                            </p>
+                            <p class="change {{ 'positive' if sales_change >= 0 else 'negative' }}">
+                                {{ "%.1f"|format(sales_change) }}% vs last week
+                            </p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>New Orders</h3>
+                            <p class="large-number">{{ summary.NewOrders }}</p>
+                            <p class="change {{ 'positive' if orders_change >= 0 else 'negative' }}">
+                                {{ "%.1f"|format(orders_change) }}% since last week
+                            </p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>Number of Events</h3>
+                            <p class="large-number">{{ summary.NumberOfEvents }}</p>
+                        </div>
+                        <div class="summary-card">
+                            <h3>New Customers</h3>
+                            <p class="large-number">{{ summary.NewCustomers }}</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div style="height: 400px;">
+                            <canvas id="salesChart" 
+                                data-sales='{{ daily_sales|tojson|safe }}'
+                                data-eth-to-myr-rate="{{ eth_to_myr_rate }}">
+                            </canvas>
+                        </div>
+                    </div>
+                    <div class="ticket-sales-summary">
+                        <h3>Total Tickets Sold - All Time</h3>
+                        <div class="event-selector">
+                            <select id="eventSelector">
+                                <option value="all">All events</option>
+                                {% for event in event_sales|from_json %}
+                                <option value="{{ event.EventID }}">{{ event.EventTitle }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="progress-container">
+                            {% set events = event_sales|from_json %}
+                            {% set total_sold = events|sum(attribute='TotalSold') %}
+                            {% set total_capacity = events|sum(attribute='TotalCapacity') %}
+                            {% set percentage = (total_sold / total_capacity * 100)|round|int if total_capacity > 0 else 0 %}
+                            
+                            <div class="progress-circle" data-percentage="{{ percentage }}">
+                                <span class="progress-text">{{ percentage }}%</span>
+                            </div>
+                            <div class="progress-bars">
+                                {% for event in event_sales|from_json %}
+                                <div class="progress-bar" 
+                                     data-event-id="{{ event.EventID }}"
+                                     data-ticket-type="{{ event.TicketType }}">
+                                    <div class="progress-label">
+                                        {% if event.TicketType %}
+                                            {{ event.EventTitle }} - {{ event.TicketType }}
+                                        {% else %}
+                                            {{ event.EventTitle }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="progress-info">
+                                        Orders: {{ event.OrderCount }} | Revenue: RM{{ "%.2f"|format(event.TotalRevenue * 14000) }}
+                                        <span class="eth-value">({{ "%.4f"|format(event.TotalRevenue) }} ETH)</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        {% set event_percentage = (event.TotalSold / event.TotalCapacity * 100)|round|int if event.TotalCapacity > 0 else 0 %}
+                                        <div class="progress-fill" style="width: {{ event_percentage }}%;"></div>
+                                    </div>
+                                    <div class="progress-text">{{ event.TotalSold }}/{{ event.TotalCapacity }} tickets sold</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/track_sales.js') }}"></script>
+</body>
+
+</html>
