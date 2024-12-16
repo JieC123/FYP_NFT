@@ -11,6 +11,10 @@ from itsdangerous import URLSafeTimedSerializer
 import bcrypt
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
+import os
+from flask import Flask
+
+port = os.environ.get('PORT', 5000)
 
 app = Flask(__name__, template_folder='src', static_folder='src')
 app.secret_key = 'your_secret_key_here'  # Set a secret key for flash messages and sessions
@@ -1636,5 +1640,7 @@ def complete_reservation(reservation_id):
     finally:
         conn.close()
 
+# if __name__ == '__main__':
+#     app.run(debug=True)
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=port)
